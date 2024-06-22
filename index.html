@@ -3,55 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>oivv - Innovating Fashion Tech</title>
+    <title>Omni Intelligence Virtual Vision</title>
     <style>
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #fff;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
             color: #333;
         }
-        .header {
+        header {
+            background-color: #4A90E2;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        header p {
+            margin: 5px 0 0;
+            font-size: 1.2em;
+        }
+        main {
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        main h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        main p {
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+        footer {
             background-color: #333;
-            color: #fff;
-            padding: 1rem;
+            color: white;
             text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
         }
-        .main {
+        .cta {
+            background-color: #4A90E2;
+            color: white;
+            padding: 15px 30px;
+            margin-top: 20px;
+            display: inline-block;
+            text-decoration: none;
+            font-size: 1.2em;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .cta:hover {
+            background-color: #357ABD;
+        }
+        .features {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 80vh;
-            text-align: center;
-            padding: 1rem;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 20px;
         }
-        .main h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+        .feature {
+            background-color: white;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            min-width: 280px;
+            max-width: 300px;
         }
-        .main p {
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .footer {
-            text-align: center;
-            padding: 1rem;
-            background-color: #f4f4f4;
+        .feature h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>oivv</h1>
-        <p>Revolutionizing Fashion with Technology</p>
-    </div>
-    <div class="main">
-        <h1>Welcome to oivv</h1>
-        <p>Your fashion tech platform</p>
-    </div>
-    <div class="footer">
-        <p>&copy; 2024 oivv. All rights reserved.</p>
-    </div>
+    <header>
+        <h1>Omni Intelligence Virtual Vision</h1>
+        <p>Empowering the Future of Fashion</p>
+    </header>
+    <main>
+        <h2>Welcome to the Future of Fashion</h2>
+        <p>Omni Intelligence Virtual Vision (OIVV) is a comprehensive, smart, and innovative platform designed to transform the fashion industry. Leveraging advanced AI and cutting-edge virtual technologies, we provide seamless and personalized experiences for designers, suppliers, and consumers alike.</p>
+        <a href="#" class="cta">Get Started</a>
+        <div class="features">
+            <div class="feature">
+                <h3>Comprehensive Solutions</h3>
+                <p>Our platform covers all aspects of the fashion industry, offering a unified solution for designers, suppliers, and consumers.</p>
+            </div>
+            <div class="feature">
+                <h3>Advanced Intelligence</h3>
+                <p>Utilizing AI and machine learning, we deliver smart solutions that enhance efficiency and personalization in fashion.</p>
+            </div>
+            <div class="feature">
+                <h3>Virtual Integration</h3>
+                <p>Experience the future of fashion with our virtual try-ons, digital wardrobes, and interactive design spaces.</p>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>© 2024 OIVV. All rights reserved.</p>
+    </footer>
 </body>
 </html>

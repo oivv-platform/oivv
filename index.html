@@ -4,205 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Omni Intelligence Virtual Vision</title>
-    <style>
-        :root {
-            --primary-color: #A8D5BA; /* Muted Apple Green */
-            --header-bg-color: #333;
-            --header-text-color: white;
-            --header-hover-color: #81C784; /* A slightly darker green for hover */
-            --text-color: #333;
-            --bg-color: #f4f4f4;
-            --button-hover-bg: #81C784;
-        }
-        body {
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-        header {
-            background-color: var(--header-bg-color);
-            color: var(--header-text-color);
-            padding: 20px 0;
-            text-align: center;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-        header.scrolled {
-            border-radius: 15px;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 2.5em;
-        }
-        header p {
-            margin: 5px 0 0;
-            font-size: 1.2em;
-        }
-        main {
-            padding: 80px 20px 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        main h2 {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        main p {
-            font-size: 1.2em;
-            line-height: 1.6;
-        }
-        footer {
-            background-color: var(--header-bg-color);
-            color: var(--header-text-color);
-            text-align: center;
-            padding: 10px 0;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-        .cta {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 15px 30px;
-            margin-top: 20px;
-            display: inline-block;
-            text-decoration: none;
-            font-size: 1.2em;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        .cta:hover {
-            background-color: var(--button-hover-bg);
-        }
-        .features {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-        .feature {
-            background-color: white;
-            padding: 20px;
-            margin: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            flex: 1;
-            min-width: 280px;
-            max-width: 300px;
-        }
-        .feature h3 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-        }
-        nav {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-        nav a {
-            color: var(--header-text-color);
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        nav a:hover {
-            background-color: var(--header-hover-color);
-        }
-        @media (max-width: 768px) {
-            nav {
-                flex-direction: column;
-                align-items: flex-end;
-                position: fixed;
-                top: 60px;
-                right: 10px;
-                background: var(--header-bg-color);
-                padding: 10px;
-                border-radius: 5px;
-                display: none;
-            }
-            nav a {
-                display: block;
-                margin: 5px 0;
-            }
-            .menu-toggle {
-                display: block;
-                cursor: pointer;
-                color: var(--header-text-color);
-                font-size: 1.5em;
-                position: absolute;
-                right: 20px;
-                top: 20px;
-            }
-        }
-        @media (min-width: 769px) {
-            .menu-toggle {
-                display: none;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <div class="menu-toggle">&#9776;</div>
-        <h1>oivv</h1>
-        <p>Empowering the Future of Fashion</p>
+        <div class="logo">OIVV</div>
         <nav>
-            <a href="#process">Our Process</a>
-            <a href="#yarns">Yarns</a>
-            <a href="#fabrics">Fabrics</a>
-            <a href="#accessories">Accessories</a>
-            <a href="#designer">Designer</a>
-            <a href="#production">Production</a>
-            <a href="#consumer">Consumer</a>
-            <a href="#contact">Contact</a>
+            <ul>
+                <li><a href="#">Our Process</a></li>
+                <li><a href="#">Yarns</a></li>
+                <li><a href="#">Fabrics</a></li>
+                <li><a href="#">Accessories</a></li>
+                <li><a href="#">Designer</a></li>
+                <li><a href="#">Production</a></li>
+                <li><a href="#">Consumer</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
         </nav>
     </header>
     <main>
-        <h2>Welcome to the Future of Fashion</h2>
-        <p>Omni Intelligence Virtual Vision (OIVV) is a comprehensive, smart, and innovative platform designed to transform the fashion industry. Leveraging advanced AI and cutting-edge virtual technologies, we provide seamless and personalized experiences for designers, suppliers, and consumers alike.</p>
-        <a href="#" class="cta">Get Started</a>
-        <div class="features">
-            <div class="feature">
-                <h3>Comprehensive Solutions</h3>
-                <p>Our platform covers all aspects of the fashion industry, offering a unified solution for designers, suppliers, and consumers.</p>
-            </div>
-            <div class="feature">
-                <h3>Advanced Intelligence</h3>
-                <p>Utilizing AI and machine learning, we deliver smart solutions that enhance efficiency and personalization in fashion.</p>
-            </div>
-            <div class="feature">
-                <h3>Virtual Integration</h3>
-                <p>Experience the future of fashion with our virtual try-ons, digital wardrobes, and interactive design spaces.</p>
-            </div>
+        <div class="hero">
+            <h1>Omni Intelligence Virtual Vision</h1>
+            <button>Start</button>
         </div>
+        <section class="welcome">
+            <h2>Welcome to OIVV</h2>
+            <p>OIVV is a comprehensive, smart, and innovative platform designed to transform the fashion industry. Leveraging advanced AI and cutting-edge virtual technologies, we provide seamless and personalized experiences for designers, suppliers, and consumers alike.</p>
+        </section>
     </main>
     <footer>
         <p>© 2024 OIVV. All rights reserved.</p>
     </footer>
-
-    <script>
-        const header = document.querySelector('header');
-        const menuToggle = document.querySelector('.menu-toggle');
-        const nav = document.querySelector('nav');
-
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-
-        menuToggle.addEventListener('click', () => {
-            nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
-        });
-    </script>
+    <script src="scripts.js"></script>
 </body>
 </html>

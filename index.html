@@ -13,10 +13,8 @@
             background-color: #f4f4f4;
             color: #333;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            flex-direction: column;
+            min-height: 100vh;
         }
         header {
             background-color: #ffffff;
@@ -35,6 +33,8 @@
         }
         .container {
             text-align: center;
+            margin-top: 100px;
+            flex: 1;
         }
         .button-grid {
             display: flex;
@@ -62,10 +62,34 @@
             transform: scale(1.1);
             background-color: rgba(255, 255, 255, 0.4);
         }
+        .button.consumer {
+            width: 180px;
+            height: 180px;
+        }
         .under-development {
             margin-top: 50px;
             font-size: 1.2em;
             color: #555;
+        }
+        .content {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+        .content h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .content p {
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
         }
     </style>
 </head>
@@ -78,13 +102,21 @@
             <a href="#yarns" class="button">YARNS</a>
             <a href="#fabrics" class="button">FABRICS</a>
             <a href="#accessories" class="button">ACCESSORIES</a>
+            <a href="#consumer" class="button consumer">CONSUMER</a>
             <a href="#designer" class="button">DESIGNER</a>
             <a href="#production" class="button">PRODUCTION</a>
-            <a href="#consumer" class="button">CONSUMER</a>
+            <a href="#info" class="button">INFO</a>
         </div>
         <div class="under-development">
             <p>This website is under development. Please check back soon!</p>
         </div>
+        <div class="content">
+            <h2>Welcome to OIVV</h2>
+            <p>OIVV is a comprehensive, smart, and innovative platform designed to transform the fashion industry. Leveraging advanced AI and cutting-edge virtual technologies, we provide seamless and personalized experiences for designers, suppliers, producers, and consumers alike. By offering a transparent and sustainable fashion ecosystem, we aim to give birth to new avenues in the fashion industry.</p>
+        </div>
     </div>
+    <footer>
+        <p>© 2024 OIVV. All rights reserved.</p>
+    </footer>
 </body>
 </html>

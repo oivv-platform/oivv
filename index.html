@@ -3,72 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OIVV - Under Development</title>
+    <meta name="description" content="OIVV (Open Interactive Virtual Vista) is enhancing the fashion industry by integrating advanced AI and virtual technologies. Our platform connects designers, suppliers, producers, and consumers, providing transparent, personalized, and sustainable experiences.">
+    <meta name="keywords" content="OIVV, Open Interactive Virtual Vista, fashion technology, AI in fashion, virtual fashion platform, digital wardrobes, virtual try-ons, fashion designers, fashion suppliers, fashion producers, personalized fashion experience, interactive design spaces, transparent fashion production, sustainable fashion, advanced AI, virtual technologies, creative fashion tools, digital fabrics, clothing design, fashion simulation, fashion production, fashion pre-orders, fabric suppliers, 3D knitting, cut and sew, custom clothing, virtual clothing">
+    <title>OIVV - Open Interactive Virtual Vista</title>
     <style>
         body {
             margin: 0;
             font-family: 'Arial', sans-serif;
             background-color: #f4f4f4;
             color: #333;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
         }
         header {
             background-color: #ffffff;
             padding: 20px 0;
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            width: 100%;
             position: fixed;
+            width: 100%;
             top: 0;
             z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        header.scrolled {
+            padding: 10px 0;
+            background-color: #a8d5ba;
+            border-radius: 10px;
         }
         header h1 {
             margin: 0;
             font-size: 1.5em;
             color: #555;
         }
-        .main-content {
-            margin-top: 100px; /* Adjust for fixed header */
+        nav {
+            margin: 20px 0;
         }
-        .main-content h2 {
+        nav a {
+            color: #333;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 1em;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        nav a:hover {
+            background-color: #4A90E2;
+            color: white;
+        }
+        .hero {
+            height: 100vh;
+            background: url('your-background-image.jpg') center center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding-top: 60px; /* Adjust for fixed header */
+        }
+        .hero h2 {
+            font-size: 2.5em;
+            margin: 0;
+        }
+        .hero .start-button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background-color: #4A90E2;
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .hero .start-button:hover {
+            background-color: #357ABD;
+        }
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .content h2 {
             font-size: 2em;
             margin-bottom: 10px;
         }
-        .main-content p {
+        .content p {
             font-size: 1.2em;
+            line-height: 1.6;
         }
-        footer {
+        .footer {
             background-color: #333;
             color: white;
             text-align: center;
             padding: 10px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
         }
-        .logo {
-            max-width: 150px;
-            margin-bottom: 20px;
+        .development-notice {
+            color: #333;
+            font-size: 1.2em;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <header>
+    <header id="header">
         <h1>OIVV</h1>
+        <nav>
+            <a href="#process">OUR PROCESS</a>
+            <a href="#yarns">YARNS</a>
+            <a href="#fabrics">FABRICS</a>
+            <a href="#accessories">ACCESSORIES</a>
+            <a href="#designer">DESIGNER</a>
+            <a href="#production">PRODUCTION</a>
+            <a href="#consumer">CONSUMER</a>
+            <a href="#contact">CONTACT</a>
+        </nav>
     </header>
-    <div class="main-content">
-        <img src="your-logo-url.png" alt="OIVV Logo" class="logo">
-        <h2>Our Website is Under Development</h2>
-        <p>We're working hard to bring you a new and improved experience. Please check back soon!</p>
+    <div class="hero">
+        <h2>OPEN INTERACTIVE VIRTUAL VISTA</h2>
+        <a href="#" class="start-button">START</a>
     </div>
-    <footer>
+    <div class="content">
+        <h2>Welcome to OIVV</h2>
+        <p>OIVV (Open Interactive Virtual Vista) is a comprehensive, smart, and innovative platform designed to enhance the fashion industry. By integrating advanced AI and cutting-edge virtual technologies, we provide seamless, transparent, and personalized experiences for designers, suppliers, producers, and consumers.</p>
+        <p class="development-notice">This website is currently under development. Stay tuned for updates!</p>
+    </div>
+    <footer class="footer">
         <p>© 2024 OIVV. All rights reserved.</p>
-        <p>Contact us at <a href="mailto:info@oivv.io" style="color: white;">info@oivv.io</a></p>
     </footer>
+    <script>
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    </script>
 </body>
 </html>

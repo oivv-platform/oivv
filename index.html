@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="OIVV (Open Interactive Virtual Vista) is enhancing the fashion industry by integrating advanced AI and virtual technologies. Our platform connects designers, suppliers, producers, and consumers to provide a transparent and sustainable fashion ecosystem.">
-    <meta name="keywords" content="fashion, AI, virtual technology, designers, suppliers, producers, consumers, sustainable fashion, circular fashion, transparent fashion, digital fashion, virtual try-ons, fabric simulation, CLO3D">
     <title>OIVV - Open Interactive Virtual Vista</title>
     <style>
         body {
@@ -12,9 +10,6 @@
             font-family: 'Arial', sans-serif;
             background-color: #f4f4f4;
             color: #333;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
         }
         header {
             background-color: #ffffff;
@@ -31,50 +26,62 @@
             font-size: 1.5em;
             color: #555;
         }
-        .container {
-            text-align: center;
-            margin-top: 100px;
-            flex: 1;
+        nav {
+            margin: 20px 0;
         }
-        .button-grid {
+        nav a {
+            color: #333;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 1em;
+        }
+        nav a:hover {
+            color: #4A90E2;
+        }
+        .hero {
+            height: 100vh;
+            background: url('your-background-image.jpg') center center/cover no-repeat;
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding-top: 60px; /* Adjust for fixed header */
         }
-        .button {
+        .buttons {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 150px;
-            height: 150px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 1px rgba(255,255,255,0.6);
+            margin: 50px 0;
+        }
+        .buttons div {
+            width: 100px;
+            height: 100px;
+            background-color: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(10px);
-            transition: transform 0.3s ease, background-color 0.3s ease;
+            border-radius: 10px;
+            margin: 0 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-size: 1em;
             color: #333;
-            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
-        .button:hover {
-            transform: scale(1.1);
-            background-color: rgba(255, 255, 255, 0.4);
+        .buttons div:hover {
+            background-color: #98fb98; /* Mute Apple green color */
+            color: #fff;
         }
-        .button.consumer {
-            width: 180px;
-            height: 180px;
-        }
-        .under-development {
-            margin-top: 50px;
-            font-size: 1.2em;
-            color: #555;
+        .buttons div#center {
+            width: 120px;
+            height: 120px;
         }
         .content {
             max-width: 800px;
-            margin: 50px auto;
-            padding: 0 20px;
+            margin: 0 auto;
+            padding: 60px 20px;
             text-align: center;
         }
         .content h2 {
@@ -96,27 +103,55 @@
 <body>
     <header>
         <h1>OIVV</h1>
+        <nav>
+            <a href="#process">OUR PROCESS</a>
+            <a href="#yarns">YARNS</a>
+            <a href="#fabrics">FABRICS</a>
+            <a href="#accessories">ACCESSORIES</a>
+            <a href="#designer">DESIGNER</a>
+            <a href="#production">PRODUCTION</a>
+            <a href="#consumer">CONSUMER</a>
+            <a href="#contact">CONTACT</a>
+        </nav>
     </header>
-    <div class="container">
-        <div class="button-grid">
-            <a href="#yarns" class="button">YARNS</a>
-            <a href="#fabrics" class="button">FABRICS</a>
-            <a href="#accessories" class="button">ACCESSORIES</a>
-            <a href="#consumer" class="button consumer">CONSUMER</a>
-            <a href="#designer" class="button">DESIGNER</a>
-            <a href="#production" class="button">PRODUCTION</a>
-            <a href="#info" class="button">INFO</a>
+    <div class="hero">
+        <h2>OPEN INTERACTIVE VIRTUAL VISTA</h2>
+        <div class="buttons" id="buttons">
+            <div id="btn1">YARNS</div>
+            <div id="btn2">FABRICS</div>
+            <div id="btn3">ACCESSORIES</div>
+            <div id="center">CONSUMER</div>
+            <div id="btn4">DESIGNER</div>
+            <div id="btn5">PRODUCTION</div>
+            <div id="btn6">CONTACT</div>
         </div>
-        <div class="under-development">
-            <p>This website is under development. Please check back soon!</p>
-        </div>
-        <div class="content">
-            <h2>Welcome to OIVV</h2>
-            <p>OIVV is a comprehensive, smart, and innovative platform designed to transform the fashion industry. Leveraging advanced AI and cutting-edge virtual technologies, we provide seamless and personalized experiences for designers, suppliers, producers, and consumers alike. By offering a transparent and sustainable fashion ecosystem, we aim to give birth to new avenues in the fashion industry.</p>
-        </div>
+    </div>
+    <div class="content">
+        <h2>Welcome to OIVV</h2>
+        <p>OIVV is a comprehensive, smart, and innovative platform designed to transform the fashion industry. Leveraging advanced AI and cutting-edge virtual technologies, we provide seamless and personalized experiences for designers, suppliers, producers, and consumers alike. Join us in creating a transparent, sustainable, and circular fashion ecosystem where creativity and technology converge to empower the future of fashion.</p>
     </div>
     <footer>
         <p>© 2024 OIVV. All rights reserved.</p>
     </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.buttons div');
+            const centerButton = document.getElementById('center');
+            document.getElementById('buttons').addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                buttons.forEach(button => {
+                    const buttonRect = button.getBoundingClientRect();
+                    const distance = Math.abs(buttonRect.left + buttonRect.width / 2 - x);
+                    button.style.transform = `translateX(${distance / 5}px)`;
+                });
+            });
+            document.getElementById('buttons').addEventListener('mouseleave', function() {
+                buttons.forEach(button => {
+                    button.style.transform = 'translateX(0)';
+                });
+            });
+        });
+    </script>
 </body>
 </html>

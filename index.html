@@ -26,21 +26,8 @@
             font-size: 1.5em;
             color: #555;
         }
-        nav {
-            margin: 20px 0;
-        }
-        nav a {
-            color: #333;
-            text-decoration: none;
-            margin: 0 15px;
-            font-size: 1em;
-        }
-        nav a:hover {
-            color: #4A90E2;
-        }
         .hero {
             height: 100vh;
-            background: url('your-background-image.jpg') center center/cover no-repeat;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -54,6 +41,8 @@
             justify-content: center;
             align-items: center;
             margin: 50px 0;
+            position: relative;
+            perspective: 1000px;
         }
         .buttons div {
             width: 100px;
@@ -67,16 +56,12 @@
             align-items: center;
             font-size: 1em;
             color: #333;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
             cursor: pointer;
         }
         .buttons div:hover {
             background-color: #98fb98; /* Mute Apple green color */
             color: #fff;
-        }
-        .buttons div#center {
-            width: 120px;
-            height: 120px;
         }
         .content {
             max-width: 800px;
@@ -103,16 +88,6 @@
 <body>
     <header>
         <h1>OIVV</h1>
-        <nav>
-            <a href="#process">OUR PROCESS</a>
-            <a href="#yarns">YARNS</a>
-            <a href="#fabrics">FABRICS</a>
-            <a href="#accessories">ACCESSORIES</a>
-            <a href="#designer">DESIGNER</a>
-            <a href="#production">PRODUCTION</a>
-            <a href="#consumer">CONSUMER</a>
-            <a href="#contact">CONTACT</a>
-        </nav>
     </header>
     <div class="hero">
         <h2>OPEN INTERACTIVE VIRTUAL VISTA</h2>
@@ -120,10 +95,10 @@
             <div id="btn1">YARNS</div>
             <div id="btn2">FABRICS</div>
             <div id="btn3">ACCESSORIES</div>
-            <div id="center">CONSUMER</div>
             <div id="btn4">DESIGNER</div>
             <div id="btn5">PRODUCTION</div>
-            <div id="btn6">CONTACT</div>
+            <div id="btn6">CONSUMER</div>
+            <div id="btn7">CONTACT</div>
         </div>
     </div>
     <div class="content">
@@ -136,21 +111,39 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const buttons = document.querySelectorAll('.buttons div');
-            const centerButton = document.getElementById('center');
+            let currentIndex = 3; // Start with the middle button
+
+            const updateButtonStyles = () => {
+                buttons.forEach((button, index) => {
+                    const distance = Math.abs(index - currentIndex);
+                    button.style.transform = `rotateY(${(index - currentIndex) * 30}deg) translateZ(${500 - distance * 100}px)`;
+                    button.style.zIndex = 10 - distance;
+                    button.style.width = index === currentIndex ? '120px' : '100px';
+                    button.style.height = index === currentIndex ? '120px' : '100px';
+                });
+            };
+
+            const moveButtons = (direction) => {
+                if (direction === 'left' && currentIndex > 0) {
+                    currentIndex--;
+                } else if (direction === 'right' && currentIndex < buttons.length - 1) {
+                    currentIndex++;
+                }
+                updateButtonStyles();
+            };
+
             document.getElementById('buttons').addEventListener('mousemove', function(e) {
                 const rect = this.getBoundingClientRect();
                 const x = e.clientX - rect.left;
-                buttons.forEach(button => {
-                    const buttonRect = button.getBoundingClientRect();
-                    const distance = Math.abs(buttonRect.left + buttonRect.width / 2 - x);
-                    button.style.transform = `translateX(${distance / 5}px)`;
-                });
+
+                if (x < rect.width / 4) {
+                    moveButtons('left');
+                } else if (x > rect.width * 3 / 4) {
+                    moveButtons('right');
+                }
             });
-            document.getElementById('buttons').addEventListener('mouseleave', function() {
-                buttons.forEach(button => {
-                    button.style.transform = 'translateX(0)';
-                });
-            });
+
+            updateButtonStyles();
         });
     </script>
 </body>

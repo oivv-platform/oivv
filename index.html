@@ -7,20 +7,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* --- DESIGN SYSTEM & COLOR PALETTE --- */
+        /* --- DESIGN SYSTEM & COLOR PALETTE (V3) --- */
         :root {
-            --background: #1a1a1a;
-            --surface: #242424;
-            --text-primary: #f5f5f5; /* Soft cream/ivory */
-            --text-secondary: #a3a3a3;
-            --accent: #e18a3c; /* Richer, more sophisticated amber */
-            --accent-light: #f7b783;
-            --border: #3a3a3a;
-            --font-heading: 'Cormorant Garamond', serif;
-            --font-body: 'Lato', sans-serif;
+            --background: #101727; /* Deep Navy/Charcoal Blue */
+            --surface: #1E293B;   /* Slate Blue */
+            --text-primary: #E2E8F0; /* Crisp Off-white/Light Gray */
+            --text-secondary: #94A3B8;
+            --accent: #38BDF8;   /* Cool, Muted Sky Blue */
+            --accent-light: #7DD3FC;
+            --border: #334155;
+            --font-heading: 'DM Serif Display', serif;
+            --font-body: 'Sora', sans-serif;
         }
 
         /* --- BASE STYLES & TYPOGRAPHY --- */
@@ -33,7 +33,7 @@
         }
         h1, h2, h3, h4, h5, h6 {
             font-family: var(--font-heading);
-            font-weight: 700;
+            font-weight: 400; /* DM Serif Display is naturally bold */
         }
 
         /* --- SCROLLING & SLIDE STRUCTURE --- */
@@ -63,20 +63,29 @@
         .container-snap::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
         /* --- UI COMPONENTS & EFFECTS --- */
-        .glass-card {
+        .card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 1rem;
             padding: 1.5rem;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .glass-card:hover {
+        .card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent);
+        }
+        .glass-text-card {
+            background: rgba(30, 41, 59, 0.5); /* Semi-transparent surface */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
         }
         .dot-pattern {
-            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
-            background-size: 25px 25px;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0);
+            background-size: 30px 30px;
         }
         #cover-video {
             position: absolute;
@@ -94,7 +103,7 @@
             bottom: 100%;
             left: 50%;
             transform: translateX(-50%) translateY(-10px);
-            background-color: #111827;
+            background-color: #020617;
             color: white;
             padding: 8px 12px;
             border-radius: 8px;
@@ -110,36 +119,6 @@
             opacity: 1;
             visibility: visible;
         }
-        
-        /* --- GEMINI API STYLING --- */
-        .gemini-btn {
-            background-color: var(--accent);
-            color: #1C1C1C;
-            padding: 12px 24px;
-            border-radius: 9999px;
-            font-weight: 700;
-            font-family: var(--font-body);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        .gemini-btn:hover {
-            background-color: transparent;
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .gemini-output {
-            background: rgba(10, 10, 10, 0.8);
-            border: 1px solid var(--border);
-            padding: 1rem;
-            border-radius: 0.75rem;
-            margin-top: 1rem;
-            font-style: italic;
-            color: var(--text-secondary);
-            text-align: left;
-        }
     </style>
 </head>
 <body>
@@ -149,7 +128,7 @@
         <!-- Slide 1: Cover -->
         <section id="cover" class="slide text-center overflow-hidden">
             <video id="cover-video" autoplay loop muted playsinline>
-                <source src="https://placehold.co/v/1920x1080/1a1a1a/e18a3c/mp4?text=MePont" type="video/mp4">
+                <source src="https://placehold.co/v/1920x1080/101727/38BDF8/mp4?text=MePont" type="video/mp4">
             </video>
             <div class="absolute inset-0 bg-gradient-to-b from-[var(--background)] via-[var(--background)]/80 to-[var(--background)]"></div>
             <div class="relative z-10">
@@ -165,23 +144,23 @@
         </section>
 
         <!-- Slide 2: The Problem -->
-        <section id="problem" class="slide text-center">
+        <section id="problem" class="slide text-center dot-pattern">
             <h2 class="text-6xl tracking-tight">The Fashion Industry is Broken.</h2>
             <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">Decades of opaque practices have created a system that is wasteful, expensive, and disconnected from its customers.</p>
             <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-7xl">
-                <div class="glass-card">
+                <div class="glass-text-card">
                     <h3 class="text-3xl text-[var(--accent)]">Opaque Pricing</h3>
                     <p class="mt-2 text-lg">Consumers pay 5-10x markups with no visibility into the true cost of production.</p>
                 </div>
-                <div class="glass-card">
+                <div class="glass-text-card">
                     <h3 class="text-3xl text-[var(--accent)]">Overproduction Waste</h3>
                     <p class="mt-2 text-lg">Up to 40% of all fashion produced is never sold, leading to immense environmental waste.</p>
                 </div>
-                <div class="glass-card">
+                <div class="glass-text-card">
                     <h3 class="text-3xl text-[var(--accent)]">High Return Rates</h3>
                     <p class="mt-2 text-lg">Poor online fit leads to ~25% return rates for apparel, creating massive logistical costs.</p>
                 </div>
-                <div class="glass-card">
+                <div class="glass-text-card">
                     <h3 class="text-3xl text-[var(--accent)]">Consumer Disconnect</h3>
                     <p class="mt-2 text-lg">Shoppers have no connection to the makers or the story behind their clothes.</p>
                 </div>
@@ -189,52 +168,48 @@
         </section>
 
         <!-- Slide 3: The Solution -->
-        <section id="solution" class="slide text-center dot-pattern">
-            <h2 class="text-6xl tracking-tight">Our Solution: An AI-Enhanced Ecosystem</h2>
-            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">MePont is not just an app. It's a multi-platform ecosystem built on three pillars, enhanced with AI to add value at every step.</p>
+        <section id="solution" class="slide text-center">
+            <h2 class="text-6xl tracking-tight">Our Solution: An Intelligent Ecosystem</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">MePont is not just an app. It's a multi-platform ecosystem built on three pillars to fix the industry's core problems.</p>
             <div class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
-                <div class="glass-card text-center">
-                    <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1C1C1C/e18a3c/mp4?text=Transparent+Pricing" type="video/mp4"></video>
+                <div class="card text-center">
+                    <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/101727/38BDF8/mp4?text=Transparent+Pricing" type="video/mp4"></video>
                     <h3 class="text-3xl text-[var(--accent)]">Radical Transparency</h3>
                     <p class="mt-2 text-lg">A zero-inventory, crowdfunded model with a fully transparent price breakdown for every item.</p>
                 </div>
-                <div class="glass-card text-center">
-                    <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1C1C1C/e18a3c/mp4?text=Virtual+Try-On" type="video/mp4"></video>
+                <div class="card text-center">
+                    <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/101727/38BDF8/mp4?text=Virtual+Try-On" type="video/mp4"></video>
                     <h3 class="text-3xl text-[var(--accent)]">Immersive Experience</h3>
                     <p class="mt-2 text-lg">A high-fidelity UE5 platform with physics-based virtual try-on that builds confidence.</p>
                 </div>
-                <div class="glass-card text-center">
-                    <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1C1C1C/e18a3c/mp4?text=Community+Hub" type="video/mp4"></video>
+                <div class="card text-center">
+                    <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/101727/38BDF8/mp4?text=Community+Hub" type="video/mp4"></video>
                     <h3 class="text-3xl text-[var(--accent)]">Community & Connection</h3>
                     <p class="mt-2 text-lg">A platform that connects users directly to manufacturers and builds a community around shared values.</p>
                 </div>
             </div>
-            <div class="mt-8 text-center">
-                 <button id="stylingBtn" class="gemini-btn">✨ Get AI Styling Advice</button>
-                 <div id="stylingOutput" class="gemini-output max-w-2xl mx-auto hidden"></div>
-            </div>
         </section>
 
         <!-- Slide 4: The Business Model -->
-        <section id="model" class="slide text-center">
-            <h2 class="text-6xl tracking-tight">The Business Model: AI-Enriched Value</h2>
-            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">We build trust with transparent pricing and add value for our partners with AI-powered tools.</p>
-            <div class="mt-12 w-full max-w-2xl glass-card p-8">
+        <section id="model" class="slide text-center dot-pattern">
+            <h2 class="text-6xl tracking-tight">The Business Model: Data-Enriched Value</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">We build trust with transparent pricing and add value for our partners with intelligent tools.</p>
+            <div class="mt-12 w-full max-w-2xl card p-8">
                 <h3 class="text-4xl">Example: Designer T-Shirt</h3>
                 <div class="mt-8 space-y-4">
-                    <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-black/20">
+                    <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-[var(--background)]">
                         <span class="font-medium text-lg text-[var(--text-secondary)]">Manufacturer's Base Cost</span>
                         <span class="font-bold text-3xl">€10.00</span>
                         <div class="tooltip">The direct cost from our partner manufacturer in Portugal.</div>
                     </div>
                     <div class="flex justify-center -my-2"><span class="text-[var(--accent)] font-bold text-2xl">+</span></div>
-                    <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-black/20">
+                    <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-[var(--background)]">
                         <span class="font-medium text-lg text-[var(--text-secondary)]">Designer & Digitization Fee (10%)</span>
                         <span class="font-bold text-3xl">€1.00</span>
                         <div class="tooltip">Covers the cost of 3D asset creation by our artists.</div>
                     </div>
                     <div class="flex justify-center -my-2"><span class="text-[var(--accent)] font-bold text-2xl">+</span></div>
-                    <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-black/20">
+                    <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-[var(--background)]">
                         <span class="font-medium text-lg text-[var(--text-secondary)]">MePont Platform Fee (20%)</span>
                         <span class="font-bold text-3xl">€2.00</span>
                         <div class="tooltip">Our commission for technology, marketing, and operations.</div>
@@ -247,19 +222,15 @@
                     </div>
                      <p class="text-center mt-4 text-[var(--text-secondary)]">Traditional Retail Price: €50 - €90</p>
                 </div>
-                 <div class="mt-8 text-center">
-                    <button id="descriptionBtn" class="gemini-btn">✨ Generate Product Description</button>
-                    <div id="descriptionOutput" class="gemini-output hidden"></div>
-                </div>
             </div>
         </section>
 
         <!-- Slide 5: Market Opportunity -->
-        <section id="market" class="slide text-center dot-pattern">
+        <section id="market" class="slide text-center">
              <h2 class="text-6xl tracking-tight">A Confluence of High-Growth Markets</h2>
             <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">MePont is positioned at the intersection of several massive, rapidly expanding digital and sustainable markets.</p>
             <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-7xl">
-                <div class="group glass-card text-center relative overflow-hidden">
+                <div class="group card text-center relative overflow-hidden">
                     <h3 class="text-2xl text-[var(--accent-light)]">Fashion E-commerce</h3>
                     <p class="text-5xl font-bold mt-2">$1.5T</p>
                     <p class="text-lg text-[var(--text-secondary)] mt-1">by 2029 (11.5% CAGR)</p>
@@ -267,7 +238,7 @@
                         <p class="text-md text-center">Analyst: A robust and expanding primary channel, confirming the viability of our core marketplace.</p>
                     </div>
                 </div>
-                <div class="group glass-card text-center relative overflow-hidden">
+                <div class="group card text-center relative overflow-hidden">
                     <h3 class="text-2xl text-[var(--accent-light)]">Virtual Try-On (VTO)</h3>
                     <p class="text-5xl font-bold mt-2">$12.2B</p>
                     <p class="text-lg text-[var(--text-secondary)] mt-1">in 2025 (26.9% CAGR)</p>
@@ -275,15 +246,15 @@
                         <p class="text-md text-center">Analyst: Our plan underestimates this market. The opportunity for our core tech is larger than assumed.</p>
                     </div>
                 </div>
-                <div class="group glass-card text-center relative overflow-hidden">
+                <div class="group card text-center relative overflow-hidden">
                     <h3 class="text-2xl text-[var(--accent-light)]">AI in Fashion</h3>
                     <p class="text-5xl font-bold mt-2">$1.8B</p>
                     <p class="text-lg text-[var(--text-secondary)] mt-1">in 2025 (~40% CAGR)</p>
                      <div class="absolute inset-0 bg-[var(--background)]/95 p-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <p class="text-md text-center">Analyst: The staggering growth rate validates the strategic importance of our AI features and roadmap.</p>
+                        <p class="text-md text-center">Analyst: The staggering growth rate validates the strategic importance of our intelligent features and roadmap.</p>
                     </div>
                 </div>
-                <div class="group glass-card text-center relative overflow-hidden">
+                <div class="group card text-center relative overflow-hidden">
                     <h3 class="text-2xl text-[var(--accent-light)]">Sustainable Fashion</h3>
                     <p class="text-5xl font-bold mt-2">$9.5B</p>
                     <p class="text-lg text-[var(--text-secondary)] mt-1">in 2025 (8.1% CAGR)</p>
@@ -296,23 +267,23 @@
         </section>
 
         <!-- Slide 6: Omnichannel Strategy -->
-        <section id="omnichannel" class="slide text-center">
+        <section id="omnichannel" class="slide text-center dot-pattern">
             <h2 class="text-6xl tracking-tight">Omnichannel Strategy: Reaching Every Consumer</h2>
             <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">Our tiered platform strategy maximizes market reach while intelligently managing our most expensive cloud costs.</p>
             <div class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
-                <div class="group glass-card p-8 border-2 border-[var(--accent)]">
+                <div class="group card p-8 border-2 border-[var(--accent)]">
                     <h3 class="text-3xl text-[var(--accent)]">Tier 1: Web/Mobile App</h3>
                     <p class="text-6xl font-bold mt-2">75%</p>
                     <p class="mt-2 text-lg">The accessible hub for daily interactions. Drives scale and volume.</p>
                     <p class="mt-4 text-md text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity">Tech: ARKit, Jetpack Compose, Swift UI</p>
                 </div>
-                <div class="group glass-card p-8">
+                <div class="group card p-8">
                     <h3 class="text-3xl">Tier 2: Cloud-Streamed UE5</h3>
                     <p class="text-6xl font-bold mt-2">15%</p>
                     <p class="mt-2 text-lg">The immersive 3D experience for engaged enthusiasts on any device.</p>
                     <p class="mt-4 text-md text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity">Tech: AWS G-Series, NICE DCV</p>
                 </div>
-                <div class="group glass-card p-8">
+                <div class="group card p-8">
                     <h3 class="text-3xl">Tier 3: Downloadable Client</h3>
                     <p class="text-6xl font-bold mt-2">10%</p>
                     <p class="mt-2 text-lg">The highest-fidelity experience for power users on PC/PS5.</p>
@@ -322,11 +293,11 @@
         </section>
 
         <!-- Slide 7: GTM & Tech Roadmap -->
-        <section id="roadmap" class="slide text-center dot-pattern">
+        <section id="roadmap" class="slide text-center">
             <h2 class="text-6xl tracking-tight">A Pragmatic & De-risked Plan</h2>
             <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">We are proactively mitigating key risks with a phased, capital-efficient execution plan.</p>
             <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl">
-                <div class="glass-card p-8">
+                <div class="card p-8">
                     <h3 class="text-4xl text-[var(--accent)]">Go-to-Market: The Pilot Program</h3>
                     <p class="mt-4 text-lg">Instead of a premature mass launch, our seed funding will be used to execute a focused pilot program.</p>
                     <ul class="mt-4 space-y-3 text-lg text-left">
@@ -335,7 +306,7 @@
                         <li class="flex items-start"><span class="text-[var(--accent)] mr-3 mt-1">&#10003;</span>Prove the unit economics and sales velocity at a smaller scale.</li>
                     </ul>
                 </div>
-                <div class="glass-card p-8">
+                <div class="card p-8">
                     <h3 class="text-4xl text-[var(--accent)]">Technology: Phased Roadmap</h3>
                     <p class="mt-4 text-lg">We will own our core tech by investing smartly, not recklessly.</p>
                      <ul class="mt-4 space-y-3 text-lg text-left">
@@ -347,7 +318,7 @@
         </section>
 
         <!-- Slide 8: Financials -->
-        <section id="financials" class="slide text-center">
+        <section id="financials" class="slide text-center dot-pattern">
             <h2 class="text-6xl tracking-tight">Financials: A Clear Path to Profitability</h2>
             <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">Our model shows strong revenue growth driven by our omnichannel strategy, reaching quarterly profitability by Q4 of Year 1.</p>
             <div class="mt-8 w-full max-w-6xl">
@@ -358,11 +329,11 @@
         </section>
 
         <!-- Slide 9: The Team -->
-        <section id="team" class="slide text-center dot-pattern">
+        <section id="team" class="slide text-center">
             <h2 class="text-6xl tracking-tight">The Founder: Vision & Execution</h2>
             <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">A unique blend of deep industry knowledge and proven technical capability.</p>
-            <div class="mt-12 w-full max-w-3xl glass-card p-8 text-center">
-                <img src="https://placehold.co/128x128/1a1a1a/f7b783?text=Founder" class="w-32 h-32 rounded-full mx-auto border-4 border-[var(--accent)]" alt="Founder Portrait">
+            <div class="mt-12 w-full max-w-3xl card p-8 text-center">
+                <img src="https://placehold.co/128x128/101727/7DD3FC?text=Founder" class="w-32 h-32 rounded-full mx-auto border-4 border-[var(--accent)]" alt="Founder Portrait">
                 <h3 class="text-4xl mt-6">Founder Name</h3>
                 <p class="text-[var(--accent-light)] text-xl">Founder & CEO</p>
                 <p class="mt-4 text-lg max-w-xl mx-auto">
@@ -373,7 +344,7 @@
         </section>
 
         <!-- Slide 10: The Ask -->
-        <section id="ask" class="slide text-center">
+        <section id="ask" class="slide text-center dot-pattern">
             <h2 class="text-6xl tracking-tight">The Ask & Use of Funds</h2>
             <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">We are seeking seed funding to execute our pilot program and achieve key milestones for our Series A.</p>
             <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 w-full max-w-6xl items-center">
@@ -395,62 +366,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const accentColor = '#e18a3c';
-            const textColor = '#a3a3a3';
+            const accentColor = '#38BDF8';
+            const textColor = '#94A3B8';
             const gridColor = 'rgba(255, 255, 255, 0.1)';
-
-            // --- Gemini API Integration ---
-            const descriptionBtn = document.getElementById('descriptionBtn');
-            const descriptionOutput = document.getElementById('descriptionOutput');
-            const stylingBtn = document.getElementById('stylingBtn');
-            const stylingOutput = document.getElementById('stylingOutput');
-
-            async function callGemini(prompt, outputElement, buttonElement) {
-                outputElement.classList.remove('hidden');
-                outputElement.innerHTML = '✨ Generating...';
-                buttonElement.disabled = true;
-
-                const apiKey = ""; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-                
-                const payload = {
-                    contents: [{ role: "user", parts: [{ text: prompt }] }]
-                };
-
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) throw new Error(`API error: ${response.statusText}`);
-
-                    const result = await response.json();
-                    
-                    if (result.candidates && result.candidates[0]?.content?.parts?.[0]) {
-                        const text = result.candidates[0].content.parts[0].text;
-                        outputElement.innerHTML = text.replace(/\n/g, '<br>');
-                    } else {
-                        outputElement.innerHTML = 'Sorry, could not generate a response. Please try again.';
-                    }
-                } catch (error) {
-                    console.error('Gemini API call failed:', error);
-                    outputElement.innerHTML = 'An error occurred. Please check the console for details.';
-                } finally {
-                    buttonElement.disabled = false;
-                }
-            }
-
-            descriptionBtn.addEventListener('click', () => {
-                const prompt = `You are a creative copywriter for MePont, a luxury transparent fashion marketplace. Write a compelling, short product description (2-3 sentences) for a sustainable designer t-shirt made from premium organic cotton. The manufacturer's cost is €10, but we sell it for €13. Highlight the value, quality, and the story behind the transparent price. Use an elegant, sophisticated tone.`;
-                callGemini(prompt, descriptionOutput, descriptionBtn);
-            });
-
-            stylingBtn.addEventListener('click', () => {
-                const prompt = `You are an AI fashion stylist for MePont. A user is looking at a high-quality, minimalist designer t-shirt. Provide three distinct, creative styling suggestions for different occasions (e.g., casual weekend, smart casual, evening out). Keep it concise, inspiring, and use a sophisticated tone.`;
-                callGemini(prompt, stylingOutput, stylingBtn);
-            });
 
             // --- Chart.js Implementation ---
             const financialsCtx = document.getElementById('financialsChart').getContext('2d');
@@ -461,15 +379,15 @@
                     datasets: [{
                         label: 'Total Revenue',
                         data: [30000, 112500, 270000, 600000],
-                        backgroundColor: 'rgba(225, 138, 60, 0.6)',
+                        backgroundColor: 'rgba(56, 189, 248, 0.6)',
                         borderColor: accentColor,
                         borderWidth: 1,
                         yAxisID: 'y',
                     }, {
                         label: 'Net Profit / (Loss)',
                         data: [-242200, -214700, -134700, 95300],
-                        backgroundColor: (ctx) => ctx.raw < 0 ? 'rgba(163, 163, 163, 0.4)' : 'rgba(247, 183, 131, 0.6)',
-                        borderColor: (ctx) => ctx.raw < 0 ? '#a3a3a3' : '#f7b783',
+                        backgroundColor: (ctx) => ctx.raw < 0 ? 'rgba(148, 163, 184, 0.4)' : 'rgba(125, 211, 252, 0.6)',
+                        borderColor: (ctx) => ctx.raw < 0 ? '#94A3B8' : '#7DD3FC',
                         borderWidth: 1,
                         yAxisID: 'y',
                     }]
@@ -478,21 +396,21 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { labels: { color: textColor, font: { family: "'Lato', sans-serif" } } },
+                        legend: { labels: { color: textColor, font: { family: "'Sora', sans-serif" } } },
                         tooltip: {
-                            bodyFont: { family: "'Lato', sans-serif" },
-                            titleFont: { family: "'Lato', sans-serif" },
+                            bodyFont: { family: "'Sora', sans-serif" },
+                            titleFont: { family: "'Sora', sans-serif" },
                             callbacks: {
                                 label: (ctx) => `${ctx.dataset.label}: ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(ctx.raw)}`
                             }
                         }
                     },
                     scales: {
-                        x: { ticks: { color: textColor, font: { family: "'Lato', sans-serif" } }, grid: { color: gridColor } },
+                        x: { ticks: { color: textColor, font: { family: "'Sora', sans-serif" } }, grid: { color: gridColor } },
                         y: {
                             ticks: { 
                                 color: textColor,
-                                font: { family: "'Lato', sans-serif" },
+                                font: { family: "'Sora', sans-serif" },
                                 callback: (val) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', notation: 'compact' }).format(val)
                             },
                             grid: { color: gridColor }
@@ -509,8 +427,8 @@
                     datasets: [{
                         label: 'Use of Funds',
                         data: [70, 10, 10, 5, 5],
-                        backgroundColor: ['#b45309', '#c2410c', '#d97706', '#f59e0b', '#fbbf24'],
-                        borderColor: '#1a1a1a',
+                        backgroundColor: ['#0EA5E9', '#0284C7', '#0369A1', '#075985', '#0C4A6E'],
+                        borderColor: '#101727',
                         borderWidth: 4
                     }]
                 },
@@ -518,10 +436,10 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: textColor, font: { family: "'Lato', sans-serif" } } },
+                        legend: { position: 'bottom', labels: { color: textColor, font: { family: "'Sora', sans-serif" } } },
                         tooltip: {
-                            bodyFont: { family: "'Lato', sans-serif" },
-                            titleFont: { family: "'Lato', sans-serif" },
+                            bodyFont: { family: "'Sora', sans-serif" },
+                            titleFont: { family: "'Sora', sans-serif" },
                             callbacks: {
                                 label: (ctx) => `${ctx.label}: ${ctx.raw}%`
                             }

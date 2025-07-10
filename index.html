@@ -7,65 +7,76 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* --- DESIGN SYSTEM & COLOR PALETTE --- */
         :root {
-            --background: #1C1C1C;
-            --text-primary: #F3F4F6;
-            --text-secondary: #A1A1AA;
-            --accent: #D97706; /* A sophisticated, warm amber/terracotta */
-            --accent-light: #FBBF24;
-            --surface: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
+            --background: #1a1a1a;
+            --surface: #242424;
+            --text-primary: #f5f5f5; /* Soft cream/ivory */
+            --text-secondary: #a3a3a3;
+            --accent: #e18a3c; /* Richer, more sophisticated amber */
+            --accent-light: #f7b783;
+            --border: #3a3a3a;
+            --font-heading: 'Cormorant Garamond', serif;
+            --font-body: 'Lato', sans-serif;
         }
+
+        /* --- BASE STYLES & TYPOGRAPHY --- */
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             background-color: var(--background);
             color: var(--text-primary);
         }
-        .slide {
-            min-height: 100vh;
-            scroll-snap-align: start;
-            scroll-snap-stop: always;
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+        }
+
+        /* --- SCROLLING & SLIDE STRUCTURE --- */
+        html, body {
+            height: 100%;
+            overflow: hidden;
         }
         .container-snap {
             scroll-snap-type: y mandatory;
             overflow-y: scroll;
             height: 100vh;
         }
-        /* Custom scrollbar for a cleaner look */
-        .container-snap::-webkit-scrollbar {
-            width: 5px;
-        }
-        .container-snap::-webkit-scrollbar-track {
-            background: var(--background);
-        }
-        .container-snap::-webkit-scrollbar-thumb {
-            background: var(--accent);
-            border-radius: 10px;
-        }
-        .glass-effect {
-            background: var(--surface);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            transition: all 0.3s ease-in-out;
-        }
-        .glass-effect:hover {
-             border-color: var(--accent);
-             transform: translateY(-5px);
-        }
-        .chart-container {
-            position: relative;
-            height: 60vh;
+        .slide {
+            height: 100vh;
             width: 100%;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+        .container-snap::-webkit-scrollbar { width: 5px; }
+        .container-snap::-webkit-scrollbar-track { background: var(--background); }
+        .container-snap::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+        /* --- UI COMPONENTS & EFFECTS --- */
+        .glass-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         .dot-pattern {
-            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0);
-            background-size: 20px 20px;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
+            background-size: 25px 25px;
         }
         #cover-video {
             position: absolute;
@@ -78,29 +89,6 @@
             z-index: 0;
             opacity: 0.1;
         }
-        .gemini-btn {
-            background-color: var(--accent);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 9999px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.3s;
-        }
-        .gemini-btn:hover {
-            background-color: #B45309; /* Darker accent */
-        }
-        .gemini-output {
-            background: rgba(10, 10, 10, 0.8);
-            border: 1px solid var(--border);
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 16px;
-            font-style: italic;
-            color: var(--text-secondary);
-        }
         .tooltip {
             position: absolute;
             bottom: 100%;
@@ -111,6 +99,7 @@
             padding: 8px 12px;
             border-radius: 8px;
             font-size: 12px;
+            font-family: var(--font-body);
             white-space: nowrap;
             opacity: 0;
             visibility: hidden;
@@ -121,74 +110,103 @@
             opacity: 1;
             visibility: visible;
         }
+        
+        /* --- GEMINI API STYLING --- */
+        .gemini-btn {
+            background-color: var(--accent);
+            color: #1C1C1C;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-family: var(--font-body);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .gemini-btn:hover {
+            background-color: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .gemini-output {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            text-align: left;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body>
 
     <div class="container-snap">
 
         <!-- Slide 1: Cover -->
-        <section id="cover" class="slide flex flex-col items-center justify-center text-center p-8 overflow-hidden">
+        <section id="cover" class="slide text-center overflow-hidden">
             <video id="cover-video" autoplay loop muted playsinline>
-                <source src="https://placehold.co/v/1920x1080/1C1C1C/D97706/mp4?text=MePont+UE5+Demo" type="video/mp4">
+                <source src="https://placehold.co/v/1920x1080/1a1a1a/e18a3c/mp4?text=MePont" type="video/mp4">
             </video>
             <div class="absolute inset-0 bg-gradient-to-b from-[var(--background)] via-[var(--background)]/80 to-[var(--background)]"></div>
             <div class="relative z-10">
-                <div class="w-24 h-24 mx-auto mb-6 flex items-center justify-center rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]">
-                     <svg class="w-12 h-12 text-[var(--accent)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M20 12a8 8 0 0 1-16 0"/></svg>
+                <div class="w-28 h-28 mx-auto mb-6 flex items-center justify-center rounded-full bg-[var(--accent)]/10 border-2 border-[var(--accent)]">
+                     <svg class="w-14 h-14 text-[var(--accent)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M20 12a8 8 0 0 1-16 0"/></svg>
                 </div>
-                <h1 class="text-6xl md:text-8xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">MePont</h1>
-                <p class="mt-4 text-xl md:text-2xl text-[var(--accent-light)] font-medium tracking-tight">The Transparent Fashion Marketplace</p>
-                <p class="mt-8 text-[var(--text-secondary)] max-w-2xl mx-auto">An investment opportunity to build the future of a more honest, sustainable, and connected fashion industry.</p>
+                <h1 class="text-7xl md:text-9xl tracking-tight">MePont</h1>
+                <p class="mt-4 text-2xl md:text-3xl text-[var(--accent-light)]" style="font-family: var(--font-body); font-weight: 400;">The Transparent Fashion Marketplace</p>
             </div>
              <div class="absolute bottom-10 animate-bounce">
-                <svg class="w-6 h-6 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <svg class="w-6 h-6 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </div>
         </section>
 
         <!-- Slide 2: The Problem -->
-        <section id="problem" class="slide flex flex-col items-center justify-center p-8">
-            <h2 class="text-5xl font-bold tracking-tighter text-center">The Fashion Industry is Broken.</h2>
-            <p class="mt-3 text-lg text-[var(--text-secondary)] text-center max-w-3xl">Decades of opaque practices have created a system that is wasteful, expensive, and disconnected from its customers.</p>
-            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-7xl">
-                <div class="glass-effect rounded-2xl p-6">
-                    <h3 class="text-2xl font-bold text-[var(--accent)]">Opaque Pricing</h3>
-                    <p class="mt-2 text-[var(--text-primary)]">Consumers pay 5-10x markups with no visibility into the true cost of production.</p>
+        <section id="problem" class="slide text-center">
+            <h2 class="text-6xl tracking-tight">The Fashion Industry is Broken.</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">Decades of opaque practices have created a system that is wasteful, expensive, and disconnected from its customers.</p>
+            <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-7xl">
+                <div class="glass-card">
+                    <h3 class="text-3xl text-[var(--accent)]">Opaque Pricing</h3>
+                    <p class="mt-2 text-lg">Consumers pay 5-10x markups with no visibility into the true cost of production.</p>
                 </div>
-                <div class="glass-effect rounded-2xl p-6">
-                    <h3 class="text-2xl font-bold text-[var(--accent)]">Overproduction Waste</h3>
-                    <p class="mt-2 text-[var(--text-primary)]">Up to 40% of all fashion produced is never sold, leading to immense environmental waste.</p>
+                <div class="glass-card">
+                    <h3 class="text-3xl text-[var(--accent)]">Overproduction Waste</h3>
+                    <p class="mt-2 text-lg">Up to 40% of all fashion produced is never sold, leading to immense environmental waste.</p>
                 </div>
-                <div class="glass-effect rounded-2xl p-6">
-                    <h3 class="text-2xl font-bold text-[var(--accent)]">High Return Rates</h3>
-                    <p class="mt-2 text-[var(--text-primary)]">Poor online fit leads to ~25% return rates for apparel, creating massive logistical costs and waste.</p>
+                <div class="glass-card">
+                    <h3 class="text-3xl text-[var(--accent)]">High Return Rates</h3>
+                    <p class="mt-2 text-lg">Poor online fit leads to ~25% return rates for apparel, creating massive logistical costs.</p>
                 </div>
-                <div class="glass-effect rounded-2xl p-6">
-                    <h3 class="text-2xl font-bold text-[var(--accent)]">Consumer Disconnect</h3>
-                    <p class="mt-2 text-[var(--text-primary)]">Shoppers have no connection to the makers or the story behind their clothes.</p>
+                <div class="glass-card">
+                    <h3 class="text-3xl text-[var(--accent)]">Consumer Disconnect</h3>
+                    <p class="mt-2 text-lg">Shoppers have no connection to the makers or the story behind their clothes.</p>
                 </div>
             </div>
         </section>
 
         <!-- Slide 3: The Solution -->
-        <section id="solution" class="slide flex flex-col items-center justify-center p-8 dot-pattern">
-            <h2 class="text-5xl font-bold tracking-tighter text-center">Our Solution: An AI-Enhanced Ecosystem</h2>
-            <p class="mt-3 text-lg text-[var(--text-secondary)] text-center max-w-3xl">MePont is not just an app. It's a multi-platform ecosystem built on three pillars, enhanced with AI to add value at every step.</p>
-            <div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
-                <div class="glass-effect rounded-2xl p-6 text-center overflow-hidden">
-                    <video class="w-full h-48 object-cover rounded-lg" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1C1C1C/D97706/mp4?text=Transparent+Pricing+Demo" type="video/mp4"></video>
-                    <h3 class="text-2xl font-bold text-[var(--accent)] mt-4">Radical Transparency</h3>
-                    <p class="mt-2 text-[var(--text-primary)]">A zero-inventory, crowdfunded model with a fully transparent price breakdown for every item.</p>
+        <section id="solution" class="slide text-center dot-pattern">
+            <h2 class="text-6xl tracking-tight">Our Solution: An AI-Enhanced Ecosystem</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">MePont is not just an app. It's a multi-platform ecosystem built on three pillars, enhanced with AI to add value at every step.</p>
+            <div class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
+                <div class="glass-card text-center">
+                    <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1C1C1C/e18a3c/mp4?text=Transparent+Pricing" type="video/mp4"></video>
+                    <h3 class="text-3xl text-[var(--accent)]">Radical Transparency</h3>
+                    <p class="mt-2 text-lg">A zero-inventory, crowdfunded model with a fully transparent price breakdown for every item.</p>
                 </div>
-                <div class="glass-effect rounded-2xl p-6 text-center overflow-hidden">
-                    <video class="w-full h-48 object-cover rounded-lg" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1C1C1C/D97706/mp4?text=Virtual+Try-On+Demo" type="video/mp4"></video>
-                    <h3 class="text-2xl font-bold text-[var(--accent)] mt-4">Immersive Experience</h3>
-                    <p class="mt-2 text-[var(--text-primary)]">A high-fidelity UE5 platform with physics-based virtual try-on that builds confidence and reduces returns.</p>
+                <div class="glass-card text-center">
+                    <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1C1C1C/e18a3c/mp4?text=Virtual+Try-On" type="video/mp4"></video>
+                    <h3 class="text-3xl text-[var(--accent)]">Immersive Experience</h3>
+                    <p class="mt-2 text-lg">A high-fidelity UE5 platform with physics-based virtual try-on that builds confidence.</p>
                 </div>
-                <div class="glass-effect rounded-2xl p-6 text-center overflow-hidden">
-                    <video class="w-full h-48 object-cover rounded-lg" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1C1C1C/D97706/mp4?text=Community+Hub+Demo" type="video/mp4"></video>
-                    <h3 class="text-2xl font-bold text-[var(--accent)] mt-4">Community & Connection</h3>
-                    <p class="mt-2 text-[var(--text-primary)]">A platform that connects users directly to manufacturers and builds a community around shared values.</p>
+                <div class="glass-card text-center">
+                    <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1C1C1C/e18a3c/mp4?text=Community+Hub" type="video/mp4"></video>
+                    <h3 class="text-3xl text-[var(--accent)]">Community & Connection</h3>
+                    <p class="mt-2 text-lg">A platform that connects users directly to manufacturers and builds a community around shared values.</p>
                 </div>
             </div>
             <div class="mt-8 text-center">
@@ -198,34 +216,34 @@
         </section>
 
         <!-- Slide 4: The Business Model -->
-        <section id="model" class="slide flex flex-col items-center justify-center p-8">
-            <h2 class="text-5xl font-bold tracking-tighter text-center">The Business Model: AI-Enriched Value</h2>
-            <p class="mt-3 text-lg text-[var(--text-secondary)] text-center max-w-3xl">We build trust with transparent pricing and add value for our partners with AI-powered tools.</p>
-            <div class="mt-12 w-full max-w-2xl glass-effect rounded-2xl p-8">
-                <h3 class="text-2xl font-semibold text-center">Example: High-Quality Designer T-Shirt</h3>
-                <div class="mt-8 space-y-4" id="price-breakdown">
+        <section id="model" class="slide text-center">
+            <h2 class="text-6xl tracking-tight">The Business Model: AI-Enriched Value</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">We build trust with transparent pricing and add value for our partners with AI-powered tools.</p>
+            <div class="mt-12 w-full max-w-2xl glass-card p-8">
+                <h3 class="text-4xl">Example: Designer T-Shirt</h3>
+                <div class="mt-8 space-y-4">
                     <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-black/20">
-                        <span class="font-medium text-[var(--text-secondary)]">Manufacturer's Base Cost</span>
-                        <span class="font-bold text-2xl text-white">€10.00</span>
+                        <span class="font-medium text-lg text-[var(--text-secondary)]">Manufacturer's Base Cost</span>
+                        <span class="font-bold text-3xl">€10.00</span>
                         <div class="tooltip">The direct cost from our partner manufacturer in Portugal.</div>
                     </div>
                     <div class="flex justify-center -my-2"><span class="text-[var(--accent)] font-bold text-2xl">+</span></div>
                     <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-black/20">
-                        <span class="font-medium text-[var(--text-secondary)]">Designer & Digitization Fee (10%)</span>
-                        <span class="font-bold text-2xl text-white">€1.00</span>
+                        <span class="font-medium text-lg text-[var(--text-secondary)]">Designer & Digitization Fee (10%)</span>
+                        <span class="font-bold text-3xl">€1.00</span>
                         <div class="tooltip">Covers the cost of 3D asset creation by our artists.</div>
                     </div>
                     <div class="flex justify-center -my-2"><span class="text-[var(--accent)] font-bold text-2xl">+</span></div>
                     <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-black/20">
-                        <span class="font-medium text-[var(--text-secondary)]">MePont Platform Fee (20%)</span>
-                        <span class="font-bold text-2xl text-white">€2.00</span>
+                        <span class="font-medium text-lg text-[var(--text-secondary)]">MePont Platform Fee (20%)</span>
+                        <span class="font-bold text-3xl">€2.00</span>
                         <div class="tooltip">Our commission for technology, marketing, and operations.</div>
                     </div>
                 </div>
                 <div class="mt-6 pt-6 border-t border-[var(--border)]">
                     <div class="flex justify-between items-center">
-                        <span class="text-xl font-bold text-[var(--accent-light)]">MePont Final Price</span>
-                        <span class="font-black text-4xl text-[var(--accent)]">€13.00</span>
+                        <span class="text-2xl font-bold text-[var(--accent-light)]">MePont Final Price</span>
+                        <span class="text-5xl font-bold text-[var(--accent)]">€13.00</span>
                     </div>
                      <p class="text-center mt-4 text-[var(--text-secondary)]">Traditional Retail Price: €50 - €90</p>
                 </div>
@@ -237,40 +255,40 @@
         </section>
 
         <!-- Slide 5: Market Opportunity -->
-        <section id="market" class="slide flex flex-col items-center justify-center p-8 dot-pattern">
-             <h2 class="text-5xl font-bold tracking-tighter text-center">A Confluence of High-Growth Markets</h2>
-            <p class="mt-3 text-lg text-[var(--text-secondary)] text-center max-w-3xl">MePont is positioned at the intersection of several massive, rapidly expanding digital and sustainable markets.</p>
-            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-7xl">
-                <div class="group glass-effect rounded-2xl p-6 text-center relative overflow-hidden">
-                    <h3 class="text-lg font-semibold text-[var(--accent-light)]">Fashion E-commerce</h3>
-                    <p class="text-4xl font-bold mt-2">$1.5 Trillion</p>
-                    <p class="text-[var(--text-secondary)] mt-1">by 2029 (11.5% CAGR)</p>
-                    <div class="absolute inset-0 bg-[var(--background)]/90 p-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <p class="text-sm text-center">Analyst: A robust and expanding primary channel, confirming the viability of our core marketplace.</p>
+        <section id="market" class="slide text-center dot-pattern">
+             <h2 class="text-6xl tracking-tight">A Confluence of High-Growth Markets</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">MePont is positioned at the intersection of several massive, rapidly expanding digital and sustainable markets.</p>
+            <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-7xl">
+                <div class="group glass-card text-center relative overflow-hidden">
+                    <h3 class="text-2xl text-[var(--accent-light)]">Fashion E-commerce</h3>
+                    <p class="text-5xl font-bold mt-2">$1.5T</p>
+                    <p class="text-lg text-[var(--text-secondary)] mt-1">by 2029 (11.5% CAGR)</p>
+                    <div class="absolute inset-0 bg-[var(--background)]/95 p-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <p class="text-md text-center">Analyst: A robust and expanding primary channel, confirming the viability of our core marketplace.</p>
                     </div>
                 </div>
-                <div class="group glass-effect rounded-2xl p-6 text-center relative overflow-hidden">
-                    <h3 class="text-lg font-semibold text-[var(--accent-light)]">Virtual Try-On (VTO)</h3>
-                    <p class="text-4xl font-bold mt-2">$12.17 Billion</p>
-                    <p class="text-[var(--text-secondary)] mt-1">in 2025 (26.9% CAGR)</p>
-                     <div class="absolute inset-0 bg-[var(--background)]/90 p-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <p class="text-sm text-center">Analyst: Our plan underestimates this market. The opportunity for our core tech is larger than assumed.</p>
+                <div class="group glass-card text-center relative overflow-hidden">
+                    <h3 class="text-2xl text-[var(--accent-light)]">Virtual Try-On (VTO)</h3>
+                    <p class="text-5xl font-bold mt-2">$12.2B</p>
+                    <p class="text-lg text-[var(--text-secondary)] mt-1">in 2025 (26.9% CAGR)</p>
+                     <div class="absolute inset-0 bg-[var(--background)]/95 p-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <p class="text-md text-center">Analyst: Our plan underestimates this market. The opportunity for our core tech is larger than assumed.</p>
                     </div>
                 </div>
-                <div class="group glass-effect rounded-2xl p-6 text-center relative overflow-hidden">
-                    <h3 class="text-lg font-semibold text-[var(--accent-light)]">AI in Fashion</h3>
-                    <p class="text-4xl font-bold mt-2">$1.77 Billion</p>
-                    <p class="text-[var(--text-secondary)] mt-1">in 2025 (~40% CAGR)</p>
-                     <div class="absolute inset-0 bg-[var(--background)]/90 p-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <p class="text-sm text-center">Analyst: The staggering growth rate validates the strategic importance of our AI features and roadmap.</p>
+                <div class="group glass-card text-center relative overflow-hidden">
+                    <h3 class="text-2xl text-[var(--accent-light)]">AI in Fashion</h3>
+                    <p class="text-5xl font-bold mt-2">$1.8B</p>
+                    <p class="text-lg text-[var(--text-secondary)] mt-1">in 2025 (~40% CAGR)</p>
+                     <div class="absolute inset-0 bg-[var(--background)]/95 p-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <p class="text-md text-center">Analyst: The staggering growth rate validates the strategic importance of our AI features and roadmap.</p>
                     </div>
                 </div>
-                <div class="group glass-effect rounded-2xl p-6 text-center relative overflow-hidden">
-                    <h3 class="text-lg font-semibold text-[var(--accent-light)]">Sustainable Fashion</h3>
-                    <p class="text-4xl font-bold mt-2">$9.48 Billion</p>
-                    <p class="text-[var(--text-secondary)] mt-1">in 2025 (8.1% CAGR)</p>
-                     <div class="absolute inset-0 bg-[var(--background)]/90 p-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <p class="text-sm text-center">Analyst: Our zero-inventory model directly addresses this market's core values, creating strong brand alignment.</p>
+                <div class="group glass-card text-center relative overflow-hidden">
+                    <h3 class="text-2xl text-[var(--accent-light)]">Sustainable Fashion</h3>
+                    <p class="text-5xl font-bold mt-2">$9.5B</p>
+                    <p class="text-lg text-[var(--text-secondary)] mt-1">in 2025 (8.1% CAGR)</p>
+                     <div class="absolute inset-0 bg-[var(--background)]/95 p-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <p class="text-md text-center">Analyst: Our zero-inventory model directly addresses this market's core values, creating strong brand alignment.</p>
                     </div>
                 </div>
             </div>
@@ -278,60 +296,60 @@
         </section>
 
         <!-- Slide 6: Omnichannel Strategy -->
-        <section id="omnichannel" class="slide flex flex-col items-center justify-center p-8">
-            <h2 class="text-5xl font-bold tracking-tighter text-center">Omnichannel Strategy: Reaching Every Consumer</h2>
-            <p class="mt-3 text-lg text-[var(--text-secondary)] text-center max-w-3xl">Our tiered platform strategy maximizes market reach while intelligently managing our most expensive cloud costs.</p>
-            <div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
-                <div class="group glass-effect rounded-2xl p-6 border-2 border-[var(--accent)]">
-                    <h3 class="text-2xl font-bold text-[var(--accent)]">Tier 1: Web/Mobile App</h3>
-                    <p class="text-5xl font-black mt-2">75%</p>
-                    <p class="mt-2 text-[var(--text-primary)]">The accessible hub for daily interactions. Drives scale and volume.</p>
-                    <p class="mt-4 text-sm text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity">Tech: ARKit, Jetpack Compose, Swift UI</p>
+        <section id="omnichannel" class="slide text-center">
+            <h2 class="text-6xl tracking-tight">Omnichannel Strategy: Reaching Every Consumer</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">Our tiered platform strategy maximizes market reach while intelligently managing our most expensive cloud costs.</p>
+            <div class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
+                <div class="group glass-card p-8 border-2 border-[var(--accent)]">
+                    <h3 class="text-3xl text-[var(--accent)]">Tier 1: Web/Mobile App</h3>
+                    <p class="text-6xl font-bold mt-2">75%</p>
+                    <p class="mt-2 text-lg">The accessible hub for daily interactions. Drives scale and volume.</p>
+                    <p class="mt-4 text-md text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity">Tech: ARKit, Jetpack Compose, Swift UI</p>
                 </div>
-                <div class="group glass-effect rounded-2xl p-6">
-                    <h3 class="text-2xl font-bold text-white">Tier 2: Cloud-Streamed UE5</h3>
-                    <p class="text-5xl font-black mt-2">15%</p>
-                    <p class="mt-2 text-[var(--text-primary)]">The immersive 3D experience for engaged enthusiasts on any device.</p>
-                    <p class="mt-4 text-sm text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity">Tech: AWS G-Series, NICE DCV</p>
+                <div class="group glass-card p-8">
+                    <h3 class="text-3xl">Tier 2: Cloud-Streamed UE5</h3>
+                    <p class="text-6xl font-bold mt-2">15%</p>
+                    <p class="mt-2 text-lg">The immersive 3D experience for engaged enthusiasts on any device.</p>
+                    <p class="mt-4 text-md text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity">Tech: AWS G-Series, NICE DCV</p>
                 </div>
-                <div class="group glass-effect rounded-2xl p-6">
-                    <h3 class="text-2xl font-bold text-white">Tier 3: Downloadable Client</h3>
-                    <p class="text-5xl font-black mt-2">10%</p>
-                    <p class="mt-2 text-[var(--text-primary)]">The highest-fidelity experience for power users on PC/PS5.</p>
-                     <p class="mt-4 text-sm text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity">Tech: DirectX 12, PS5 SDK</p>
+                <div class="group glass-card p-8">
+                    <h3 class="text-3xl">Tier 3: Downloadable Client</h3>
+                    <p class="text-6xl font-bold mt-2">10%</p>
+                    <p class="mt-2 text-lg">The highest-fidelity experience for power users on PC/PS5.</p>
+                     <p class="mt-4 text-md text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity">Tech: DirectX 12, PS5 SDK</p>
                 </div>
             </div>
         </section>
 
         <!-- Slide 7: GTM & Tech Roadmap -->
-        <section id="roadmap" class="slide flex flex-col items-center justify-center p-8 dot-pattern">
-            <h2 class="text-5xl font-bold tracking-tighter text-center">A Pragmatic & De-risked Plan</h2>
-            <p class="mt-3 text-lg text-[var(--text-secondary)] text-center max-w-3xl">We are proactively mitigating key risks with a phased, capital-efficient execution plan.</p>
-            <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl">
-                <div class="glass-effect rounded-2xl p-8">
-                    <h3 class="text-3xl font-bold text-[var(--accent)]">Go-to-Market: The Pilot Program</h3>
-                    <p class="mt-4 text-[var(--text-primary)]">Instead of a premature mass launch, our seed funding will be used to execute a focused pilot program.</p>
-                    <ul class="mt-4 space-y-2 text-[var(--text-primary)]">
-                        <li class="flex items-start"><span class="text-[var(--accent)] mr-2 mt-1">&#10003;</span>Onboard a curated cohort of 5-10 manufacturers.</li>
-                        <li class="flex items-start"><span class="text-[var(--accent)] mr-2 mt-1">&#10003;</span>Validate the onboarding process and technology integration.</li>
-                        <li class="flex items-start"><span class="text-[var(--accent)] mr-2 mt-1">&#10003;</span>Prove the unit economics and sales velocity at a smaller scale.</li>
+        <section id="roadmap" class="slide text-center dot-pattern">
+            <h2 class="text-6xl tracking-tight">A Pragmatic & De-risked Plan</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">We are proactively mitigating key risks with a phased, capital-efficient execution plan.</p>
+            <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl">
+                <div class="glass-card p-8">
+                    <h3 class="text-4xl text-[var(--accent)]">Go-to-Market: The Pilot Program</h3>
+                    <p class="mt-4 text-lg">Instead of a premature mass launch, our seed funding will be used to execute a focused pilot program.</p>
+                    <ul class="mt-4 space-y-3 text-lg text-left">
+                        <li class="flex items-start"><span class="text-[var(--accent)] mr-3 mt-1">&#10003;</span>Onboard a curated cohort of 5-10 manufacturers.</li>
+                        <li class="flex items-start"><span class="text-[var(--accent)] mr-3 mt-1">&#10003;</span>Validate the onboarding process and technology integration.</li>
+                        <li class="flex items-start"><span class="text-[var(--accent)] mr-3 mt-1">&#10003;</span>Prove the unit economics and sales velocity at a smaller scale.</li>
                     </ul>
                 </div>
-                <div class="glass-effect rounded-2xl p-8">
-                    <h3 class="text-3xl font-bold text-[var(--accent)]">Technology: Phased Roadmap</h3>
-                    <p class="mt-4 text-[var(--text-primary)]">We will own our core tech by investing smartly, not recklessly.</p>
-                     <ul class="mt-4 space-y-2 text-[var(--text-primary)]">
-                        <li class="flex items-start"><strong class="text-[var(--accent)] mr-2">P1:</strong>Master Unreal's Chaos Cloth system & build our proprietary Digital Fabric Library.</li>
-                        <li class="flex items-start"><strong class="text-[var(--accent)] mr-2">P2:</strong>Pursue a fully proprietary simulation engine post-Series A, once the business model is proven.</li>
+                <div class="glass-card p-8">
+                    <h3 class="text-4xl text-[var(--accent)]">Technology: Phased Roadmap</h3>
+                    <p class="mt-4 text-lg">We will own our core tech by investing smartly, not recklessly.</p>
+                     <ul class="mt-4 space-y-3 text-lg text-left">
+                        <li class="flex items-start"><strong class="text-[var(--accent)] mr-3">P1:</strong>Master Unreal's Chaos Cloth system & build our proprietary Digital Fabric Library.</li>
+                        <li class="flex items-start"><strong class="text-[var(--accent)] mr-3">P2:</strong>Pursue a fully proprietary simulation engine post-Series A, once the business model is proven.</li>
                     </ul>
                 </div>
             </div>
         </section>
 
         <!-- Slide 8: Financials -->
-        <section id="financials" class="slide flex flex-col items-center justify-center p-8">
-            <h2 class="text-5xl font-bold tracking-tighter text-center">Financials: A Clear Path to Profitability</h2>
-            <p class="mt-3 text-lg text-[var(--text-secondary)] text-center max-w-3xl">Our model shows strong revenue growth driven by our omnichannel strategy, reaching quarterly profitability by Q4 of Year 1.</p>
+        <section id="financials" class="slide text-center">
+            <h2 class="text-6xl tracking-tight">Financials: A Clear Path to Profitability</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">Our model shows strong revenue growth driven by our omnichannel strategy, reaching quarterly profitability by Q4 of Year 1.</p>
             <div class="mt-8 w-full max-w-6xl">
                  <div class="chart-container">
                     <canvas id="financialsChart"></canvas>
@@ -340,32 +358,32 @@
         </section>
 
         <!-- Slide 9: The Team -->
-        <section id="team" class="slide flex flex-col items-center justify-center p-8 dot-pattern">
-            <h2 class="text-5xl font-bold tracking-tighter text-center">The Founder: Vision & Execution</h2>
-            <p class="mt-3 text-lg text-[var(--text-secondary)] text-center max-w-3xl">A unique blend of deep industry knowledge and proven technical capability.</p>
-            <div class="mt-12 w-full max-w-3xl glass-effect rounded-2xl p-8 text-center">
-                <img src="https://placehold.co/128x128/1C1C1C/FBBF24?text=Founder" class="w-32 h-32 rounded-full mx-auto border-4 border-[var(--accent)]" alt="Founder Portrait">
-                <h3 class="text-3xl font-bold mt-6">Founder Name</h3>
-                <p class="text-[var(--accent-light)] text-lg">Founder & CEO</p>
-                <p class="mt-4 text-[var(--text-primary)] max-w-xl mx-auto">
+        <section id="team" class="slide text-center dot-pattern">
+            <h2 class="text-6xl tracking-tight">The Founder: Vision & Execution</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">A unique blend of deep industry knowledge and proven technical capability.</p>
+            <div class="mt-12 w-full max-w-3xl glass-card p-8 text-center">
+                <img src="https://placehold.co/128x128/1a1a1a/f7b783?text=Founder" class="w-32 h-32 rounded-full mx-auto border-4 border-[var(--accent)]" alt="Founder Portrait">
+                <h3 class="text-4xl mt-6">Founder Name</h3>
+                <p class="text-[var(--accent-light)] text-xl">Founder & CEO</p>
+                <p class="mt-4 text-lg max-w-xl mx-auto">
                     With a Master's in Fashion Studies and a background as a Textile Engineer, I saw the industry's flaws firsthand. I taught myself to code and built the MePont MVP to prove a better way is possible—a platform founded on transparency, technology, and a deep respect for the craft.
                 </p>
             </div>
-            <p class="mt-8 text-lg text-[var(--text-secondary)]">We are raising funds to build our foundational 11-person team of experts in technology, 3D production, and business development.</p>
+            <p class="mt-8 text-lg text-[var(--text-secondary)]">We are raising funds to build our foundational 11-person team of experts.</p>
         </section>
 
         <!-- Slide 10: The Ask -->
-        <section id="ask" class="slide flex flex-col items-center justify-center p-8">
-            <h2 class="text-5xl font-bold tracking-tighter text-center">The Ask & Use of Funds</h2>
-            <p class="mt-3 text-lg text-[var(--text-secondary)] text-center max-w-3xl">We are seeking seed funding to execute our pilot program and achieve key milestones for our Series A.</p>
-            <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-12 w-full max-w-6xl items-center">
+        <section id="ask" class="slide text-center">
+            <h2 class="text-6xl tracking-tight">The Ask & Use of Funds</h2>
+            <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">We are seeking seed funding to execute our pilot program and achieve key milestones for our Series A.</p>
+            <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 w-full max-w-6xl items-center">
                 <div class="text-center lg:text-left">
-                    <p class="text-2xl text-[var(--accent-light)]">Seed Round Ask</p>
-                    <p class="text-8xl font-black tracking-tighter my-2">€1.5M</p>
-                    <p class="text-xl text-[var(--text-secondary)]">For an 18-month runway to prove the core model and achieve market traction.</p>
+                    <p class="text-3xl text-[var(--accent-light)]">Seed Round Ask</p>
+                    <p class="text-9xl font-bold tracking-tighter my-2">€1.5M</p>
+                    <p class="text-2xl text-[var(--text-secondary)]">For an 18-month runway to prove the core model and achieve market traction.</p>
                 </div>
                 <div class="w-full">
-                    <h3 class="text-2xl font-bold text-center mb-4">Use of Funds</h3>
+                    <h3 class="text-3xl text-center mb-4">Use of Funds</h3>
                     <div class="w-full max-w-md mx-auto">
                         <canvas id="useOfFundsChart"></canvas>
                     </div>
@@ -377,8 +395,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const accentColor = '#D97706';
-            const textColor = '#A1A1AA';
+            const accentColor = '#e18a3c';
+            const textColor = '#a3a3a3';
             const gridColor = 'rgba(255, 255, 255, 0.1)';
 
             // --- Gemini API Integration ---
@@ -425,12 +443,12 @@
             }
 
             descriptionBtn.addEventListener('click', () => {
-                const prompt = `You are a creative copywriter for MePont. Write a compelling, short product description (2-3 sentences) for a sustainable designer t-shirt. The manufacturer's cost is €10, but we sell it for €13. Highlight the value, quality, and the story behind the transparent price.`;
+                const prompt = `You are a creative copywriter for MePont, a luxury transparent fashion marketplace. Write a compelling, short product description (2-3 sentences) for a sustainable designer t-shirt made from premium organic cotton. The manufacturer's cost is €10, but we sell it for €13. Highlight the value, quality, and the story behind the transparent price. Use an elegant, sophisticated tone.`;
                 callGemini(prompt, descriptionOutput, descriptionBtn);
             });
 
             stylingBtn.addEventListener('click', () => {
-                const prompt = `You are an AI fashion stylist for MePont. A user is looking at a high-quality, minimalist designer t-shirt. Provide three distinct, creative styling suggestions for different occasions (e.g., casual weekend, smart casual, evening out). Keep it concise and inspiring.`;
+                const prompt = `You are an AI fashion stylist for MePont. A user is looking at a high-quality, minimalist designer t-shirt. Provide three distinct, creative styling suggestions for different occasions (e.g., casual weekend, smart casual, evening out). Keep it concise, inspiring, and use a sophisticated tone.`;
                 callGemini(prompt, stylingOutput, stylingBtn);
             });
 
@@ -443,15 +461,15 @@
                     datasets: [{
                         label: 'Total Revenue',
                         data: [30000, 112500, 270000, 600000],
-                        backgroundColor: 'rgba(217, 119, 6, 0.6)',
+                        backgroundColor: 'rgba(225, 138, 60, 0.6)',
                         borderColor: accentColor,
                         borderWidth: 1,
                         yAxisID: 'y',
                     }, {
                         label: 'Net Profit / (Loss)',
                         data: [-242200, -214700, -134700, 95300],
-                        backgroundColor: (ctx) => ctx.raw < 0 ? 'rgba(156, 163, 175, 0.4)' : 'rgba(251, 191, 36, 0.6)',
-                        borderColor: (ctx) => ctx.raw < 0 ? '#6b7280' : '#FBBF24',
+                        backgroundColor: (ctx) => ctx.raw < 0 ? 'rgba(163, 163, 163, 0.4)' : 'rgba(247, 183, 131, 0.6)',
+                        borderColor: (ctx) => ctx.raw < 0 ? '#a3a3a3' : '#f7b783',
                         borderWidth: 1,
                         yAxisID: 'y',
                     }]
@@ -460,18 +478,21 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { labels: { color: textColor } },
+                        legend: { labels: { color: textColor, font: { family: "'Lato', sans-serif" } } },
                         tooltip: {
+                            bodyFont: { family: "'Lato', sans-serif" },
+                            titleFont: { family: "'Lato', sans-serif" },
                             callbacks: {
                                 label: (ctx) => `${ctx.dataset.label}: ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(ctx.raw)}`
                             }
                         }
                     },
                     scales: {
-                        x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                        x: { ticks: { color: textColor, font: { family: "'Lato', sans-serif" } }, grid: { color: gridColor } },
                         y: {
                             ticks: { 
                                 color: textColor,
+                                font: { family: "'Lato', sans-serif" },
                                 callback: (val) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', notation: 'compact' }).format(val)
                             },
                             grid: { color: gridColor }
@@ -488,8 +509,8 @@
                     datasets: [{
                         label: 'Use of Funds',
                         data: [70, 10, 10, 5, 5],
-                        backgroundColor: ['#9A3412', '#B45309', '#D97706', '#F59E0B', '#FBBF24'],
-                        borderColor: '#1C1C1C',
+                        backgroundColor: ['#b45309', '#c2410c', '#d97706', '#f59e0b', '#fbbf24'],
+                        borderColor: '#1a1a1a',
                         borderWidth: 4
                     }]
                 },
@@ -497,8 +518,10 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: textColor } },
+                        legend: { position: 'bottom', labels: { color: textColor, font: { family: "'Lato', sans-serif" } } },
                         tooltip: {
+                            bodyFont: { family: "'Lato', sans-serif" },
+                            titleFont: { family: "'Lato', sans-serif" },
                             callbacks: {
                                 label: (ctx) => `${ctx.label}: ${ctx.raw}%`
                             }

@@ -69,16 +69,19 @@
             const [showPledgeModal, setShowPledgeModal] = useState(false);
             const [show3DModal, setShow3DModal] = useState(false);
             const [showMediaModal, setShowMediaModal] = useState({ visible: false, startIndex: 0 });
+            const [showCampaignModal, setShowCampaignModal] = useState(null);
 
-            const isModalOpen = showPledgeModal || show3DModal || showMediaModal.visible;
+            const isModalOpen = showPledgeModal || show3DModal || showMediaModal.visible || !!showCampaignModal;
             
             const hasPurchased = (campaignId) => pledgedItems.some(item => item.id === campaignId);
 
-            const navigateTo = (screen) => setCurrentScreen(screen);
+            const navigateTo = (screen) => {
+                setShowCampaignModal(null);
+                setCurrentScreen(screen);
+            }
 
             const viewCampaignDetail = (campaign) => {
-                setSelectedCampaign(campaign);
-                navigateTo('CampaignDetail');
+                setShowCampaignModal(campaign);
             };
             
             const handleLike = (campaignId) => {
@@ -130,19 +133,6 @@
                 switch (currentScreen) {
                 case 'Home':
                     return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
-                case 'CampaignDetail':
-                    return <CampaignDetailScreen 
-                                campaign={selectedCampaign} 
-                                onPledge={() => setShowPledgeModal(true)} 
-                                onBack={() => navigateTo('Home')}
-                                onLike={handleLike}
-                                isLiked={likedItems.includes(selectedCampaign.id)}
-                                hasPurchased={hasPurchased(selectedCampaign.id)}
-                                onCommentSubmit={addComment}
-                                onReviewSubmit={addReview}
-                                onShow3D={() => setShow3DModal(true)}
-                                onShowMedia={(startIndex) => setShowMediaModal({ visible: true, startIndex })}
-                            />;
                 case 'Dashboard':
                     return <DashboardScreen pledgedItems={pledgedItems} />;
                 default:
@@ -161,9 +151,23 @@
                             <BottomNavBar currentScreen={currentScreen} onNavigate={navigateTo} />
                         </div>
                     </div>
-                    {showPledgeModal && <PledgeModal campaign={selectedCampaign} onClose={() => setShowPledgeModal(false)} onPledge={handlePledge} />}
+                    {showCampaignModal && 
+                        <CampaignDetailModal 
+                            campaign={showCampaignModal} 
+                            onPledge={() => setShowPledgeModal(true)} 
+                            onBack={() => setShowCampaignModal(null)}
+                            onLike={handleLike}
+                            isLiked={likedItems.includes(showCampaignModal.id)}
+                            hasPurchased={hasPurchased(showCampaignModal.id)}
+                            onCommentSubmit={addComment}
+                            onReviewSubmit={addReview}
+                            onShow3D={() => setShow3DModal(true)}
+                            onShowMedia={(startIndex) => setShowMediaModal({ visible: true, startIndex })}
+                        />
+                    }
+                    {showPledgeModal && <PledgeModal campaign={showCampaignModal} onClose={() => setShowPledgeModal(false)} onPledge={handlePledge} />}
                     {show3DModal && <ThreeDModal onClose={() => setShow3DModal(false)} />}
-                    {showMediaModal.visible && <MediaViewerModal campaign={selectedCampaign} startIndex={showMediaModal.startIndex} onClose={() => setShowMediaModal({ visible: false, startIndex: 0 })} />}
+                    {showMediaModal.visible && <MediaViewerModal campaign={showCampaignModal} startIndex={showMediaModal.startIndex} onClose={() => setShowMediaModal({ visible: false, startIndex: 0 })} />}
                 </div>
             );
         }
@@ -315,9 +319,8 @@
             );
         };
 
-        function CampaignDetailScreen({ campaign, onPledge, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia }) {
-            useEffect(() => { window.scrollTo(0, 0); }, [campaign.id]);
-            
+        function CampaignDetailModal({ campaign, onPledge, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia }) {
+            const [show, setShow] = useState(false);
             const [activeTab, setActiveTab] = useState('Details');
             const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.sizeGuide.sizes)[0]);
             
@@ -328,6 +331,16 @@
             const touchStartX = useRef(0);
             const touchEndX = useRef(0);
             const hasSwiped = useRef(false);
+
+            useEffect(() => {
+                const timer = setTimeout(() => setShow(true), 10);
+                return () => clearTimeout(timer);
+            }, []);
+
+            const handleClose = () => {
+                setShow(false);
+                setTimeout(onBack, 300);
+            };
 
             const handleTouchStart = (e) => {
                 touchStartX.current = e.targetTouches[0].clientX;
@@ -361,7 +374,7 @@
             };
 
             const DetailsPanel = ({isMobile = false}) => (
-                <div className={isMobile ? "bg-white rounded-lg shadow-lg self-start mb-6" : "lg:col-span-2 bg-white rounded-lg shadow-lg self-start"}>
+                <div className={isMobile ? "bg-white rounded-lg shadow-lg self-start" : "lg:col-span-2 bg-white rounded-lg shadow-lg self-start"}>
                     <div className="p-5 border-b">
                         <div className="flex justify-between items-center">
                             <p className="text-sm text-gray-500">{campaign.designer}</p>
@@ -420,52 +433,54 @@
             };
 
             return (
-                <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-                    <button onClick={onBack} className="mb-6 text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M19 12H5"></path><polyline points="12 19 5 12 12 5"></polyline></svg>
-                        Back to all drops
-                    </button>
-                    {/* Desktop Layout */}
-                    <div className="hidden lg:grid lg:grid-cols-5 lg:gap-12">
-                        <div className="lg:col-span-3 flex gap-4">
-                            <div className="flex flex-col space-y-2">
-                                {mediaItems.map((media, index) => (
-                                    <button key={index} onClick={() => setCurrentMediaIndex(index)} className={`w-16 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 relative ${currentMediaIndex === index ? 'border-blue-600' : 'border-transparent'}`}>
-                                        <img src={media.thumbnail} className="w-full h-full object-cover" />
-                                        {media.type === 'video' && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><PlayIcon className="w-6 h-6 text-white" /></div>}
+                <div className={`fixed inset-0 bg-white z-50 overflow-y-auto transition-transform duration-300 ease-in-out ${show ? 'translate-y-0' : 'translate-y-full'}`}>
+                    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                        <button onClick={handleClose} className="mb-6 text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M19 12H5"></path><polyline points="12 19 5 12 12 5"></polyline></svg>
+                            Back to all drops
+                        </button>
+                        {/* Desktop Layout */}
+                        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-12">
+                            <div className="lg:col-span-3 flex gap-4">
+                                <div className="flex flex-col space-y-2">
+                                    {mediaItems.map((media, index) => (
+                                        <button key={index} onClick={() => setCurrentMediaIndex(index)} className={`w-16 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 relative ${currentMediaIndex === index ? 'border-blue-600' : 'border-transparent'}`}>
+                                            <img src={media.thumbnail} className="w-full h-full object-cover" />
+                                            {media.type === 'video' && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><PlayIcon className="w-6 h-6 text-white" /></div>}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="flex-1 h-[80vh]">
+                                    <button className="w-full h-full" onClick={() => onShowMedia(currentMediaIndex)}>
+                                        {mediaItems[currentMediaIndex].type === 'video' ? (
+                                            <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover rounded-lg shadow-lg bg-black"></video>
+                                        ) : (
+                                            <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover rounded-lg shadow-lg" />
+                                        )}
                                     </button>
-                                ))}
+                                </div>
                             </div>
-                            <div className="flex-1 h-[80vh]">
-                                <button className="w-full h-full" onClick={() => onShowMedia(currentMediaIndex)}>
+                            <DetailsPanel />
+                        </div>
+
+                        {/* Mobile Layout */}
+                        <div className="lg:hidden">
+                             <div className="mb-6" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onClick={() => handleMediaClick(currentMediaIndex)}>
+                                <div className={`aspect-w-3 aspect-h-4 mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}>
                                     {mediaItems[currentMediaIndex].type === 'video' ? (
                                         <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover rounded-lg shadow-lg bg-black"></video>
                                     ) : (
                                         <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover rounded-lg shadow-lg" />
                                     )}
-                                </button>
+                                </div>
+                                <div className="flex justify-center items-center space-x-2">
+                                    {mediaItems.map((_, index) => (
+                                        <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                    ))}
+                                </div>
                             </div>
+                            <DetailsPanel isMobile={true} />
                         </div>
-                        <DetailsPanel />
-                    </div>
-
-                    {/* Mobile Layout */}
-                    <div className="lg:hidden">
-                        <div className="mb-6" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onClick={() => handleMediaClick(currentMediaIndex)}>
-                             <div className={`aspect-w-3 aspect-h-4 mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}>
-                                {mediaItems[currentMediaIndex].type === 'video' ? (
-                                    <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover rounded-lg shadow-lg bg-black"></video>
-                                ) : (
-                                    <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover rounded-lg shadow-lg" />
-                                )}
-                            </div>
-                            <div className="flex justify-center items-center space-x-2">
-                                {mediaItems.map((_, index) => (
-                                    <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                                ))}
-                            </div>
-                        </div>
-                        <DetailsPanel isMobile={true} />
                     </div>
                 </div>
             );

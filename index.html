@@ -23,6 +23,16 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        .cursor-grab {
+            cursor: grab;
+        }
+        .cursor-grabbing {
+            cursor: grabbing;
+        }
+        .blur-background {
+            filter: blur(4px);
+            transition: filter 0.3s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -31,7 +41,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // Mock Data
+        // Mock Data: Represents the state that would come from a database
         const MOCK_CAMPAIGNS = [
             { id: 5, name: 'The Lisbon Tech Chino', designer: 'Urban Form', price: 75, stage: 'DESIGN', productionRound: 1, likes: 412, targetLikes: 500, category: 'Trousers', heroImage: 'https://placehold.co/600x800/d1fae5/065f46?text=Lisbon+Chino', images: ['https://placehold.co/600x800/d1fae5/065f46?text=Lisbon+Chino'], details: 'A classic chino silhouette made with a modern, water-repellent stretch fabric. Designed for comfort and versatility, from the office to the weekend.', priceBreakdown: { materials: 28, manufacturing: 27, designer: 10, platform: 7.5 }, productPassport: [ { type: 'Fabric', name: 'Main Body', composition: '98% Organic Cotton, 2% Elastane', origin: 'Izmir, Turkey', certifications: ['GOTS Certified Organic Cotton', 'OEKO-TEX Standard 100'] }, { type: 'Hardware', name: 'Zipper', composition: 'YKK NATULON® (Recycled PET)', origin: 'Japan'}, { type: 'Hardware', name: 'Button', composition: 'Corozo (nut-based)', origin: 'Ecuador'} ], sizeGuide: { fitDetails: 'Slim fit with a gentle taper from knee to ankle. Offers slight stretch for comfort.', sizes: { '30': { 'Waist': '31"', 'Inseam': '32"', 'Thigh': '23"', 'Leg Opening': '14"' }, '32': { 'Waist': '33"', 'Inseam': '32"', 'Thigh': '24"', 'Leg Opening': '14.5"' }, '34': { 'Waist': '35"', 'Inseam': '32"', 'Thigh': '25"', 'Leg Opening': '15"' }, '36': { 'Waist': '37"', 'Inseam': '32"', 'Thigh': '26"', 'Leg Opening': '15.5"' }, } }, comments: [{user: 'Mark P.', comment: 'This looks amazing! I hope it gets made.'}], reviews: [], },
             { id: 1, name: 'The Milano Linen Blazer', designer: 'Studio Rossi', price: 85, stage: 'PRE_ORDER', productionRound: 2, category: 'Blazers', heroImage: 'https://placehold.co/600x800/e2e8f0/4a5568?text=Milano+Blazer', images: [ 'https://placehold.co/600x800/e2e8f0/4a5568?text=Milano+Blazer', 'https://placehold.co/600x800/d1d5db/4a5568?text=Side+View', 'https://placehold.co/600x800/9ca3af/4a5568?text=Fabric+Detail', ], details: 'Crafted from 100% organic Italian linen, this blazer offers a relaxed yet structured fit. Perfect for summer evenings and smart-casual events. Features natural horn buttons and a silk-blend lining.', factory: 'Made ethically in Porto, Portugal by a family-owned facility known for its exceptional tailoring.', preOrderDetails: { fundingType: 'INDEPENDENT', daysLeft: 12, sizes: { 'S': { moq: 50, funded: 50 }, 'M': { moq: 100, funded: 98 }, 'L': { moq: 100, funded: 35 }, 'XL': { moq: 50, funded: 2 } } }, priceBreakdown: { materials: 35, manufacturing: 31, designer: 10, platform: 8.5 }, productPassport: [ { type: 'Fabric', name: 'Main Body', composition: '100% Organic Linen', origin: 'Emilia-Romagna, Italy', certifications: ['European Flax® Certified'] }, { type: 'Fabric', name: 'Lining', composition: '50% Cupro, 50% Viscose', origin: 'Como, Italy' }, { type: 'Hardware', name: 'Buttons', composition: 'Natural Horn', origin: 'Parma, Italy' } ], sizeGuide: { fitDetails: 'Relaxed, unstructured fit. Designed to be worn comfortably over a shirt. Consider sizing down for a slimmer fit.', sizes: { 'S': { 'Chest': '38"', 'Sleeve': '25"', 'Length': '28"' }, 'M': { 'Chest': '40"', 'Sleeve': '25.5"', 'Length': '28.5"' }, 'L': { 'Chest': '42"', 'Sleeve': '26"', 'Length': '29"' }, 'XL': { 'Chest': '44"', 'Sleeve': '26.5"', 'Length': '29.5"' }, } }, comments: [{user: 'Julia S.', comment: 'So excited for Round 2!'}], reviews: [ { user: 'Alex R.', rating: 5, comment: 'Received this from the first round. The quality is absolutely insane for the price. The linen is soft, not scratchy at all.'}, { user: 'Beatrice L.', rating: 4, comment: 'Beautiful blazer, though it runs a little large. I would recommend sizing down if you are between sizes.'}, ] },
@@ -39,7 +49,8 @@
             { id: 6, name: 'The Aegean Polo Shirt', designer: 'Maritime Co.', price: 45, stage: 'SAMPLING', productionRound: 1, samplingDaysLeft: 7, category: 'Tops', heroImage: 'https://placehold.co/600x800/e0f2fe/0c4a6e?text=Aegean+Polo', images: ['https://placehold.co/600x800/e0f2fe/0c4a6e?text=Aegean+Polo'], details: 'A premium polo made from piqué knit sea-island cotton for exceptional softness and breathability. The sample is currently being perfected.', priceBreakdown: { materials: 18, manufacturing: 15, designer: 5, platform: 4.5 }, productPassport: [ { type: 'Fabric', name: 'Main Body', composition: '100% Sea Island Cotton', origin: 'Caribbean' }, { type: 'Hardware', name: 'Buttons', composition: 'Mother of Pearl', origin: 'Vietnam' } ], sizeGuide: { fitDetails: 'Classic fit, true to size.', sizes: { 'S': { 'Chest': '37"', 'Length': '27"' }, 'M': { 'Chest': '39"', 'Length': '27.5"' }, 'L': { 'Chest': '41"', 'Length': '28"' }, 'XL': { 'Chest': '43"', 'Length': '28.5"' }, } }, comments: [], reviews: [], },
         ];
 
-        // SVG Icons
+        // SVG Icons for UI elements
+        const CubeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>;
         const HomeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>;
         const UserIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
         const XIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
@@ -47,7 +58,7 @@
         const ArrowRightIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
         const StarIcon = ({ className, isFilled }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={isFilled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
 
-        // Main App Component
+        // Main App Component: Manages state and routing
         function App() {
             const [currentScreen, setCurrentScreen] = useState('Home');
             const [campaigns, setCampaigns] = useState(MOCK_CAMPAIGNS);
@@ -55,6 +66,7 @@
             const [pledgedItems, setPledgedItems] = useState([]);
             const [likedItems, setLikedItems] = useState([]);
             const [showPledgeModal, setShowPledgeModal] = useState(false);
+            const [show3DModal, setShow3DModal] = useState(false);
             
             const hasPurchased = (campaignId) => pledgedItems.some(item => item.id === campaignId);
 
@@ -65,42 +77,48 @@
                 navigateTo('CampaignDetail');
             };
             
+            // Handles liking/unliking a campaign
             const handleLike = (campaignId) => {
                 setLikedItems(prev => prev.includes(campaignId) ? prev.filter(id => id !== campaignId) : [...prev, campaignId]);
                 setCampaigns(prevCampaigns =>
-                prevCampaigns.map(c => {
-                    if (c.id === campaignId) {
-                    const isLiked = likedItems.includes(campaignId);
-                    return { ...c, likes: isLiked ? c.likes - 1 : c.likes + 1 };
-                    }
-                    return c;
-                })
+                    prevCampaigns.map(c => {
+                        if (c.id === campaignId) {
+                            const isLiked = !likedItems.includes(campaignId);
+                            return { ...c, likes: isLiked ? c.likes + 1 : c.likes - 1 };
+                        }
+                        return c;
+                    })
                 );
             };
 
+            // Handles pledging for a campaign
             const handlePledge = (campaign, size) => {
                 const newPledge = { ...campaign, size, productionStatus: 'Funded' };
                 setPledgedItems(prev => [...prev, newPledge]);
                 setCampaigns(prevCampaigns =>
-                prevCampaigns.map(c => {
-                    if (c.id === campaign.id && c.stage === 'PRE_ORDER') {
-                    const updatedSizes = { ...c.preOrderDetails.sizes };
-                    updatedSizes[size].funded += 1;
-                    return { ...c, preOrderDetails: { ...c.preOrderDetails, sizes: updatedSizes }};
-                    }
-                    return c;
-                })
+                    prevCampaigns.map(c => {
+                        if (c.id === campaign.id && c.stage === 'PRE_ORDER') {
+                            const updatedSizes = { ...c.preOrderDetails.sizes };
+                            if(updatedSizes[size]) {
+                                updatedSizes[size].funded += 1;
+                            }
+                            return { ...c, preOrderDetails: { ...c.preOrderDetails, sizes: updatedSizes }};
+                        }
+                        return c;
+                    })
                 );
                 setShowPledgeModal(false);
             };
-
+            
+            // Adds a new comment to a campaign
             const addComment = (campaignId, commentText) => {
                 const newComment = { user: 'You', comment: commentText };
                 setCampaigns(prev => prev.map(c => 
                     c.id === campaignId ? {...c, comments: [...c.comments, newComment]} : c
                 ));
             };
-
+            
+            // Adds a new review to a campaign
             const addReview = (campaignId, review) => {
                 const newReview = { user: 'You', ...review };
                 setCampaigns(prev => prev.map(c => 
@@ -108,6 +126,7 @@
                 ));
             };
 
+            // Simple router to render the correct screen
             const renderScreen = () => {
                 switch (currentScreen) {
                 case 'Home':
@@ -122,6 +141,7 @@
                                 hasPurchased={hasPurchased(selectedCampaign.id)}
                                 onCommentSubmit={addComment}
                                 onReviewSubmit={addReview}
+                                onShow3D={() => setShow3DModal(true)}
                             />;
                 case 'Dashboard':
                     return <DashboardScreen pledgedItems={pledgedItems} />;
@@ -132,37 +152,44 @@
 
             return (
                 <div className="w-full min-h-screen">
-                    <div className="max-w-7xl mx-auto">
-                        <TopNavBar onNavigate={navigateTo} />
-                        <main>
-                            {renderScreen()}
-                        </main>
+                    <div className={showPledgeModal || show3DModal ? 'blur-background' : ''}>
+                        <div className="max-w-7xl mx-auto pb-16 sm:pb-0">
+                            <TopNavBar onNavigate={navigateTo} />
+                            <main>
+                                {renderScreen()}
+                            </main>
+                            <BottomNavBar currentScreen={currentScreen} onNavigate={navigateTo} />
+                        </div>
                     </div>
                     {showPledgeModal && <PledgeModal campaign={selectedCampaign} onClose={() => setShowPledgeModal(false)} onPledge={handlePledge} />}
+                    {show3DModal && <ThreeDModal onClose={() => setShow3DModal(false)} />}
                 </div>
             );
         }
 
-        // 3D Viewer Component
+        // 3D Viewer Component using Three.js
         function ThreeDViewer() {
             const mountRef = useRef(null);
+            const isDragging = useRef(false);
+            const previousMousePosition = useRef({ x: 0, y: 0 });
 
             useEffect(() => {
+                const currentMount = mountRef.current;
+                if (!currentMount) return;
+
                 const scene = new THREE.Scene();
                 scene.background = new THREE.Color(0xf1f5f9);
-                const camera = new THREE.PerspectiveCamera(75, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000);
+                const camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
                 const renderer = new THREE.WebGLRenderer({ antialias: true });
-                renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
-                mountRef.current.appendChild(renderer.domElement);
+                renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+                currentMount.appendChild(renderer.domElement);
 
-                // Add a simple object (torus)
                 const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
-                const material = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.5 });
+                const material = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.5, metalness: 0.2 });
                 const torusKnot = new THREE.Mesh(geometry, material);
                 scene.add(torusKnot);
 
-                // Add lighting
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
                 scene.add(ambientLight);
                 const pointLight = new THREE.PointLight(0xffffff, 0.8);
                 pointLight.position.set(25, 50, 25);
@@ -170,82 +197,76 @@
 
                 camera.position.z = 30;
 
-                // Mouse controls for rotation
-                let isDragging = false;
-                let previousMousePosition = { x: 0, y: 0 };
-
                 const onMouseDown = (e) => {
-                    isDragging = true;
+                    isDragging.current = true;
+                    currentMount.classList.add('cursor-grabbing');
                 };
                 const onMouseUp = (e) => {
-                    isDragging = false;
+                    isDragging.current = false;
+                    currentMount.classList.remove('cursor-grabbing');
                 };
                 const onMouseMove = (e) => {
-                    const deltaMove = {
-                        x: e.offsetX - previousMousePosition.x,
-                        y: e.offsetY - previousMousePosition.y
-                    };
-
-                    if (isDragging) {
-                        const deltaRotationQuaternion = new THREE.Quaternion()
-                            .setFromEuler(new THREE.Euler(
+                    const { offsetX, offsetY } = e;
+                    if (isDragging.current) {
+                        const deltaMove = {
+                            x: offsetX - previousMousePosition.current.x,
+                            y: offsetY - previousMousePosition.current.y
+                        };
+                        const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
+                            new THREE.Euler(
                                 (deltaMove.y * Math.PI) / 180,
                                 (deltaMove.x * Math.PI) / 180,
                                 0,
                                 'XYZ'
-                            ));
+                            )
+                        );
                         torusKnot.quaternion.multiplyQuaternions(deltaRotationQuaternion, torusKnot.quaternion);
                     }
-                    previousMousePosition = { x: e.offsetX, y: e.offsetY };
+                    previousMousePosition.current = { x: offsetX, y: offsetY };
                 };
                 
-                 // Zoom controls
                 const onWheel = (e) => {
+                    e.preventDefault();
                     camera.position.z += e.deltaY * 0.01;
-                    camera.position.z = Math.max(15, Math.min(camera.position.z, 50)); // Clamp zoom
+                    camera.position.z = Math.max(15, Math.min(camera.position.z, 50));
                 }
 
-                renderer.domElement.addEventListener('mousedown', onMouseDown);
-                renderer.domElement.addEventListener('mouseup', onMouseUp);
-                renderer.domElement.addEventListener('mousemove', onMouseMove);
-                renderer.domElement.addEventListener('wheel', onWheel);
-
+                currentMount.addEventListener('mousedown', onMouseDown);
+                window.addEventListener('mouseup', onMouseUp);
+                currentMount.addEventListener('mousemove', onMouseMove);
+                currentMount.addEventListener('wheel', onWheel, { passive: false });
 
                 const animate = function () {
                     requestAnimationFrame(animate);
                     renderer.render(scene, camera);
                 };
-
                 animate();
                 
-                // Handle resize
                 const handleResize = () => {
-                    if (mountRef.current) {
-                        camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
+                    if (currentMount) {
+                        camera.aspect = currentMount.clientWidth / currentMount.clientHeight;
                         camera.updateProjectionMatrix();
-                        renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+                        renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
                     }
                 }
                 window.addEventListener('resize', handleResize);
 
-
-                // Cleanup
                 return () => {
                     window.removeEventListener('resize', handleResize);
-                    if(mountRef.current) {
-                       mountRef.current.removeChild(renderer.domElement);
+                    window.removeEventListener('mouseup', onMouseUp);
+                    if(currentMount && renderer.domElement) {
+                       currentMount.removeChild(renderer.domElement);
                     }
                 };
             }, []);
 
-            return <div ref={mountRef} className="w-full h-96 rounded-lg bg-slate-200 cursor-grab"></div>;
+            return <div ref={mountRef} className="w-full h-full cursor-grab"></div>;
         }
-
 
         // Screen Components
         function HomeScreen({ campaigns, onCampaignSelect, onLike, likedItems }) {
             const [selectedCategory, setSelectedCategory] = useState('All');
-            const categories = ['All', 'Outerwear', 'Blazers', 'Denim', 'Dresses', 'Trousers', 'Tops'];
+            const categories = ['All', 'Outerwear', 'Blazers', 'Trousers', 'Tops', 'Denim', 'Dresses'];
 
             const filteredCampaigns = campaigns.filter(campaign => 
                 selectedCategory === 'All' || campaign.category === selectedCategory
@@ -277,7 +298,7 @@
             );
         };
 
-        function CampaignDetailScreen({ campaign, onPledge, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit }) {
+        function CampaignDetailScreen({ campaign, onPledge, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D }) {
             const [activeTab, setActiveTab] = useState('Details');
             const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.sizeGuide.sizes)[0]);
             
@@ -296,9 +317,9 @@
                                         <div className="flex justify-between"><span className="text-gray-600">Composition</span><span className="font-medium text-right">{section.composition}</span></div>
                                         <div className="flex justify-between"><span className="text-gray-600">Origin</span><span className="font-medium text-right">{section.origin}</span></div>
                                         {section.certifications && section.certifications.length > 0 && (
-                                            <div>
-                                                <span className="text-gray-600">Certifications</span>
-                                                <ul className="list-disc list-inside pl-1 text-right">
+                                            <div className="text-right">
+                                                <span className="text-gray-600 float-left">Certifications</span>
+                                                <ul className="list-disc list-inside inline-block text-left">
                                                     {section.certifications.map(cert => <li key={cert} className="font-medium">{cert}</li>)}
                                                 </ul>
                                             </div>
@@ -309,8 +330,6 @@
                         </div>
                     </div>
                     );
-                case '3D View':
-                    return <ThreeDViewer />;
                 case 'Price Breakdown':
                     const totalCost = Object.values(campaign.priceBreakdown).reduce((sum, val) => sum + val, 0);
                     return (
@@ -318,7 +337,7 @@
                         <p className="text-gray-700 mb-4 text-sm">We believe in radical transparency. Here's the true cost of making this garment.</p>
                         <div className="space-y-3 mb-6">
                         {Object.entries(campaign.priceBreakdown).map(([key, value]) => {
-                            const percentage = (value / totalCost) * 100;
+                            const percentage = (value / campaign.price) * 100;
                             return (
                             <div key={key}>
                                 <div className="flex justify-between text-sm mb-1">
@@ -505,8 +524,15 @@
                         Back to all drops
                     </button>
                     <div className="md:grid md:grid-cols-2 md:gap-12">
-                        <div className="mb-6 md:mb-0">
+                        <div className="mb-6 md:mb-0 relative group">
                             <img src={campaign.heroImage} alt={campaign.name} className="w-full h-auto object-cover rounded-lg shadow-lg" />
+                            <button 
+                                onClick={onShow3D}
+                                className="absolute inset-0 flex items-center justify-center bg-black/50 text-white font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            >
+                                <CubeIcon className="w-8 h-8 mr-2" />
+                                View in 3D
+                            </button>
                         </div>
                         <div className="bg-white rounded-lg shadow-lg">
                             <div className="p-5 border-b">
@@ -521,7 +547,7 @@
                             
                             <div className="px-5 pb-5">
                                 <div className="flex border-b overflow-x-auto scrollbar-hide">
-                                    {['Details', '3D View', 'Price Breakdown', 'Size & Fit', 'Community'].map(tab => (
+                                    {['Details', 'Price Breakdown', 'Size & Fit', 'Community'].map(tab => (
                                         <button key={tab} onClick={() => setActiveTab(tab)} className={`py-2 px-4 font-semibold text-sm whitespace-nowrap ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}>
                                             {tab}
                                         </button>
@@ -682,34 +708,115 @@
             );
         };
 
-        function PledgeModal({ campaign, onClose, onPledge }) {
-            const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.preOrderDetails.sizes)[0]);
+        function ThreeDModal({ onClose }) {
+            const [show, setShow] = useState(false);
+
+            useEffect(() => {
+                const timer = setTimeout(() => setShow(true), 10);
+                return () => clearTimeout(timer);
+            }, []);
+
+            const handleClose = () => {
+                setShow(false);
+                setTimeout(onClose, 300);
+            };
 
             return (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
-                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <div 
+                    className={`fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`}
+                    onClick={handleClose}
+                >
+                    <div 
+                        className={`w-full h-full max-w-4xl max-h-[80vh] bg-slate-200 rounded-lg shadow-2xl relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-800 bg-white/50 rounded-full p-2 hover:bg-white z-10">
+                            <XIcon className="w-6 h-6" />
+                        </button>
+                        <ThreeDViewer />
+                    </div>
+                </div>
+            );
+        }
+
+        function PledgeModal({ campaign, onClose, onPledge }) {
+            const [show, setShow] = useState(false);
+            const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.preOrderDetails.sizes)[0]);
+            const isCombinedFunding = campaign.preOrderDetails.fundingType === 'COMBINED';
+
+            useEffect(() => {
+                // Animate in on mount
+                const timer = setTimeout(() => setShow(true), 10); // Small delay for transition to trigger
+                return () => clearTimeout(timer);
+            }, []);
+
+            const handleClose = () => {
+                setShow(false); // Animate out
+                setTimeout(onClose, 300); // Wait for animation to finish before calling parent's onClose
+            };
+
+            // Calculate combined progress if needed
+            let combinedProgress = 0;
+            let totalFunded = 0;
+            if (isCombinedFunding) {
+                totalFunded = Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0);
+                combinedProgress = campaign.preOrderDetails.overallMoq > 0 ? (totalFunded / campaign.preOrderDetails.overallMoq) * 100 : 0;
+            }
+
+            return (
+                <div 
+                    className={`fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`}
+                    onClick={handleClose}
+                >
+                    <div 
+                        className={`bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
                             <XIcon className="w-6 h-6" />
                         </button>
                         <h2 className="font-bold text-2xl mb-2">{campaign.name}</h2>
                         <p className="text-lg text-gray-600 mb-6">€{campaign.price}</p>
                         
+                        {isCombinedFunding && (
+                            <div className="mb-4">
+                                <h3 className="font-semibold text-sm mb-2">Overall Funding Progress</h3>
+                                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${combinedProgress}%` }}></div>
+                                </div>
+                                <div className="flex justify-between items-center text-xs text-gray-600 mt-1">
+                                    <span>{totalFunded} / {campaign.preOrderDetails.overallMoq} Funded</span>
+                                    <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="mb-4">
-                            <h3 className="font-semibold text-sm mb-3">Funding Progress by Size</h3>
+                            <h3 className="font-semibold text-sm mb-3">{isCombinedFunding ? 'Pledges by Size' : 'Funding Progress by Size'}</h3>
                             <div className="space-y-3">
                                 {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => {
-                                    const moq = campaign.preOrderDetails.fundingType === 'COMBINED' ? campaign.preOrderDetails.overallMoq : data.moq;
-                                    const progress = (data.funded / moq) * 100;
-                                    const isFunded = campaign.preOrderDetails.fundingType === 'INDEPENDENT' && progress >= 100;
+                                    if (isCombinedFunding) {
+                                        return (
+                                            <div key={size} className="flex justify-between items-center text-sm py-1">
+                                                <span className="font-medium text-gray-800">{size}</span>
+                                                <span className="text-gray-600 font-semibold">{data.funded} pledged</span>
+                                            </div>
+                                        )
+                                    }
+                                    
+                                    // INDEPENDENT funding logic
+                                    const moq = data.moq;
+                                    const progress = moq ? (data.funded / moq) * 100 : 0;
+                                    const isFunded = moq && progress >= 100;
                                     return (
                                         <div key={size}>
                                             <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}>
                                                 <span className="font-semibold">{size}</span>
-                                                <span>{data.funded} / {data.moq || 'N/A'}</span>
+                                                {moq && <span>{data.funded} / {moq}</span>}
                                             </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                            {moq && <div className="w-full bg-gray-200 rounded-full h-2">
                                                 <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div>
-                                            </div>
+                                            </div>}
                                         </div>
                                     );
                                 })}
@@ -728,7 +835,7 @@
                         </div>
 
                         <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-r-lg mb-6">
-                            <p className="text-sm text-blue-800">Your card will only be charged if the campaign for this size is successful.</p>
+                            <p className="text-sm text-blue-800">Your card will only be charged if the funding goal is met.</p>
                         </div>
 
                         <button onClick={() => onPledge(campaign, selectedSize)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all">
@@ -761,7 +868,7 @@
 
         function BottomNavBar({ currentScreen, onNavigate }) {
             return (
-                <div className="sm:hidden bg-white/80 backdrop-blur-sm border-t border-gray-200 flex justify-around p-2 fixed bottom-0 w-full">
+                <div className="sm:hidden bg-white/80 backdrop-blur-sm border-t border-gray-200 flex justify-around p-2 fixed bottom-0 w-full z-40">
                     <button onClick={() => onNavigate('Home')} className={`flex flex-col items-center space-y-1 p-2 rounded-lg w-full ${currentScreen === 'Home' ? 'text-blue-600' : 'text-gray-500'}`}>
                         <HomeIcon className="w-6 h-6" />
                         <span className="text-xs font-semibold">Drops</span>

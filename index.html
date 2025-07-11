@@ -172,6 +172,7 @@
             const mountRef = useRef(null);
             const isDragging = useRef(false);
             const previousPointerPosition = useRef({ x: 0, y: 0 });
+            const initialPinchDistance = useRef(0);
 
             useEffect(() => {
                 const currentMount = mountRef.current;
@@ -198,30 +199,42 @@
                 camera.position.z = 30;
 
                 const getPointerCoordinates = (event) => {
-                    if (event.touches) {
-                        return { x: event.touches[0].clientX, y: event.touches[0].clientY };
-                    } else {
-                        return { x: event.clientX, y: event.clientY };
-                    }
+                    return event.touches ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : { x: event.clientX, y: event.clientY };
+                };
+
+                const getPinchDistance = (event) => {
+                    const dx = event.touches[0].clientX - event.touches[1].clientX;
+                    const dy = event.touches[0].clientY - event.touches[1].clientY;
+                    return Math.sqrt(dx * dx + dy * dy);
                 };
 
                 const onPointerDown = (e) => {
-                    isDragging.current = true;
-                    currentMount.classList.add('cursor-grabbing');
-                    const coords = getPointerCoordinates(e);
-                    previousPointerPosition.current = { x: coords.x, y: coords.y };
+                    if (e.touches && e.touches.length === 2) {
+                        initialPinchDistance.current = getPinchDistance(e);
+                        isDragging.current = false;
+                    } else {
+                        isDragging.current = true;
+                        currentMount.classList.add('cursor-grabbing');
+                        const coords = getPointerCoordinates(e);
+                        previousPointerPosition.current = { x: coords.x, y: coords.y };
+                    }
                 };
 
-                const onPointerUp = () => {
+                const onPointerUp = (e) => {
                     isDragging.current = false;
+                    initialPinchDistance.current = 0;
                     currentMount.classList.remove('cursor-grabbing');
                 };
 
                 const onPointerMove = (e) => {
-                    if (e.type === 'touchmove') {
-                        e.preventDefault(); // Prevent page scroll on touch devices
-                    }
-                    if (isDragging.current) {
+                    e.preventDefault(); 
+                    if (e.touches && e.touches.length === 2) {
+                        const newPinchDistance = getPinchDistance(e);
+                        const delta = newPinchDistance - initialPinchDistance.current;
+                        camera.position.z -= delta * 0.1;
+                        camera.position.z = Math.max(15, Math.min(camera.position.z, 50));
+                        initialPinchDistance.current = newPinchDistance;
+                    } else if (isDragging.current) {
                         const coords = getPointerCoordinates(e);
                         const deltaMove = {
                             x: coords.x - previousPointerPosition.current.x,
@@ -236,11 +249,10 @@
                 };
                 
                 const onWheel = (e) => {
-                    camera.position.z += e.deltaY * 0.01;
+                    camera.position.z += e.deltaY * 0.05; // Increased sensitivity
                     camera.position.z = Math.max(15, Math.min(camera.position.z, 50));
                 };
 
-                // Add both mouse and touch event listeners
                 currentMount.addEventListener('mousedown', onPointerDown);
                 window.addEventListener('mouseup', onPointerUp);
                 window.addEventListener('mousemove', onPointerMove);

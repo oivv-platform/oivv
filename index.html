@@ -323,14 +323,41 @@
             
             const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
             const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+            const [isFading, setIsFading] = useState(false);
             
             const touchStartX = useRef(0);
             const touchEndX = useRef(0);
-            const handleTouchStart = (e) => { touchStartX.current = e.targetTouches[0].clientX; };
-            const handleTouchMove = (e) => { touchEndX.current = e.targetTouches[0].clientX; };
+            const hasSwiped = useRef(false);
+
+            const handleTouchStart = (e) => {
+                touchStartX.current = e.targetTouches[0].clientX;
+                hasSwiped.current = false;
+            };
+            const handleTouchMove = (e) => {
+                touchEndX.current = e.targetTouches[0].clientX;
+                if (Math.abs(touchStartX.current - touchEndX.current) > 10) {
+                    hasSwiped.current = true;
+                }
+            };
             const handleTouchEnd = () => {
-                if (touchStartX.current - touchEndX.current > 50) { setCurrentMediaIndex(prev => Math.min(prev + 1, mediaItems.length - 1)); }
-                if (touchStartX.current - touchEndX.current < -50) { setCurrentMediaIndex(prev => Math.max(prev - 1, 0)); }
+                const swipeDistance = touchStartX.current - touchEndX.current;
+                if (Math.abs(swipeDistance) > 50) { // Swipe detected
+                    const direction = swipeDistance > 0 ? 1 : -1;
+                    const newIndex = Math.max(0, Math.min(currentMediaIndex + direction, mediaItems.length - 1));
+                    if (newIndex !== currentMediaIndex) {
+                        setIsFading(true);
+                        setTimeout(() => {
+                            setCurrentMediaIndex(newIndex);
+                            setIsFading(false);
+                        }, 150);
+                    }
+                }
+            };
+            
+            const handleMediaClick = (index) => {
+                if (!hasSwiped.current) {
+                    onShowMedia(index);
+                }
             };
 
             const DetailsPanel = ({isMobile = false}) => (
@@ -424,16 +451,13 @@
 
                     {/* Mobile Layout */}
                     <div className="lg:hidden">
-                        <DetailsPanel isMobile={true} />
-                        <div onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
-                             <div className="aspect-w-3 aspect-h-4 mb-2">
-                                 <button onClick={() => onShowMedia(currentMediaIndex)} className="w-full h-full">
-                                    {mediaItems[currentMediaIndex].type === 'video' ? (
-                                        <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover rounded-lg shadow-lg bg-black"></video>
-                                    ) : (
-                                        <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover rounded-lg shadow-lg" />
-                                    )}
-                                </button>
+                        <div className="mb-6" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onClick={() => handleMediaClick(currentMediaIndex)}>
+                             <div className={`aspect-w-3 aspect-h-4 mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}>
+                                {mediaItems[currentMediaIndex].type === 'video' ? (
+                                    <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover rounded-lg shadow-lg bg-black"></video>
+                                ) : (
+                                    <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover rounded-lg shadow-lg" />
+                                )}
                             </div>
                             <div className="flex justify-center items-center space-x-2">
                                 {mediaItems.map((_, index) => (
@@ -441,6 +465,7 @@
                                 ))}
                             </div>
                         </div>
+                        <DetailsPanel isMobile={true} />
                     </div>
                 </div>
             );

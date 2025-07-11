@@ -170,45 +170,90 @@
 
         function ThreeDViewer() {
             const mountRef = useRef(null);
+            const isDragging = useRef(false);
+            const previousPointerPosition = useRef({ x: 0, y: 0 });
+
             useEffect(() => {
                 const currentMount = mountRef.current;
                 if (!currentMount) return;
+
                 const scene = new THREE.Scene();
                 scene.background = new THREE.Color(0xf1f5f9);
                 const camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
                 const renderer = new THREE.WebGLRenderer({ antialias: true });
                 renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
                 currentMount.appendChild(renderer.domElement);
+
                 const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
                 const material = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.5, metalness: 0.2 });
                 const torusKnot = new THREE.Mesh(geometry, material);
                 scene.add(torusKnot);
+
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
                 scene.add(ambientLight);
                 const pointLight = new THREE.PointLight(0xffffff, 0.8);
                 pointLight.position.set(25, 50, 25);
                 scene.add(pointLight);
+
                 camera.position.z = 30;
-                let isDragging = false;
-                let previousMousePosition = { x: 0, y: 0 };
-                const onMouseDown = (e) => { isDragging = true; currentMount.classList.add('cursor-grabbing'); };
-                const onMouseUp = (e) => { isDragging = false; currentMount.classList.remove('cursor-grabbing'); };
-                const onMouseMove = (e) => {
-                    const { offsetX, offsetY } = e;
-                    if (isDragging) {
-                        const deltaMove = { x: offsetX - previousMousePosition.x, y: offsetY - previousMousePosition.y };
-                        const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler((deltaMove.y * Math.PI) / 180, (deltaMove.x * Math.PI) / 180, 0, 'XYZ'));
-                        torusKnot.quaternion.multiplyQuaternions(deltaRotationQuaternion, torusKnot.quaternion);
+
+                const getPointerCoordinates = (event) => {
+                    if (event.touches) {
+                        return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+                    } else {
+                        return { x: event.clientX, y: event.clientY };
                     }
-                    previousMousePosition = { x: offsetX, y: offsetY };
                 };
-                const onWheel = (e) => { e.preventDefault(); camera.position.z += e.deltaY * 0.01; camera.position.z = Math.max(15, Math.min(camera.position.z, 50)); }
-                currentMount.addEventListener('mousedown', onMouseDown);
-                window.addEventListener('mouseup', onMouseUp);
-                currentMount.addEventListener('mousemove', onMouseMove);
+
+                const onPointerDown = (e) => {
+                    isDragging.current = true;
+                    currentMount.classList.add('cursor-grabbing');
+                    const coords = getPointerCoordinates(e);
+                    previousPointerPosition.current = { x: coords.x, y: coords.y };
+                };
+
+                const onPointerUp = () => {
+                    isDragging.current = false;
+                    currentMount.classList.remove('cursor-grabbing');
+                };
+
+                const onPointerMove = (e) => {
+                    if (e.type === 'touchmove') {
+                        e.preventDefault(); // Prevent page scroll on touch devices
+                    }
+                    if (isDragging.current) {
+                        const coords = getPointerCoordinates(e);
+                        const deltaMove = {
+                            x: coords.x - previousPointerPosition.current.x,
+                            y: coords.y - previousPointerPosition.current.y
+                        };
+                        const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
+                            new THREE.Euler((deltaMove.y * Math.PI) / 180, (deltaMove.x * Math.PI) / 180, 0, 'XYZ')
+                        );
+                        torusKnot.quaternion.multiplyQuaternions(deltaRotationQuaternion, torusKnot.quaternion);
+                        previousPointerPosition.current = { x: coords.x, y: coords.y };
+                    }
+                };
+                
+                const onWheel = (e) => {
+                    camera.position.z += e.deltaY * 0.01;
+                    camera.position.z = Math.max(15, Math.min(camera.position.z, 50));
+                };
+
+                // Add both mouse and touch event listeners
+                currentMount.addEventListener('mousedown', onPointerDown);
+                window.addEventListener('mouseup', onPointerUp);
+                window.addEventListener('mousemove', onPointerMove);
+                
+                currentMount.addEventListener('touchstart', onPointerDown, { passive: false });
+                window.addEventListener('touchend', onPointerUp);
+                window.addEventListener('touchmove', onPointerMove, { passive: false });
+
                 currentMount.addEventListener('wheel', onWheel, { passive: false });
+
                 const animate = function () { requestAnimationFrame(animate); renderer.render(scene, camera); };
                 animate();
+                
                 const handleResize = () => {
                     if (currentMount) {
                         camera.aspect = currentMount.clientWidth / currentMount.clientHeight;
@@ -217,10 +262,16 @@
                     }
                 }
                 window.addEventListener('resize', handleResize);
+
                 return () => {
+                    window.removeEventListener('mouseup', onPointerUp);
+                    window.removeEventListener('mousemove', onPointerMove);
+                    window.removeEventListener('touchend', onPointerUp);
+                    window.removeEventListener('touchmove', onPointerMove);
                     window.removeEventListener('resize', handleResize);
-                    window.removeEventListener('mouseup', onMouseUp);
-                    if(currentMount && renderer.domElement) { currentMount.removeChild(renderer.domElement); }
+                    if(currentMount && renderer.domElement) {
+                       currentMount.removeChild(renderer.domElement);
+                    }
                 };
             }, []);
             return <div ref={mountRef} className="w-full h-full cursor-grab"></div>;

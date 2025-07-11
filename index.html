@@ -1,457 +1,742 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MePont | The Transparent Fashion Marketplace</title>
+    <title>MePont | Community-Powered Fashion</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* --- DESIGN SYSTEM & COLOR PALETTE (V4 - Light Mode) --- */
-        :root {
-            --background: #F3F4F6; /* Light Gray */
-            --surface: #FFFFFF;   /* White */
-            --text-primary: #111827; /* Dark Gray/Black */
-            --text-secondary: #4B5563;
-            --accent: #1E40AF;   /* Classic, Strong Navy Blue */
-            --accent-light: #3B82F6;
-            --border: #D1D5DB;
-            --font-heading: 'Playfair Display', serif;
-            --font-body: 'Inter', sans-serif;
-        }
-
-        /* --- BASE STYLES & TYPOGRAPHY --- */
         body {
-            font-family: var(--font-body);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            background-color: var(--background);
-            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
         }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-heading);
-            font-weight: 700;
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
         }
-
-        /* --- SCROLLING & SLIDE STRUCTURE --- */
-        html, body {
-            height: 100%;
-            overflow: hidden;
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
-        .container-snap {
-            scroll-snap-type: y mandatory;
-            overflow-y: scroll;
-            height: 100vh;
+        .animate-fly {
+            animation: fly-to-cart 1s ease-in-out forwards;
         }
-        .slide {
-            height: 100vh;
-            width: 100%;
-            scroll-snap-align: start;
-            scroll-snap-stop: always;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            position: relative;
-        }
-        .container-snap::-webkit-scrollbar { width: 5px; }
-        .container-snap::-webkit-scrollbar-track { background: var(--background); }
-        .container-snap::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-
-        /* --- UI COMPONENTS & EFFECTS --- */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        }
-        .background-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 0;
-            opacity: 0.05;
-        }
-        .content-wrapper {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .animated-dropdown .dropdown-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
-            padding-top: 0;
-            padding-bottom: 0;
-        }
-        .animated-dropdown:hover .dropdown-content {
-            max-height: 200px; /* Adjust as needed */
-            padding-top: 1rem;
-            padding-bottom: 1rem;
+        @keyframes fly-to-cart {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(150px, 600px) scale(0.1);
+                opacity: 0;
+            }
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-100">
+    <div id="root"></div>
 
-    <div class="container-snap">
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-        <!-- Slide 1: Cover -->
-        <section id="cover" class="slide text-center overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=2074&auto=format&fit=crop" class="background-image" alt="Abstract texture">
-            <div class="absolute inset-0 bg-gradient-to-b from-white via-white/80 to-white"></div>
-            <div class="content-wrapper">
-                <div class="w-28 h-28 mx-auto mb-6 flex items-center justify-center rounded-full bg-[var(--accent)]/10 border-2 border-[var(--accent)]">
-                     <svg class="w-14 h-14 text-[var(--accent)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M20 12a8 8 0 0 1-16 0"/></svg>
-                </div>
-                <h1 class="text-7xl md:text-9xl tracking-tight">MePont</h1>
-                <p class="mt-4 text-2xl md:text-3xl text-[var(--accent-light)]" style="font-family: var(--font-body); font-weight: 400;">The Transparent Fashion Marketplace</p>
-            </div>
-             <div class="absolute bottom-10 animate-bounce z-10">
-                <svg class="w-6 h-6 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-        </section>
+        // Mock Data
+        const MOCK_CAMPAIGNS = [
+            { id: 5, name: 'The Lisbon Tech Chino', designer: 'Urban Form', price: 75, stage: 'DESIGN', productionRound: 1, likes: 412, targetLikes: 500, category: 'Trousers', heroImage: 'https://placehold.co/600x800/d1fae5/065f46?text=Lisbon+Chino', images: ['https://placehold.co/600x800/d1fae5/065f46?text=Lisbon+Chino'], details: 'A classic chino silhouette made with a modern, water-repellent stretch fabric. Designed for comfort and versatility, from the office to the weekend.', priceBreakdown: { materials: 28, manufacturing: 27, designer: 10, platform: 7.5 }, productPassport: [ { type: 'Fabric', name: 'Main Body', composition: '98% Organic Cotton, 2% Elastane', origin: 'Izmir, Turkey', certifications: ['GOTS Certified Organic Cotton', 'OEKO-TEX Standard 100'] }, { type: 'Hardware', name: 'Zipper', composition: 'YKK NATULON® (Recycled PET)', origin: 'Japan'}, { type: 'Hardware', name: 'Button', composition: 'Corozo (nut-based)', origin: 'Ecuador'} ], sizeGuide: { fitDetails: 'Slim fit with a gentle taper from knee to ankle. Offers slight stretch for comfort.', sizes: { '30': { 'Waist': '31"', 'Inseam': '32"', 'Thigh': '23"', 'Leg Opening': '14"' }, '32': { 'Waist': '33"', 'Inseam': '32"', 'Thigh': '24"', 'Leg Opening': '14.5"' }, '34': { 'Waist': '35"', 'Inseam': '32"', 'Thigh': '25"', 'Leg Opening': '15"' }, '36': { 'Waist': '37"', 'Inseam': '32"', 'Thigh': '26"', 'Leg Opening': '15.5"' }, } }, comments: [{user: 'Mark P.', comment: 'This looks amazing! I hope it gets made.'}], reviews: [], },
+            { id: 1, name: 'The Milano Linen Blazer', designer: 'Studio Rossi', price: 85, stage: 'PRE_ORDER', productionRound: 2, category: 'Blazers', heroImage: 'https://placehold.co/600x800/e2e8f0/4a5568?text=Milano+Blazer', images: [ 'https://placehold.co/600x800/e2e8f0/4a5568?text=Milano+Blazer', 'https://placehold.co/600x800/d1d5db/4a5568?text=Side+View', 'https://placehold.co/600x800/9ca3af/4a5568?text=Fabric+Detail', ], details: 'Crafted from 100% organic Italian linen, this blazer offers a relaxed yet structured fit. Perfect for summer evenings and smart-casual events. Features natural horn buttons and a silk-blend lining.', factory: 'Made ethically in Porto, Portugal by a family-owned facility known for its exceptional tailoring.', preOrderDetails: { fundingType: 'INDEPENDENT', daysLeft: 12, sizes: { 'S': { moq: 50, funded: 50 }, 'M': { moq: 100, funded: 98 }, 'L': { moq: 100, funded: 35 }, 'XL': { moq: 50, funded: 2 } } }, priceBreakdown: { materials: 35, manufacturing: 31, designer: 10, platform: 8.5 }, productPassport: [ { type: 'Fabric', name: 'Main Body', composition: '100% Organic Linen', origin: 'Emilia-Romagna, Italy', certifications: ['European Flax® Certified'] }, { type: 'Fabric', name: 'Lining', composition: '50% Cupro, 50% Viscose', origin: 'Como, Italy' }, { type: 'Hardware', name: 'Buttons', composition: 'Natural Horn', origin: 'Parma, Italy' } ], sizeGuide: { fitDetails: 'Relaxed, unstructured fit. Designed to be worn comfortably over a shirt. Consider sizing down for a slimmer fit.', sizes: { 'S': { 'Chest': '38"', 'Sleeve': '25"', 'Length': '28"' }, 'M': { 'Chest': '40"', 'Sleeve': '25.5"', 'Length': '28.5"' }, 'L': { 'Chest': '42"', 'Sleeve': '26"', 'Length': '29"' }, 'XL': { 'Chest': '44"', 'Sleeve': '26.5"', 'Length': '29.5"' }, } }, comments: [{user: 'Julia S.', comment: 'So excited for Round 2!'}], reviews: [ { user: 'Alex R.', rating: 5, comment: 'Received this from the first round. The quality is absolutely insane for the price. The linen is soft, not scratchy at all.'}, { user: 'Beatrice L.', rating: 4, comment: 'Beautiful blazer, though it runs a little large. I would recommend sizing down if you are between sizes.'}, ] },
+            { id: 7, name: 'The Nomad Travel Shirt', designer: 'Wayfarer Co.', price: 65, stage: 'PRE_ORDER', productionRound: 1, category: 'Tops', heroImage: 'https://placehold.co/600x800/f3f4f6/1f2937?text=Nomad+Shirt', images: ['https://placehold.co/600x800/f3f4f6/1f2937?text=Nomad+Shirt'], details: 'The only shirt you need. Made from a technical merino wool blend that is wrinkle-resistant, anti-odor, and temperature regulating.', preOrderDetails: { fundingType: 'COMBINED', daysLeft: 18, overallMoq: 200, sizes: { 'S': { funded: 30 }, 'M': { funded: 65 }, 'L': { funded: 40 }, 'XL': { funded: 15 } } }, priceBreakdown: { materials: 25, manufacturing: 22, designer: 10, platform: 6.5 }, productPassport: [ { type: 'Fabric', name: 'Main Body', composition: '87% Merino Wool, 13% Nylon', origin: 'Australia (Wool), Japan (Milling)'}, ], sizeGuide: { fitDetails: 'Modern athletic fit. Not too slim, not too loose.', sizes: { 'S': { 'Chest': '38"', 'Length': '28"' }, 'M': { 'Chest': '40"', 'Length': '29"' }, 'L': { 'Chest': '42"', 'Length': '30"' }, 'XL': { 'Chest': '44"', 'Length': '30.5"' }, } }, comments: [], reviews: [], },
+            { id: 6, name: 'The Aegean Polo Shirt', designer: 'Maritime Co.', price: 45, stage: 'SAMPLING', productionRound: 1, samplingDaysLeft: 7, category: 'Tops', heroImage: 'https://placehold.co/600x800/e0f2fe/0c4a6e?text=Aegean+Polo', images: ['https://placehold.co/600x800/e0f2fe/0c4a6e?text=Aegean+Polo'], details: 'A premium polo made from piqué knit sea-island cotton for exceptional softness and breathability. The sample is currently being perfected.', priceBreakdown: { materials: 18, manufacturing: 15, designer: 5, platform: 4.5 }, productPassport: [ { type: 'Fabric', name: 'Main Body', composition: '100% Sea Island Cotton', origin: 'Caribbean' }, { type: 'Hardware', name: 'Buttons', composition: 'Mother of Pearl', origin: 'Vietnam' } ], sizeGuide: { fitDetails: 'Classic fit, true to size.', sizes: { 'S': { 'Chest': '37"', 'Length': '27"' }, 'M': { 'Chest': '39"', 'Length': '27.5"' }, 'L': { 'Chest': '41"', 'Length': '28"' }, 'XL': { 'Chest': '43"', 'Length': '28.5"' }, } }, comments: [], reviews: [], },
+        ];
 
-        <!-- Slide 2: The Problem -->
-        <section id="problem" class="slide text-center">
-            <div class="content-wrapper">
-                <h2 class="text-6xl tracking-tight">The Fashion Industry is Broken.</h2>
-                <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">Decades of opaque practices have created a system that is wasteful, expensive, and disconnected from its customers.</p>
-                <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-7xl">
-                    <div class="card">
-                        <h3 class="text-3xl text-[var(--accent)]">Opaque Pricing</h3>
-                        <p class="mt-2 text-lg text-[var(--text-primary)]">Consumers pay 5-10x markups with no visibility into the true cost of production.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="text-3xl text-[var(--accent)]">Overproduction Waste</h3>
-                        <p class="mt-2 text-lg text-[var(--text-primary)]">Up to 40% of all fashion produced is never sold, leading to immense environmental waste.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="text-3xl text-[var(--accent)]">High Return Rates</h3>
-                        <p class="mt-2 text-lg text-[var(--text-primary)]">Poor online fit leads to ~25% return rates for apparel, creating massive logistical costs.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="text-3xl text-[var(--accent)]">Consumer Disconnect</h3>
-                        <p class="mt-2 text-lg text-[var(--text-primary)]">Shoppers have no connection to the makers or the story behind their clothes.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        // SVG Icons
+        const HomeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>;
+        const UserIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
+        const XIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
+        const HeartIcon = ({ className, isFilled }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={isFilled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>;
+        const ArrowRightIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
+        const StarIcon = ({ className, isFilled }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={isFilled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
 
-        <!-- Slide 3: The Solution -->
-        <section id="solution" class="slide text-center">
-            <img src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?q=80&w=1974&auto=format&fit=crop" class="background-image" alt="Abstract blue wave">
-            <div class="content-wrapper">
-                <h2 class="text-6xl tracking-tight">Our Solution: An Intelligent Ecosystem</h2>
-                <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">MePont is not just an app. It's a multi-platform ecosystem built on three pillars to fix the industry's core problems.</p>
-                <div class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
-                    <div class="card text-center">
-                        <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1E40AF/FFFFFF/mp4?text=Transparent+Pricing" type="video/mp4"></video>
-                        <h3 class="text-3xl text-[var(--accent)]">Radical Transparency</h3>
-                        <p class="mt-2 text-lg">A zero-inventory, crowdfunded model with a fully transparent price breakdown for every item.</p>
-                    </div>
-                    <div class="card text-center">
-                        <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1E40AF/FFFFFF/mp4?text=Virtual+Try-On" type="video/mp4"></video>
-                        <h3 class="text-3xl text-[var(--accent)]">Immersive Experience</h3>
-                        <p class="mt-2 text-lg">A high-fidelity UE5 platform with physics-based virtual try-on that builds confidence.</p>
-                    </div>
-                    <div class="card text-center">
-                        <video class="w-full h-48 object-cover rounded-lg mb-4" autoplay loop muted playsinline><source src="https://placehold.co/v/600x400/1E40AF/FFFFFF/mp4?text=Community+Hub" type="video/mp4"></video>
-                        <h3 class="text-3xl text-[var(--accent)]">Community & Connection</h3>
-                        <p class="mt-2 text-lg">A platform that connects users directly to manufacturers and builds a community around shared values.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        // Main App Component
+        function App() {
+            const [currentScreen, setCurrentScreen] = useState('Home');
+            const [campaigns, setCampaigns] = useState(MOCK_CAMPAIGNS);
+            const [selectedCampaign, setSelectedCampaign] = useState(null);
+            const [pledgedItems, setPledgedItems] = useState([]);
+            const [likedItems, setLikedItems] = useState([]);
+            const [showPledgeModal, setShowPledgeModal] = useState(false);
+            
+            const hasPurchased = (campaignId) => pledgedItems.some(item => item.id === campaignId);
 
-        <!-- Slide 4: The Business Model -->
-        <section id="model" class="slide text-center">
-            <div class="content-wrapper">
-                <h2 class="text-6xl tracking-tight">The Business Model: Data-Enriched Value</h2>
-                <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">We build trust with transparent pricing and add value for our partners with intelligent tools.</p>
-                <div class="mt-12 w-full max-w-2xl card p-8">
-                    <h3 class="text-4xl">Example: Designer T-Shirt</h3>
-                    <div class="mt-8 space-y-4">
-                        <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-[var(--background)]/50">
-                            <span class="font-medium text-lg text-[var(--text-secondary)]">Manufacturer's Base Cost</span>
-                            <span class="font-bold text-3xl text-[var(--text-primary)]">€10.00</span>
-                        </div>
-                        <div class="flex justify-center -my-2"><span class="text-[var(--accent)] font-bold text-2xl">+</span></div>
-                        <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-[var(--background)]/50">
-                            <span class="font-medium text-lg text-[var(--text-secondary)]">Designer & Digitization Fee (10%)</span>
-                            <span class="font-bold text-3xl text-[var(--text-primary)]">€1.00</span>
-                        </div>
-                        <div class="flex justify-center -my-2"><span class="text-[var(--accent)] font-bold text-2xl">+</span></div>
-                        <div class="has-tooltip relative flex justify-between items-center p-4 rounded-lg bg-[var(--background)]/50">
-                            <span class="font-medium text-lg text-[var(--text-secondary)]">MePont Platform Fee (20%)</span>
-                            <span class="font-bold text-3xl text-[var(--text-primary)]">€2.00</span>
-                        </div>
-                    </div>
-                    <div class="mt-6 pt-6 border-t border-[var(--border)]">
-                        <div class="flex justify-between items-center">
-                            <span class="text-2xl font-bold text-[var(--accent-light)]">MePont Final Price</span>
-                            <span class="text-5xl font-bold text-[var(--accent)]">€13.00</span>
-                        </div>
-                         <p class="text-center mt-4 text-[var(--text-secondary)]">Traditional Retail Price: €50 - €90</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            const navigateTo = (screen) => setCurrentScreen(screen);
 
-        <!-- Slide 5: Market Opportunity -->
-        <section id="market" class="slide text-center">
-            <img src="https://images.unsplash.com/photo-1554147090-e1221a04a025?q=80&w=2048&auto=format&fit=crop" class="background-image" alt="Abstract gradient">
-            <div class="content-wrapper">
-                 <h2 class="text-6xl tracking-tight">A Confluence of High-Growth Markets</h2>
-                <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">MePont is positioned at the intersection of several massive, rapidly expanding digital and sustainable markets.</p>
-                <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-7xl">
-                    <div class="card text-center animated-dropdown">
-                        <h3 class="text-2xl text-[var(--accent-light)]">Fashion E-commerce</h3>
-                        <p class="text-5xl font-bold mt-2">$1.5T</p>
-                        <p class="text-lg text-[var(--text-secondary)] mt-1">by 2029 (11.5% CAGR)</p>
-                        <div class="dropdown-content">
-                            <p class="text-md text-center text-[var(--text-secondary)]">Analyst: A robust and expanding primary channel, confirming the viability of our core marketplace.</p>
-                        </div>
-                    </div>
-                    <div class="card text-center animated-dropdown">
-                        <h3 class="text-2xl text-[var(--accent-light)]">Virtual Try-On (VTO)</h3>
-                        <p class="text-5xl font-bold mt-2">$12.2B</p>
-                        <p class="text-lg text-[var(--text-secondary)] mt-1">in 2025 (26.9% CAGR)</p>
-                         <div class="dropdown-content">
-                            <p class="text-md text-center text-[var(--text-secondary)]">Analyst: Our plan underestimates this market. The opportunity for our core tech is larger than assumed.</p>
-                        </div>
-                    </div>
-                    <div class="card text-center animated-dropdown">
-                        <h3 class="text-2xl text-[var(--accent-light)]">AI in Fashion</h3>
-                        <p class="text-5xl font-bold mt-2">$1.8B</p>
-                        <p class="text-lg text-[var(--text-secondary)] mt-1">in 2025 (~40% CAGR)</p>
-                         <div class="dropdown-content">
-                            <p class="text-md text-center text-[var(--text-secondary)]">Analyst: The staggering growth rate validates the strategic importance of our intelligent features and roadmap.</p>
-                        </div>
-                    </div>
-                    <div class="card text-center animated-dropdown">
-                        <h3 class="text-2xl text-[var(--accent-light)]">Sustainable Fashion</h3>
-                        <p class="text-5xl font-bold mt-2">$9.5B</p>
-                        <p class="text-lg text-[var(--text-secondary)] mt-1">in 2025 (8.1% CAGR)</p>
-                         <div class="dropdown-content">
-                            <p class="text-md text-center text-[var(--text-secondary)]">Analyst: Our zero-inventory model directly addresses this market's core values, creating strong brand alignment.</p>
-                        </div>
-                    </div>
-                </div>
-                 <p class="mt-8 text-sm text-gray-500 text-center">Sources: McKinsey, Bain & Co., Statista, Fortune Business Insights, Grand View Research.</p>
-            </div>
-        </section>
-
-        <!-- Slide 6: Omnichannel Strategy -->
-        <section id="omnichannel" class="slide text-center">
-            <div class="content-wrapper">
-                <h2 class="text-6xl tracking-tight">Omnichannel Strategy: Reaching Every Consumer</h2>
-                <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">Our tiered platform strategy maximizes market reach while intelligently managing our most expensive cloud costs.</p>
-                <div class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
-                    <div class="card p-8 border-2 border-[var(--accent)]">
-                        <h3 class="text-3xl text-[var(--accent)]">Tier 1: Web/Mobile App</h3>
-                        <p class="text-6xl font-bold mt-2">75%</p>
-                        <p class="mt-2 text-lg">The accessible hub for daily interactions. Drives scale and volume.</p>
-                    </div>
-                    <div class="card p-8">
-                        <h3 class="text-3xl">Tier 2: Cloud-Streamed UE5</h3>
-                        <p class="text-6xl font-bold mt-2">15%</p>
-                        <p class="mt-2 text-lg">The immersive 3D experience for engaged enthusiasts on any device.</p>
-                    </div>
-                    <div class="card p-8">
-                        <h3 class="text-3xl">Tier 3: Downloadable Client</h3>
-                        <p class="text-6xl font-bold mt-2">10%</p>
-                        <p class="mt-2 text-lg">The highest-fidelity experience for power users on PC/PS5.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Slide 7: GTM & Tech Roadmap -->
-        <section id="roadmap" class="slide text-center">
-             <img src="https://images.unsplash.com/photo-1533134486753-c833f0ed4866?q=80&w=2070&auto=format&fit=crop" class="background-image" alt="Architectural lines">
-            <div class="content-wrapper">
-                <h2 class="text-6xl tracking-tight">A Pragmatic & De-risked Plan</h2>
-                <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">We are proactively mitigating key risks with a phased, capital-efficient execution plan.</p>
-                <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl">
-                    <div class="card p-8">
-                        <h3 class="text-4xl text-[var(--accent)]">Go-to-Market: The Pilot Program</h3>
-                        <p class="mt-4 text-lg">Instead of a premature mass launch, our seed funding will be used to execute a focused pilot program.</p>
-                        <ul class="mt-4 space-y-3 text-lg text-left">
-                            <li class="flex items-start"><span class="text-[var(--accent)] mr-3 mt-1">&#10003;</span>Onboard a curated cohort of 5-10 manufacturers.</li>
-                            <li class="flex items-start"><span class="text-[var(--accent)] mr-3 mt-1">&#10003;</span>Validate the onboarding process and technology integration.</li>
-                            <li class="flex items-start"><span class="text-[var(--accent)] mr-3 mt-1">&#10003;</span>Prove the unit economics and sales velocity at a smaller scale.</li>
-                        </ul>
-                    </div>
-                    <div class="card p-8">
-                        <h3 class="text-4xl text-[var(--accent)]">Technology: Phased Roadmap</h3>
-                        <p class="mt-4 text-lg">We will own our core tech by investing smartly, not recklessly.</p>
-                         <ul class="mt-4 space-y-3 text-lg text-left">
-                            <li class="flex items-start"><strong class="text-[var(--accent)] mr-3">P1:</strong>Master Unreal's Chaos Cloth system & build our proprietary Digital Fabric Library.</li>
-                            <li class="flex items-start"><strong class="text-[var(--accent)] mr-3">P2:</strong>Pursue a fully proprietary simulation engine post-Series A, once the business model is proven.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Slide 8: Financials -->
-        <section id="financials" class="slide text-center">
-            <div class="content-wrapper">
-                <h2 class="text-6xl tracking-tight">Financials: A Clear Path to Profitability</h2>
-                <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">Our model shows strong revenue growth driven by our omnichannel strategy, reaching quarterly profitability by Q4 of Year 1.</p>
-                <div class="mt-8 w-full max-w-6xl">
-                     <div style="height: 60vh; width: 100%; position: relative;">
-                        <canvas id="financialsChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Slide 9: The Team -->
-        <section id="team" class="slide text-center">
-             <img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=2070&auto=format&fit=crop" class="background-image" alt="Modern interior">
-            <div class="content-wrapper">
-                <h2 class="text-6xl tracking-tight">The Founder: Vision & Execution</h2>
-                <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">A unique blend of deep industry knowledge and proven technical capability.</p>
-                <div class="mt-12 w-full max-w-3xl card p-8 text-center">
-                    <img src="https://placehold.co/128x128/F3F4F6/1E40AF?text=Founder" class="w-32 h-32 rounded-full mx-auto border-4 border-[var(--accent)]" alt="Founder Portrait">
-                    <h3 class="text-4xl mt-6">Founder Name</h3>
-                    <p class="text-[var(--accent-light)] text-xl">Founder & CEO</p>
-                    <p class="mt-4 text-lg max-w-xl mx-auto">
-                        With a Master's in Fashion Studies and a background as a Textile Engineer, I saw the industry's flaws firsthand. I taught myself to code and built the MePont MVP to prove a better way is possible—a platform founded on transparency, technology, and a deep respect for the craft.
-                    </p>
-                </div>
-                <p class="mt-8 text-lg text-[var(--text-secondary)]">We are raising funds to build our foundational 11-person team of experts.</p>
-            </div>
-        </section>
-
-        <!-- Slide 10: The Ask -->
-        <section id="ask" class="slide text-center">
-            <div class="content-wrapper">
-                <h2 class="text-6xl tracking-tight">The Ask & Use of Funds</h2>
-                <p class="mt-4 text-xl text-[var(--text-secondary)] max-w-3xl">We are seeking seed funding to execute our pilot program and achieve key milestones for our Series A.</p>
-                <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 w-full max-w-6xl items-center">
-                    <div class="text-center lg:text-left">
-                        <p class="text-3xl text-[var(--accent-light)]">Seed Round Ask</p>
-                        <p class="text-9xl font-bold tracking-tighter my-2">€1.5M</p>
-                        <p class="text-2xl text-[var(--text-secondary)]">For an 18-month runway to prove the core model and achieve market traction.</p>
-                    </div>
-                    <div class="w-full">
-                        <h3 class="text-3xl text-center mb-4">Use of Funds</h3>
-                        <div class="w-full max-w-md mx-auto">
-                            <canvas id="useOfFundsChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const accentColor = '#38BDF8';
-            const textColor = '#4B5563';
-            const gridColor = 'rgba(0, 0, 0, 0.05)';
-            const bodyFont = "'Sora', sans-serif";
-            const headingFont = "'Playfair Display', serif";
-
-            // --- Chart.js Implementation ---
-            const financialsCtx = document.getElementById('financialsChart').getContext('2d');
-            new Chart(financialsCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-                    datasets: [{
-                        label: 'Total Revenue',
-                        data: [30000, 112500, 270000, 600000],
-                        backgroundColor: 'rgba(56, 189, 248, 0.6)',
-                        borderColor: accentColor,
-                        borderWidth: 1,
-                        yAxisID: 'y',
-                    }, {
-                        label: 'Net Profit / (Loss)',
-                        data: [-242200, -214700, -134700, 95300],
-                        backgroundColor: (ctx) => ctx.raw < 0 ? 'rgba(148, 163, 184, 0.4)' : 'rgba(125, 211, 252, 0.6)',
-                        borderColor: (ctx) => ctx.raw < 0 ? '#94A3B8' : '#7DD3FC',
-                        borderWidth: 1,
-                        yAxisID: 'y',
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: textColor, font: { family: bodyFont } } },
-                        tooltip: {
-                            bodyFont: { family: bodyFont },
-                            titleFont: { family: bodyFont },
-                            callbacks: {
-                                label: (ctx) => `${ctx.dataset.label}: ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(ctx.raw)}`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: { ticks: { color: textColor, font: { family: bodyFont } }, grid: { color: gridColor } },
-                        y: {
-                            ticks: { 
-                                color: textColor,
-                                font: { family: bodyFont },
-                                callback: (val) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', notation: 'compact' }).format(val)
-                            },
-                            grid: { color: gridColor }
-                        }
+            const viewCampaignDetail = (campaign) => {
+                setSelectedCampaign(campaign);
+                navigateTo('CampaignDetail');
+            };
+            
+            const handleLike = (campaignId) => {
+                setLikedItems(prev => prev.includes(campaignId) ? prev.filter(id => id !== campaignId) : [...prev, campaignId]);
+                setCampaigns(prevCampaigns =>
+                prevCampaigns.map(c => {
+                    if (c.id === campaignId) {
+                    const isLiked = likedItems.includes(campaignId);
+                    return { ...c, likes: isLiked ? c.likes - 1 : c.likes + 1 };
                     }
-                }
-            });
+                    return c;
+                })
+                );
+            };
 
-            const useOfFundsCtx = document.getElementById('useOfFundsChart').getContext('2d');
-            new Chart(useOfFundsCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Team (Salaries)', 'Cloud & APIs', 'Marketing & Sales', 'Software & G&A', 'CapEx'],
-                    datasets: [{
-                        label: 'Use of Funds',
-                        data: [70, 10, 10, 5, 5],
-                        backgroundColor: ['#0EA5E9', '#0284C7', '#0369A1', '#075985', '#0C4A6E'],
-                        borderColor: '#F3F4F6',
-                        borderWidth: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: textColor, font: { family: bodyFont } } },
-                        tooltip: {
-                            bodyFont: { family: bodyFont },
-                            titleFont: { family: bodyFont },
-                            callbacks: {
-                                label: (ctx) => `${ctx.label}: ${ctx.raw}%`
-                            }
-                        }
+            const handlePledge = (campaign, size) => {
+                const newPledge = { ...campaign, size, productionStatus: 'Funded' };
+                setPledgedItems(prev => [...prev, newPledge]);
+                setCampaigns(prevCampaigns =>
+                prevCampaigns.map(c => {
+                    if (c.id === campaign.id && c.stage === 'PRE_ORDER') {
+                    const updatedSizes = { ...c.preOrderDetails.sizes };
+                    updatedSizes[size].funded += 1;
+                    return { ...c, preOrderDetails: { ...c.preOrderDetails, sizes: updatedSizes }};
                     }
+                    return c;
+                })
+                );
+                setShowPledgeModal(false);
+            };
+
+            const addComment = (campaignId, commentText) => {
+                const newComment = { user: 'You', comment: commentText };
+                setCampaigns(prev => prev.map(c => 
+                    c.id === campaignId ? {...c, comments: [...c.comments, newComment]} : c
+                ));
+            };
+
+            const addReview = (campaignId, review) => {
+                const newReview = { user: 'You', ...review };
+                setCampaigns(prev => prev.map(c => 
+                    c.id === campaignId ? {...c, reviews: [...c.reviews, newReview]} : c
+                ));
+            };
+
+            const renderScreen = () => {
+                switch (currentScreen) {
+                case 'Home':
+                    return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
+                case 'CampaignDetail':
+                    return <CampaignDetailScreen 
+                                campaign={selectedCampaign} 
+                                onPledge={() => setShowPledgeModal(true)} 
+                                onBack={() => navigateTo('Home')}
+                                onLike={handleLike}
+                                isLiked={likedItems.includes(selectedCampaign.id)}
+                                hasPurchased={hasPurchased(selectedCampaign.id)}
+                                onCommentSubmit={addComment}
+                                onReviewSubmit={addReview}
+                            />;
+                case 'Dashboard':
+                    return <DashboardScreen pledgedItems={pledgedItems} />;
+                default:
+                    return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
                 }
-            });
-        });
+            };
+
+            return (
+                <div className="w-full min-h-screen">
+                    <div className="max-w-7xl mx-auto">
+                        <TopNavBar onNavigate={navigateTo} />
+                        <main>
+                            {renderScreen()}
+                        </main>
+                    </div>
+                    {showPledgeModal && <PledgeModal campaign={selectedCampaign} onClose={() => setShowPledgeModal(false)} onPledge={handlePledge} />}
+                </div>
+            );
+        }
+
+        // Screen Components
+        function HomeScreen({ campaigns, onCampaignSelect, onLike, likedItems }) {
+            const [selectedCategory, setSelectedCategory] = useState('All');
+            const categories = ['All', 'Outerwear', 'Blazers', 'Denim', 'Dresses', 'Trousers', 'Tops'];
+
+            const filteredCampaigns = campaigns.filter(campaign => 
+                selectedCategory === 'All' || campaign.category === selectedCategory
+            );
+
+            return (
+                <div className="p-4 sm:p-6 lg:p-8">
+                <header className="mb-8 text-center">
+                    <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">MePont</h1>
+                    <p className="mt-2 text-lg text-gray-600">Community-powered fashion. Sell then make.</p>
+                </header>
+                
+                <div className="mb-8">
+                    <div className="flex justify-center flex-wrap gap-2">
+                    {categories.map(category => (
+                        <button key={category} onClick={() => setSelectedCategory(category)} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors whitespace-nowrap ${selectedCategory === category ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 shadow-sm hover:bg-gray-50'}`}>
+                        {category}
+                        </button>
+                    ))}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {filteredCampaigns.map(campaign => (
+                    <CampaignCard key={campaign.id} campaign={campaign} onSelect={onCampaignSelect} onLike={onLike} isLiked={likedItems.includes(campaign.id)} />
+                    ))}
+                </div>
+                </div>
+            );
+        };
+
+        function CampaignDetailScreen({ campaign, onPledge, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit }) {
+            const [activeTab, setActiveTab] = useState('Details');
+            const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.sizeGuide.sizes)[0]);
+            
+            const renderTabContent = () => {
+                switch(activeTab) {
+                case 'Details':
+                    return (
+                    <div>
+                        <p className="text-gray-700 mb-6">{campaign.details}</p>
+                        <h4 className="font-bold text-md mb-3">Product Passport</h4>
+                        <div className="space-y-4">
+                            {campaign.productPassport.map((section, index) => (
+                                <div key={index} className="bg-gray-100 p-4 rounded-lg">
+                                    <h5 className="font-semibold mb-2">{section.type}: <span className="font-normal">{section.name}</span></h5>
+                                    <div className="space-y-1 text-sm">
+                                        <div className="flex justify-between"><span className="text-gray-600">Composition</span><span className="font-medium text-right">{section.composition}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-600">Origin</span><span className="font-medium text-right">{section.origin}</span></div>
+                                        {section.certifications && section.certifications.length > 0 && (
+                                            <div>
+                                                <span className="text-gray-600">Certifications</span>
+                                                <ul className="list-disc list-inside pl-1 text-right">
+                                                    {section.certifications.map(cert => <li key={cert} className="font-medium">{cert}</li>)}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    );
+                case 'Price Breakdown':
+                    const totalCost = Object.values(campaign.priceBreakdown).reduce((sum, val) => sum + val, 0);
+                    return (
+                    <div>
+                        <p className="text-gray-700 mb-4 text-sm">We believe in radical transparency. Here's the true cost of making this garment.</p>
+                        <div className="space-y-3 mb-6">
+                        {Object.entries(campaign.priceBreakdown).map(([key, value]) => {
+                            const percentage = (value / totalCost) * 100;
+                            return (
+                            <div key={key}>
+                                <div className="flex justify-between text-sm mb-1">
+                                <span className="capitalize text-gray-600">{key}</span>
+                                <span className="font-semibold">€{value.toFixed(2)}</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="bg-blue-500 h-2 rounded-full" style={{width: `${percentage}%`}}></div>
+                                </div>
+                            </div>
+                            )
+                        })}
+                        </div>
+                        <div className="border-t pt-4">
+                        <div className="flex justify-between text-sm mb-2">
+                            <span className="text-gray-600">True Cost</span>
+                            <span className="font-semibold">€{totalCost.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-md font-bold">
+                            <span>Our Price</span>
+                            <span>€{campaign.price.toFixed(2)}</span>
+                        </div>
+                        </div>
+                        <div className="mt-6 bg-gray-100 p-3 rounded-lg text-sm text-gray-600">
+                            <p><strong>Please Note:</strong> The final price at checkout will include an estimate for shipping and any applicable import duties based on your delivery address. This will be clearly displayed before you confirm your pledge.</p>
+                        </div>
+                    </div>
+                    );
+                case 'Size & Fit':
+                    return (
+                    <div>
+                        <p className="text-gray-700 mb-4">{campaign.sizeGuide.fitDetails}</p>
+                        <div className="flex space-x-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                        {Object.keys(campaign.sizeGuide.sizes).map(size => (
+                            <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
+                            {size}
+                            </button>
+                        ))}
+                        </div>
+                        <div className="bg-gray-100 p-4 rounded-lg space-y-2 text-sm">
+                        <h5 className="font-bold mb-2">Measurements for Size {selectedSize}</h5>
+                        {Object.entries(campaign.sizeGuide.sizes[selectedSize]).map(([key, value]) => (
+                            <div key={key} className="flex justify-between">
+                            <span className="text-gray-600">{key}</span>
+                            <span className="font-semibold">{value}</span>
+                            </div>
+                        ))}
+                        </div>
+                    </div>
+                    );
+                case 'Community':
+                    return (
+                    <div className="space-y-6">
+                        <div>
+                        <h4 className="font-bold text-md mb-3">Reviews</h4>
+                        {campaign.reviews.length > 0 ? (
+                            <div className="space-y-4">
+                            {campaign.reviews.map((review, index) => (
+                                <div key={index} className="border-b pb-4">
+                                <div className="flex items-center mb-1">
+                                    {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-yellow-500" isFilled={i < review.rating} />)}
+                                    <span className="ml-2 font-bold">{review.user}</span>
+                                </div>
+                                <p className="text-gray-700">{review.comment}</p>
+                                </div>
+                            ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-500 text-sm py-2">No reviews yet.</p>
+                        )}
+                        {hasPurchased && <ReviewForm campaignId={campaign.id} onSubmit={onReviewSubmit} />}
+                        </div>
+                        <div>
+                        <h4 className="font-bold text-md mb-3">Comments</h4>
+                        {campaign.comments.length > 0 ? (
+                            <div className="space-y-4">
+                            {campaign.comments.map((comment, index) => (
+                                <div key={index} className="border-b pb-4">
+                                <p className="font-bold text-sm">{comment.user}</p>
+                                <p className="text-gray-700">{comment.comment}</p>
+                                </div>
+                            ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-500 text-sm py-2">No comments yet. Be the first!</p>
+                        )}
+                        <CommentForm campaignId={campaign.id} onSubmit={onCommentSubmit} />
+                        </div>
+                    </div>
+                    );
+                default:
+                    return null;
+                }
+            };
+            
+            const renderTopSection = () => {
+                switch(campaign.stage) {
+                case 'DESIGN':
+                    const likeProgress = (campaign.likes / campaign.targetLikes) * 100;
+                    return (
+                    <div className="p-5 border-b">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${likeProgress}%` }}></div>
+                        </div>
+                        <div className="flex justify-between items-center text-sm text-gray-600 mt-2">
+                        <span>{campaign.likes} / {campaign.targetLikes} likes to sample</span>
+                        </div>
+                        <button onClick={() => onLike(campaign.id)} className={`w-full mt-4 font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 ${isLiked ? 'bg-pink-600 text-white' : 'bg-white text-pink-600 border-2 border-pink-600'}`}>
+                        <HeartIcon className="w-6 h-6" isFilled={isLiked} />
+                        <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span>
+                        </button>
+                    </div>
+                    );
+                case 'SAMPLING':
+                    return (
+                    <div className="p-5 border-b">
+                        <div className="bg-cyan-50 text-cyan-800 p-4 rounded-lg text-center mb-4">
+                        <p className="font-semibold">Sample in Progress</p>
+                        <p className="text-sm">{campaign.samplingDaysLeft} days until reveal</p>
+                        </div>
+                        <button className="w-full bg-cyan-600 text-white font-bold py-4 rounded-xl shadow-lg cursor-default">
+                            Notify Me When Live
+                        </button>
+                    </div>
+                    );
+                case 'PRE_ORDER':
+                    if (campaign.preOrderDetails.fundingType === 'COMBINED') {
+                        const totalFunded = Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0);
+                        const fundProgress = campaign.preOrderDetails.overallMoq > 0 ? (totalFunded / campaign.preOrderDetails.overallMoq) * 100 : 0;
+                        return (
+                        <div className="p-5 border-b">
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${fundProgress}%` }}></div>
+                            </div>
+                            <div className="flex justify-between items-center text-sm text-gray-600 mt-2">
+                                <span>{totalFunded} / {campaign.preOrderDetails.overallMoq} Funded</span>
+                                <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span>
+                            </div>
+                            <button onClick={onPledge} className="w-full mt-4 bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all">
+                                Pledge Now for €{campaign.price}
+                            </button>
+                        </div>
+                        );
+                    }
+                    // For INDEPENDENT funding type
+                    return (
+                        <div className="p-5 border-b">
+                            <div className="flex justify-between items-center text-sm text-gray-600 mb-4">
+                                <span className="font-semibold">Funding Ends in {campaign.preOrderDetails.daysLeft} days</span>
+                                <span className="font-bold text-lg">€{campaign.price}</span>
+                            </div>
+                            <div className="space-y-3 mb-4">
+                                <h4 className="font-semibold text-sm text-gray-800">Fund each size independently:</h4>
+                                {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => {
+                                    const progress = (data.funded / data.moq) * 100;
+                                    const isFunded = progress >= 100;
+                                    return (
+                                        <div key={size}>
+                                            <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}>
+                                                <span className="font-semibold">{size}</span>
+                                                <span>{data.funded} / {data.moq}</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <button onClick={onPledge} className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all">
+                                Pledge Now
+                            </button>
+                        </div>
+                    );
+                default:
+                    return null;
+                }
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+                    <button onClick={onBack} className="mb-6 text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M19 12H5"></path><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        Back to all drops
+                    </button>
+                    <div className="md:grid md:grid-cols-2 md:gap-12">
+                        <div className="mb-6 md:mb-0">
+                            <img src={campaign.heroImage} alt={campaign.name} className="w-full h-auto object-cover rounded-lg shadow-lg" />
+                        </div>
+                        <div className="bg-white rounded-lg shadow-lg">
+                            <div className="p-5 border-b">
+                                <div className="flex justify-between items-center">
+                                    <p className="text-sm text-gray-500">{campaign.designer}</p>
+                                    {campaign.stage === 'PRE_ORDER' && <p className="text-sm font-semibold text-gray-500">Round {campaign.productionRound}</p>}
+                                </div>
+                                <h2 className="text-3xl font-bold">{campaign.name}</h2>
+                            </div>
+                            
+                            {renderTopSection()}
+                            
+                            <div className="px-5 pb-5">
+                                <div className="flex border-b overflow-x-auto scrollbar-hide">
+                                    {['Details', 'Price Breakdown', 'Size & Fit', 'Community'].map(tab => (
+                                        <button key={tab} onClick={() => setActiveTab(tab)} className={`py-2 px-4 font-semibold text-sm whitespace-nowrap ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}>
+                                            {tab}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="py-4">
+                                {renderTabContent()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        function CommentForm({ campaignId, onSubmit }) {
+            const [comment, setComment] = useState('');
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if(comment.trim()) {
+                    onSubmit(campaignId, comment);
+                    setComment('');
+                }
+            }
+            return (
+                <form onSubmit={handleSubmit} className="mt-4">
+                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Add a comment..."></textarea>
+                    <button type="submit" className="mt-2 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg text-sm">Post Comment</button>
+                </form>
+            );
+        };
+
+        function ReviewForm({ campaignId, onSubmit }) {
+            const [rating, setRating] = useState(5);
+            const [comment, setComment] = useState('');
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if(comment.trim()) {
+                    onSubmit(campaignId, { rating, comment });
+                    setComment('');
+                    setRating(5);
+                }
+            }
+            return (
+                <form onSubmit={handleSubmit} className="mt-6 p-4 border-t">
+                    <h5 className="font-bold mb-2">Write a Review</h5>
+                    <div className="flex items-center mb-2">
+                        {[...Array(5)].map((_, i) => <button type="button" key={i} onClick={() => setRating(i+1)}><StarIcon className={`w-6 h-6 ${i < rating ? 'text-yellow-500' : 'text-gray-300'}`} isFilled={i < rating} /></button>)}
+                    </div>
+                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Share your thoughts on the fit and quality..."></textarea>
+                    <button type="submit" className="mt-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg text-sm">Submit Review</button>
+                </form>
+            );
+        };
+
+        // Reusable Components
+        function CampaignCard({ campaign, onSelect, onLike, isLiked }) {
+            const renderCardContent = () => {
+                switch (campaign.stage) {
+                case 'DESIGN':
+                    const likeProgress = (campaign.likes / campaign.targetLikes) * 100;
+                    return (
+                    <div className="p-4">
+                        <div className="flex justify-between items-start">
+                            <p className="text-sm text-gray-500">{campaign.designer}</p>
+                            <span className="font-bold text-lg">€{campaign.price}</span>
+                        </div>
+                        <h3 className="font-bold text-xl truncate -mt-1">{campaign.name}</h3>
+                        <div className="mt-4">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${likeProgress}%` }}></div>
+                        </div>
+                        <div className="flex justify-between items-center text-sm text-gray-600 mt-2">
+                            <span>{campaign.likes} / {campaign.targetLikes} likes</span>
+                            <button onClick={(e) => { e.stopPropagation(); onLike(campaign.id); }} className={`flex items-center space-x-1 font-semibold transition-colors ${isLiked ? 'text-pink-600' : 'text-gray-500'}`}>
+                            <HeartIcon className="w-4 h-4" isFilled={isLiked} />
+                            <span>{isLiked ? 'Liked' : 'Like'}</span>
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                    );
+                case 'SAMPLING':
+                    return (
+                    <div className="p-4">
+                        <div className="flex justify-between items-start">
+                            <p className="text-sm text-gray-500">{campaign.designer}</p>
+                            <span className="font-bold text-lg">€{campaign.price}</span>
+                        </div>
+                        <h3 className="font-bold text-xl truncate -mt-1">{campaign.name}</h3>
+                        <div className="mt-4 bg-cyan-50 text-cyan-800 p-3 rounded-lg text-center">
+                        <p className="font-semibold">Sample in Progress</p>
+                        <p className="text-sm">{campaign.samplingDaysLeft} days until reveal</p>
+                        </div>
+                    </div>
+                    );
+                case 'PRE_ORDER':
+                    const totalFunded = Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0);
+                    const totalMoq = campaign.preOrderDetails.fundingType === 'COMBINED' 
+                        ? campaign.preOrderDetails.overallMoq 
+                        : Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.moq, 0);
+                    const fundProgress = totalMoq > 0 ? (totalFunded / totalMoq) * 100 : 0;
+                    return (
+                    <div className="p-4">
+                        <div className="flex justify-between items-start">
+                            <p className="text-sm text-gray-500">{campaign.designer}</p>
+                            <span className="font-bold text-lg">€{campaign.price}</span>
+                        </div>
+                        <h3 className="font-bold text-xl truncate -mt-1">{campaign.name}</h3>
+                        <div className="mt-4">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${fundProgress}%` }}></div>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600 mt-2">
+                            <span>{Math.floor(fundProgress)}% Funded Overall</span>
+                            <span>{campaign.preOrderDetails.daysLeft} days left</span>
+                        </div>
+                        </div>
+                    </div>
+                    );
+                default:
+                    return null;
+                }
+            };
+
+            return (
+                <div onClick={() => onSelect(campaign)} className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-1 group">
+                <div className="h-80 relative">
+                    <img src={campaign.heroImage} alt={campaign.name} className="w-full h-full object-cover" />
+                    <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm text-xs font-bold px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-sm">
+                    <span className={
+                        campaign.stage === 'DESIGN' ? 'text-pink-600' :
+                        campaign.stage === 'SAMPLING' ? 'text-cyan-600' :
+                        'text-blue-600'
+                    }>{campaign.stage.replace('_', ' ')}</span>
+                    
+                    {campaign.stage === 'DESIGN' && (
+                        <>
+                        <ArrowRightIcon className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-500">SAMPLING</span>
+                        </>
+                    )}
+                    {campaign.stage === 'SAMPLING' && (
+                        <>
+                        <ArrowRightIcon className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-500">PRE-ORDER</span>
+                        </>
+                    )}
+                    </div>
+                    {campaign.stage === 'PRE_ORDER' && (
+                        <div className="absolute bottom-3 left-3 bg-white/80 backdrop-blur-sm text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                            Round {campaign.productionRound}
+                        </div>
+                    )}
+                </div>
+                {renderCardContent()}
+                </div>
+            );
+        };
+
+        function PledgeModal({ campaign, onClose, onPledge }) {
+            const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.preOrderDetails.sizes)[0]);
+
+            return (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
+                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                            <XIcon className="w-6 h-6" />
+                        </button>
+                        <h2 className="font-bold text-2xl mb-2">{campaign.name}</h2>
+                        <p className="text-lg text-gray-600 mb-6">€{campaign.price}</p>
+                        
+                        <div className="mb-4">
+                            <h3 className="font-semibold text-sm mb-3">Funding Progress by Size</h3>
+                            <div className="space-y-3">
+                                {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => {
+                                    const moq = campaign.preOrderDetails.fundingType === 'COMBINED' ? campaign.preOrderDetails.overallMoq : data.moq;
+                                    const progress = (data.funded / moq) * 100;
+                                    const isFunded = campaign.preOrderDetails.fundingType === 'INDEPENDENT' && progress >= 100;
+                                    return (
+                                        <div key={size}>
+                                            <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}>
+                                                <span className="font-semibold">{size}</span>
+                                                <span>{data.funded} / {data.moq || 'N/A'}</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <h3 className="font-semibold text-sm mb-2">Select Size to Pledge For</h3>
+                            <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+                                {Object.keys(campaign.preOrderDetails.sizes).map(size => (
+                                    <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-r-lg mb-6">
+                            <p className="text-sm text-blue-800">Your card will only be charged if the campaign for this size is successful.</p>
+                        </div>
+
+                        <button onClick={() => onPledge(campaign, selectedSize)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all">
+                            Confirm Pledge for Size {selectedSize}
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        function TopNavBar({ onNavigate }) {
+            return (
+                <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40">
+                    <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-16">
+                            <div className="flex-shrink-0">
+                                <button onClick={() => onNavigate('Home')} className="text-2xl font-bold text-gray-900">MePont</button>
+                            </div>
+                            <div className="hidden sm:block sm:ml-6">
+                                <div className="flex space-x-4">
+                                    <button onClick={() => onNavigate('Home')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Drops</button>
+                                    <button onClick={() => onNavigate('Dashboard')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">My MePont</button>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </header>
+            );
+        }
+
+        function BottomNavBar({ currentScreen, onNavigate }) {
+            return (
+                <div className="sm:hidden bg-white/80 backdrop-blur-sm border-t border-gray-200 flex justify-around p-2 fixed bottom-0 w-full">
+                    <button onClick={() => onNavigate('Home')} className={`flex flex-col items-center space-y-1 p-2 rounded-lg w-full ${currentScreen === 'Home' ? 'text-blue-600' : 'text-gray-500'}`}>
+                        <HomeIcon className="w-6 h-6" />
+                        <span className="text-xs font-semibold">Drops</span>
+                    </button>
+                    <button onClick={() => onNavigate('Dashboard')} className={`flex flex-col items-center space-y-1 p-2 rounded-lg w-full ${currentScreen === 'Dashboard' ? 'text-blue-600' : 'text-gray-500'}`}>
+                        <UserIcon className="w-6 h-6" />
+                        <span className="text-xs font-semibold">My MePont</span>
+                    </button>
+                </div>
+            );
+        };
+
+        function DashboardScreen({ pledgedItems }) {
+            const productionSteps = ['Funded', 'Fabric Sourced', 'In Production', 'Quality Check', 'Shipped'];
+
+            return (
+                <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+                    <header className="mb-8">
+                        <h1 className="text-3xl font-bold tracking-tight">My MePont</h1>
+                        <p className="text-gray-500">Your pledges and orders.</p>
+                    </header>
+                    {pledgedItems.length === 0 ? (
+                        <div className="text-center py-20 bg-white rounded-lg shadow">
+                            <p className="text-gray-500">You haven't pledged for any items yet.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
+                            {pledgedItems.map((item, index) => (
+                                <div key={index} className="bg-white p-4 rounded-lg shadow-md">
+                                    <div className="flex items-center space-x-4 mb-4">
+                                        <img src={item.heroImage} alt={item.name} className="w-20 h-24 object-cover rounded-md" />
+                                        <div>
+                                            <p className="font-bold">{item.name}</p>
+                                            <p className="text-sm text-gray-600">Size: {item.size}</p>
+                                            <p className="text-sm text-gray-600">Price: €{item.price}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold mb-2 text-sm">Production Status</h4>
+                                        <div className="flex items-center justify-between space-x-1">
+                                            {productionSteps.map((step, stepIndex) => {
+                                                const currentStepIndex = productionSteps.indexOf(item.productionStatus);
+                                                const isCompleted = stepIndex <= currentStepIndex;
+                                                return (
+                                                    <div key={step} className="flex-1 flex flex-col items-center">
+                                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isCompleted ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                                                            {isCompleted && <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                                                        </div>
+                                                        <p className={`text-xs mt-1 text-center ${isCompleted ? 'font-semibold text-blue-600' : 'text-gray-500'}`}>{step}</p>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
-
 </body>
 </html>

@@ -355,8 +355,8 @@
             };
             
             return (
-                <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <div className={`w-full h-full bg-white/70 backdrop-blur-xl border border-white/30 shadow-2xl rounded-2xl overflow-hidden transform transition-all duration-300 ease-in-out ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`} onClick={(e) => e.stopPropagation()}>
+                <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 md:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <div className={`w-full h-full bg-white/70 backdrop-blur-xl border border-white/30 shadow-2xl md:rounded-2xl overflow-hidden transform transition-all duration-300 ease-in-out ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`} onClick={(e) => e.stopPropagation()}>
                        <div className="w-full h-full overflow-y-auto scrollbar-hide">
                             <CampaignDetailContent campaign={campaign} onPledge={onPledge} onLike={onLike} isLiked={isLiked} hasPurchased={hasPurchased} onCommentSubmit={onCommentSubmit} onReviewSubmit={onReviewSubmit} onShow3D={onShow3D} onShowMedia={onShowMedia} onBack={handleClose} />
                        </div>

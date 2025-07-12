@@ -77,29 +77,24 @@
             const isModalOpen = showPledgeModal || show3DModal || showMediaModal.visible || !!showCampaignModal;
             const isNestedModalOpen = (!!showCampaignModal) && (showPledgeModal || show3DModal || showMediaModal.visible);
             
-            // ✅ FIX: Added useEffect to automatically advance campaign stages from DESIGN to SAMPLING
             useEffect(() => {
                 const updatedCampaigns = campaigns.map(c => {
                     if (c.stage === 'DESIGN' && c.likes >= c.targetLikes) {
-                        // Transition to Sampling stage
                         return { ...c, stage: 'SAMPLING', samplingDaysLeft: 21 }; 
                     }
                     return c;
                 });
-                // Avoid infinite loops by checking if an update is actually needed
                 if (JSON.stringify(updatedCampaigns) !== JSON.stringify(campaigns)) {
                     setCampaigns(updatedCampaigns);
                 }
             }, [campaigns]);
 
-            // ✅ FIX: Added useEffect to simulate dashboard production status updates
             const productionSteps = ['Funded', 'Fabric Sourced', 'In Production', 'Quality Check', 'Shipped'];
             useEffect(() => {
                 const interval = setInterval(() => {
                     setPledgedItems(prevItems =>
                         prevItems.map(item => {
                             const currentStepIndex = productionSteps.indexOf(item.productionStatus);
-                            // Randomly decide to advance status, but not if it's already shipped
                             if (currentStepIndex < productionSteps.length - 1 && Math.random() < 0.2) {
                                 const nextStepIndex = currentStepIndex + 1;
                                 return { ...item, productionStatus: productionSteps[nextStepIndex] };
@@ -107,7 +102,7 @@
                             return item;
                         })
                     );
-                }, 5000); // Update every 5 seconds
+                }, 5000); 
 
                 return () => clearInterval(interval);
             }, []);
@@ -138,7 +133,6 @@
             };
 
             const handlePledge = (campaign, size) => {
-                 // ✅ FIX: Initialize with the first production status for the dashboard
                 const newPledge = { ...campaign, size, productionStatus: 'Funded' };
                 setPledgedItems(prev => [...prev, newPledge]);
                 setCampaigns(prevCampaigns =>
@@ -175,7 +169,6 @@
                 case 'Home':
                     return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
                 case 'Dashboard':
-                     // ✅ FIX: Pass productionSteps to the dashboard
                     return <DashboardScreen pledgedItems={pledgedItems} productionSteps={productionSteps} />;
                 default:
                     return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
@@ -296,7 +289,7 @@
                 };
                 
                 const onWheel = (e) => {
-                    camera.position.z += e.deltaY * 0.05; // Increased sensitivity
+                    camera.position.z += e.deltaY * 0.05;
                     camera.position.z = Math.max(15, Math.min(camera.position.z, 50));
                 };
 
@@ -497,9 +490,10 @@
 
             return (
                 <div className="w-full h-full">
-                    {/* ✅ FIX: Corrected grid layout for desktop and added scrolling to details panel */}
+                    {/* Desktop Layout */}
                     <div className="hidden lg:grid lg:grid-cols-5 w-full h-full">
-                        <div className="lg:col-span-3 h-full p-4 flex gap-4">
+                        {/* ✅ FIX: Added pt-16 to create space for the close button. Adjusted p-4 to px-4 pb-4. */}
+                        <div className="lg:col-span-3 h-full px-4 pt-16 pb-4 flex gap-4">
                             <div className="flex flex-col space-y-2 pt-1 overflow-y-auto scrollbar-hide">
                                 {mediaItems.map((media, index) => (
                                     <button key={index} onClick={() => setCurrentMediaIndex(index)} className={`w-16 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 relative ${currentMediaIndex === index ? 'border-blue-600' : 'border-transparent'}`}>
@@ -518,13 +512,15 @@
                                 </button>
                             </div>
                         </div>
-                        <div className="lg:col-span-2 h-full overflow-y-auto scrollbar-hide">
+                        {/* ✅ FIX: Added pt-16 to align with the left panel and create space for the close button. */}
+                        <div className="lg:col-span-2 h-full overflow-y-auto scrollbar-hide pt-16">
                            <DetailsPanel />
                         </div>
                     </div>
 
                     {/* Mobile Layout */}
-                    <div className="lg:hidden w-full h-full overflow-y-auto scrollbar-hide pt-12">
+                     {/* ✅ FIX: Changed pt-12 to pt-16 for consistency with desktop and to ensure close button doesn't overlap. */}
+                    <div className="lg:hidden w-full h-full overflow-y-auto scrollbar-hide pt-16">
                         <div className="mb-6 px-4" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onClick={() => handleMediaClick(currentMediaIndex)}>
                             <div className={`aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}>
                                 {mediaItems[currentMediaIndex].type === 'video' ? (
@@ -628,7 +624,6 @@
                 case 'PRE_ORDER':
                     const { fundingType, sizes, overallMoq, daysLeft } = campaign.preOrderDetails;
                     
-                    // ✅ FIX: Differentiate display based on funding type for clarity
                     const CardStatus = () => {
                         if (fundingType === 'COMBINED') {
                             const totalFunded = Object.values(sizes).reduce((acc, size) => acc + size.funded, 0);

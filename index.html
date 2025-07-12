@@ -373,14 +373,24 @@
             };
             
             return (
-                <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <div className={`w-full h-full bg-white/70 backdrop-blur-xl md:rounded-2xl overflow-hidden transform transition-all duration-300 ease-in-out shadow-2xl ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`} onClick={(e) => e.stopPropagation()}>
-                       <div className="w-full h-full relative">
-                            <button onClick={handleClose} className="absolute top-4 right-4 text-gray-600 bg-white/50 rounded-full p-2 hover:bg-white z-20">
-                                <XIcon className="w-6 h-6" />
-                            </button>
-                            <CampaignDetailContent campaign={campaign} onPledge={onPledge} onLike={onLike} isLiked={isLiked} hasPurchased={hasPurchased} onCommentSubmit={onCommentSubmit} onReviewSubmit={onReviewSubmit} onShow3D={onShow3D} onShowMedia={onShowMedia} />
-                       </div>
+                // ✅ FIX: The main overlay now uses flex-col to stack the close button and the modal.
+                <div className={`fixed inset-0 z-50 flex flex-col items-center justify-start md:justify-center p-4 gap-2 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    {/* ✅ FIX: Container to constrain the width of the button and modal, and align the button to the right. */}
+                    <div 
+                        className={`flex flex-col gap-2 w-full max-w-7xl h-full md:h-auto transform transition-all duration-300 ease-in-out ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* ✅ FIX: The close button is now external to the modal content, preventing overlap. */}
+                        <button onClick={handleClose} className="self-end text-white bg-black/30 rounded-full p-2 hover:bg-black/50 z-20">
+                            <XIcon className="w-6 h-6" />
+                        </button>
+
+                        {/* The Modal Content */}
+                        <div 
+                            className={`w-full h-full min-h-0 bg-white/70 backdrop-blur-xl md:rounded-2xl overflow-hidden shadow-2xl ${isNestedModalOpen ? 'blur-background' : ''}`} 
+                        >
+                           <CampaignDetailContent campaign={campaign} onPledge={onPledge} onLike={onLike} isLiked={isLiked} hasPurchased={hasPurchased} onCommentSubmit={onCommentSubmit} onReviewSubmit={onReviewSubmit} onShow3D={onShow3D} onShowMedia={onShowMedia} />
+                        </div>
                     </div>
                 </div>
             );
@@ -491,9 +501,9 @@
             return (
                 <div className="w-full h-full">
                     {/* Desktop Layout */}
+                    {/* ✅ FIX: Removed all pt-16 padding. The layout is now handled by the parent modal component. */}
                     <div className="hidden lg:grid lg:grid-cols-5 w-full h-full">
-                        {/* ✅ FIX: Added pt-16 to create space for the close button. Adjusted p-4 to px-4 pb-4. */}
-                        <div className="lg:col-span-3 h-full px-4 pt-16 pb-4 flex gap-4">
+                        <div className="lg:col-span-3 h-full p-4 flex gap-4">
                             <div className="flex flex-col space-y-2 pt-1 overflow-y-auto scrollbar-hide">
                                 {mediaItems.map((media, index) => (
                                     <button key={index} onClick={() => setCurrentMediaIndex(index)} className={`w-16 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 relative ${currentMediaIndex === index ? 'border-blue-600' : 'border-transparent'}`}>
@@ -512,16 +522,14 @@
                                 </button>
                             </div>
                         </div>
-                        {/* ✅ FIX: Added pt-16 to align with the left panel and create space for the close button. */}
-                        <div className="lg:col-span-2 h-full overflow-y-auto scrollbar-hide pt-16">
+                        <div className="lg:col-span-2 h-full overflow-y-auto scrollbar-hide">
                            <DetailsPanel />
                         </div>
                     </div>
 
                     {/* Mobile Layout */}
-                     {/* ✅ FIX: Changed pt-12 to pt-16 for consistency with desktop and to ensure close button doesn't overlap. */}
-                    <div className="lg:hidden w-full h-full overflow-y-auto scrollbar-hide pt-16">
-                        <div className="mb-6 px-4" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onClick={() => handleMediaClick(currentMediaIndex)}>
+                    <div className="lg:hidden w-full h-full overflow-y-auto scrollbar-hide">
+                        <div className="mb-6 px-4 pt-4" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onClick={() => handleMediaClick(currentMediaIndex)}>
                             <div className={`aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}>
                                 {mediaItems[currentMediaIndex].type === 'video' ? (
                                     <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover rounded-lg shadow-lg bg-black"></video>

@@ -467,7 +467,6 @@
             );
         };
         
-        // ✅ FIX: Accordion component now controlled by parent
         const AccordionItem = ({ title, children, isOpen, onToggle }) => {
             return (
                 <div className="border-b border-gray-200">
@@ -487,7 +486,6 @@
         function CampaignDetailContent({ campaign, onPledge, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia }) {
             const [activeTab, setActiveTab] = useState('Details');
             const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.sizeGuide.sizes)[0]);
-            // ✅ FIX: State for accordion is now managed here
             const [openAccordion, setOpenAccordion] = useState(null);
             
             const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
@@ -529,7 +527,6 @@
                 }
             };
             
-            // ✅ FIX: Handler to toggle accordion items
             const handleAccordionToggle = (title) => {
                 setOpenAccordion(openAccordion === title ? null : title);
             };
@@ -580,7 +577,6 @@
                                 </div>
                             )}
                             
-                            {/* ✅ FIX: Accordion items now use state from parent */}
                             <AccordionItem title="Manufacturer & Origin" isOpen={openAccordion === 'origin'} onToggle={() => handleAccordionToggle('origin')}>
                                 <div className="space-y-2">
                                     <div className="flex justify-between"><span className="text-gray-500">Manufacturer</span><span className="font-medium text-right">{digitalPassport.manufacturerInfo.name}</span></div>
@@ -642,13 +638,14 @@
                         case 'SAMPLING': return ( <button className={`w-full mt-4 ${actionButtonClass} bg-cyan-600 text-white cursor-default`}> Notify Me When Live </button> );
                         case 'PRE_ORDER': 
                             return (
-                                <div className="flex items-center gap-4 mt-4">
+                                // ✅ FIX: Using items-stretch and matching styles for better alignment
+                                <div className="flex items-stretch gap-3 mt-4">
                                     <button onClick={onPledge} className={`flex-grow ${actionButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>
                                         Pledge Now for €{campaign.price}
                                     </button>
-                                    <span className="text-sm font-semibold text-gray-700 bg-gray-200/80 px-3 py-2 rounded-lg whitespace-nowrap">
-                                        Round {campaign.productionRound}
-                                    </span>
+                                    <div className="flex items-center justify-center text-sm font-bold text-gray-800 bg-gray-200/80 px-4 rounded-xl whitespace-nowrap">
+                                        R{campaign.productionRound}
+                                    </div>
                                 </div>
                             );
                         default: return null;
@@ -703,10 +700,11 @@
                         </div>
                     </div>
 
-                    {/* ✅ FIX: Reordered mobile layout */}
+                    {/* Mobile Layout */}
                     <div className="lg:hidden w-full h-full">
                         <DetailsPanel />
-                        <div className="mb-6 px-4 pt-4">
+                        {/* ✅ FIX: Added pb-4 for more space at the bottom */}
+                        <div className="mb-6 px-4 pt-4 pb-4">
                             <div 
                                 className={`relative aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
                                 onTouchStart={handleTouchStart}

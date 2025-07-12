@@ -177,15 +177,19 @@
 
             return (
                 <div className="w-full min-h-screen">
+                    {/* ✅ FIX: Main content area is now separate from the bottom nav bar */}
                     <div className={isModalOpen ? 'blur-background' : ''}>
                         <div className="max-w-7xl mx-auto pb-16 sm:pb-0">
                             <TopNavBar onNavigate={navigateTo} />
                             <main>
                                 {renderScreen()}
                             </main>
-                            <BottomNavBar currentScreen={currentScreen} onNavigate={navigateTo} />
                         </div>
                     </div>
+
+                    {/* ✅ FIX: Bottom nav bar moved outside the main content wrapper to keep it from being blurred */}
+                    <BottomNavBar currentScreen={currentScreen} onNavigate={navigateTo} />
+                    
                     {showCampaignModal && 
                         <CampaignDetailModal 
                             campaign={showCampaignModal} 
@@ -373,9 +377,9 @@
             };
             
             return (
-                // ✅ FIX: Added p-2 to give a small margin on mobile, and changed md:p-4 to sm:p-4 for better tablet view
+                // ✅ FIX: Changed to `bottom-16` on mobile to leave space for the nav bar. `sm:inset-0` resets it for larger screens.
                 <div 
-                    className={`fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
+                    className={`fixed top-0 left-0 right-0 bottom-16 sm:inset-0 z-50 flex items-center justify-center p-2 sm:p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
                     onClick={handleClose}
                 >
                     <div 
@@ -544,7 +548,6 @@
 
                     {/* Mobile Layout */}
                     <div className="lg:hidden w-full h-full">
-                        {/* ✅ FIX: Swipe handlers moved to the direct parent of the media */}
                         <div className="mb-6 px-4 pt-4">
                             <div 
                                 className={`relative aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
@@ -847,12 +850,13 @@
 
         function BottomNavBar({ currentScreen, onNavigate }) {
             return (
-                <div className="sm:hidden bg-white/80 backdrop-blur-sm border-t border-gray-200 flex justify-around p-2 fixed bottom-0 w-full z-40">
-                    <button onClick={() => onNavigate('Home')} className={`flex flex-col items-center space-y-1 p-2 rounded-lg w-full ${currentScreen === 'Home' ? 'text-blue-600' : 'text-gray-500'}`}>
+                // ✅ FIX: Added a fixed height to make calculations easier.
+                <div className="sm:hidden bg-white/80 backdrop-blur-sm border-t border-gray-200 flex justify-around p-2 fixed bottom-0 w-full z-40 h-16">
+                    <button onClick={() => onNavigate('Home')} className={`flex flex-col items-center justify-center space-y-1 p-2 rounded-lg w-full ${currentScreen === 'Home' ? 'text-blue-600' : 'text-gray-500'}`}>
                         <HomeIcon className="w-6 h-6" />
                         <span className="text-xs font-semibold">Drops</span>
                     </button>
-                    <button onClick={() => onNavigate('Dashboard')} className={`flex flex-col items-center space-y-1 p-2 rounded-lg w-full ${currentScreen === 'Dashboard' ? 'text-blue-600' : 'text-gray-500'}`}>
+                    <button onClick={() => onNavigate('Dashboard')} className={`flex flex-col items-center justify-center space-y-1 p-2 rounded-lg w-full ${currentScreen === 'Dashboard' ? 'text-blue-600' : 'text-gray-500'}`}>
                         <UserIcon className="w-6 h-6" />
                         <span className="text-xs font-semibold">My MePont</span>
                     </button>

@@ -502,7 +502,8 @@
                         <button onClick={handleClose} className="absolute top-4 right-4 text-gray-600 bg-white/50 rounded-full p-2 hover:bg-white z-20">
                             <XIcon className="w-6 h-6" />
                         </button>
-                        <div className="w-full h-full overflow-y-auto scrollbar-hide">
+                        {/* FIX: Removed overflow-y-auto from this wrapper div to allow independent column scrolling */}
+                        <div className="w-full h-full">
                            <CampaignDetailContent {...{campaign, onPledge, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia}} />
                         </div>
                     </div>
@@ -870,9 +871,11 @@
             };
 
             return (
-                <div className="w-full h-full pt-12 md:pt-0">
-                    {/* Desktop Layout */}
+                // This is the main container for the detail content
+                <div className="w-full h-full">
+                    {/* Desktop Layout: Uses grid to create two columns */}
                     <div className="hidden lg:grid lg:grid-cols-5 w-full h-full">
+                        {/* Left Column: Media Gallery */}
                         <div className="lg:col-span-3 h-full p-4 flex gap-4">
                             <div className="flex flex-col space-y-2 pt-1 overflow-y-auto scrollbar-hide">
                                 {mediaItems.map((media, index) => (
@@ -898,13 +901,14 @@
                                 )}
                             </div>
                         </div>
+                        {/* Right Column: Details Panel (This will scroll independently) */}
                         <div className="lg:col-span-2 h-full overflow-y-auto scrollbar-hide">
                            <DetailsPanel />
                         </div>
                     </div>
 
-                    {/* Mobile Layout */}
-                    <div className="lg:hidden w-full h-full">
+                    {/* Mobile Layout: Single column, scrolls as one unit */}
+                    <div className="lg:hidden w-full h-full overflow-y-auto scrollbar-hide">
                         <DetailsPanel />
                         <div className="mb-6 px-4 pt-4 pb-4">
                             <div 

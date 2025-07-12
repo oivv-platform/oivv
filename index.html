@@ -42,6 +42,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
+        // --- MOCK DATA ---
         const MOCK_CAMPAIGNS = [
             { 
                 id: 1, 
@@ -88,14 +89,15 @@
                 name: 'The Nomad Travel Shirt', 
                 designer: 'Wayfarer Co.', 
                 price: 65, 
-                stage: 'PRE_ORDER', 
+                stage: 'SAMPLING', 
+                samplingDaysLeft: 15,
                 productionRound: 1, 
                 category: 'Tops', 
                 heroImage: 'https://images.unsplash.com/photo-1603252109360-778ba9913158?q=80&w=800', 
                 images: ['https://images.unsplash.com/photo-1603252109360-778ba9913158?q=80&w=800', 'https://images.unsplash.com/photo-1564859228273-204232441043?q=80&w=800', 'https://images.unsplash.com/photo-1589902860377-128a3e284873?q=80&w=800'], 
                 video: {thumbnail: 'https://placehold.co/800x1000/9ca3af/ffffff?text=Video', url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4'}, 
                 details: 'The only shirt you need. Made from a technical merino wool blend that is wrinkle-resistant, anti-odor, and temperature regulating.', 
-                preOrderDetails: { fundingType: 'COMBINED', daysLeft: 18, overallMoq: 200, sizes: { 'S': { funded: 30 }, 'M': { funded: 65 }, 'L': { funded: 40 }, 'XL': { funded: 15 } } }, 
+                preOrderDetails: { fundingType: 'COMBINED', daysLeft: 18, overallMoq: 200, sizes: { 'S': { funded: 30 }, 'M': { funded: 65 }, 'L': { funded: 40 }, 'XL': { funded: 15 } } },
                 priceBreakdown: { materials: 25, manufacturing: 22, designer: 10, platform: 6.5 }, 
                 sizeGuide: { fitDetails: 'Modern athletic fit. Not too slim, not too loose.', sizes: { 'S': { 'Chest': '38"', 'Length': '28"' }, 'M': { 'Chest': '40"', 'Length': '29"' }, 'L': { 'Chest': '42"', 'Length': '30"' }, 'XL': { 'Chest': '44"', 'Length': '30.5"' }, } }, 
                 comments: [], 
@@ -123,7 +125,7 @@
             },
         ];
 
-        // SVG Icons for UI elements
+        // --- UI ICONS ---
         const PlusIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
         const MinusIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
         const PlayIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path d="M8 5v14l11-7z"></path></svg>;
@@ -132,20 +134,23 @@
         const UserIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
         const XIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
         const HeartIcon = ({ className, isFilled }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={isFilled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>;
+        const ListIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>;
         const ArrowRightIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
         const StarIcon = ({ className, isFilled }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={isFilled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
-        const EUFlagIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40" width="24" height="16"><path fill="#003399" d="M0 0h60v40H0z"/><path fill="none" stroke="#FFCC00" strokeWidth="2" strokeMiterlimit="10" d="M30 20c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10-10-4.477-10-10z" transform="translate(-10 -10) scale(1.5) translate(10 10)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(-15 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(15 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(45 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(75 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(105 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(135 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(165 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(195 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(225 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(255 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(285 30 20) translate(0 -1.5)"/><path fill="#FFCC00" d="M30 10l1.91 5.898h6.18l-5 3.645 1.91 5.898L30 21.796l-5 3.645 1.91-5.898-5-3.645h6.18L30 10z" transform="rotate(315 30 20) translate(0 -1.5)"/></svg>;
+        const EUFlagIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40" width="24" height="16"><path fill="#003399" d="M0 0h60v40H0z"/><g transform="translate(30,20) scale(1.3)"><g id="s"><g id="c"><path id="t" d="M0,-12 V0 H6 Z" transform="rotate(18 0 -12)" fill="#FFCC00"/><use href="#t" transform="scale(-1,1)"/></g><use href="#c" transform="rotate(72)"/><use href="#c" transform="rotate(144)"/><use href="#c" transform="rotate(216)"/><use href="#c" transform="rotate(288)"/></g></g></svg>;
 
-        // Main App Component: Manages state and routing
+        // --- MAIN APP COMPONENT ---
         function App() {
             const [currentScreen, setCurrentScreen] = useState('Home');
             const [campaigns, setCampaigns] = useState(MOCK_CAMPAIGNS);
             const [pledgedItems, setPledgedItems] = useState([]);
+            const [waitingListItems, setWaitingListItems] = useState([]);
             const [likedItems, setLikedItems] = useState([]);
             const [showPledgeModal, setShowPledgeModal] = useState(false);
             const [show3DModal, setShow3DModal] = useState(false);
             const [showMediaModal, setShowMediaModal] = useState({ visible: false, startIndex: 0 });
             const [showCampaignModal, setShowCampaignModal] = useState(null);
+            const [dashboardView, setDashboardView] = useState('My MePont'); 
 
             const isModalOpen = showPledgeModal || show3DModal || showMediaModal.visible || !!showCampaignModal;
             const isNestedModalOpen = (!!showCampaignModal) && (showPledgeModal || show3DModal || showMediaModal.visible);
@@ -180,12 +185,14 @@
                 return () => clearInterval(interval);
             }, []);
 
-
             const hasPurchased = (campaignId) => pledgedItems.some(item => item.id === campaignId);
             
-            const navigateTo = (screen) => {
+            const navigateTo = (screen, view = 'My MePont') => {
                 setShowCampaignModal(null);
                 setCurrentScreen(screen);
+                if (screen === 'Dashboard') {
+                    setDashboardView(view);
+                }
             }
 
             const viewCampaignDetail = (campaign) => {
@@ -193,16 +200,27 @@
             };
             
             const handleLike = (campaignId) => {
-                setLikedItems(prev => prev.includes(campaignId) ? prev.filter(id => id !== campaignId) : [...prev, campaignId]);
-                setCampaigns(prevCampaigns =>
-                    prevCampaigns.map(c => {
-                        if (c.id === campaignId) {
-                            const isLiked = !likedItems.includes(campaignId);
-                            return { ...c, likes: isLiked ? c.likes + 1 : c.likes - 1 };
-                        }
-                        return c;
-                    })
-                );
+                const campaign = campaigns.find(c => c.id === campaignId);
+                setLikedItems(prev => {
+                    const isLiked = prev.some(item => item.id === campaignId);
+                    if (isLiked) {
+                        return prev.filter(item => item.id !== campaignId);
+                    } else {
+                        return [...prev, campaign];
+                    }
+                });
+            };
+
+            const handleAddToWaitingList = (campaignId) => {
+                const campaign = campaigns.find(c => c.id === campaignId);
+                setWaitingListItems(prev => {
+                    const isOnList = prev.some(item => item.id === campaignId);
+                    if (isOnList) {
+                        return prev.filter(item => item.id !== campaignId);
+                    } else {
+                        return [...prev, campaign];
+                    }
+                });
             };
 
             const handlePledge = (campaign, size) => {
@@ -239,12 +257,24 @@
 
             const renderScreen = () => {
                 switch (currentScreen) {
-                case 'Home':
-                    return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
-                case 'Dashboard':
-                    return <DashboardScreen pledgedItems={pledgedItems} productionSteps={productionSteps} />;
-                default:
-                    return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
+                    case 'Home':
+                        return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
+                    case 'Dashboard':
+                        return <DashboardScreen 
+                                    pledgedItems={pledgedItems} 
+                                    waitingListItems={waitingListItems}
+                                    likedItems={likedItems.map(item => campaigns.find(c => c.id === item.id)).filter(Boolean)}
+                                    productionSteps={productionSteps}
+                                    activeView={dashboardView}
+                                    onNavigate={navigateTo}
+                                    onCampaignSelect={viewCampaignDetail}
+                                />;
+                    case 'WaitingList':
+                        return <WaitingListScreen items={waitingListItems} onCampaignSelect={viewCampaignDetail} />;
+                    case 'Liked':
+                        return <LikedItemsScreen items={likedItems} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
+                    default:
+                        return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
                 }
             };
 
@@ -259,7 +289,7 @@
                         </div>
                     </div>
 
-                    <BottomNavBar currentScreen={currentScreen} onNavigate={navigateTo} />
+                    <BottomNavBar currentScreen={currentScreen} dashboardView={dashboardView} onNavigate={navigateTo} />
                     
                     {showCampaignModal && 
                         <CampaignDetailModal 
@@ -267,13 +297,15 @@
                             onPledge={() => setShowPledgeModal(true)} 
                             onBack={() => setShowCampaignModal(null)}
                             onLike={handleLike}
-                            isLiked={likedItems.includes(showCampaignModal.id)}
+                            isLiked={likedItems.some(item => item.id === showCampaignModal.id)}
                             hasPurchased={hasPurchased(showCampaignModal.id)}
                             onCommentSubmit={addComment}
                             onReviewSubmit={addReview}
                             onShow3D={() => setShow3DModal(true)}
                             onShowMedia={(startIndex) => setShowMediaModal({ visible: true, startIndex })}
                             isNestedModalOpen={isNestedModalOpen}
+                            onAddToWaitingList={handleAddToWaitingList}
+                            isOnWaitingList={waitingListItems.some(item => item.id === showCampaignModal.id)}
                         />
                     }
                     {showPledgeModal && <PledgeModal campaign={showCampaignModal} onClose={() => setShowPledgeModal(false)} onPledge={handlePledge} />}
@@ -283,6 +315,7 @@
             );
         }
 
+        // --- 3D VIEWER COMPONENT ---
         function ThreeDViewer() {
             const mountRef = useRef(null);
             const isDragging = useRef(false);
@@ -404,6 +437,7 @@
             return <div ref={mountRef} className="w-full h-full cursor-grab"></div>;
         }
 
+        // --- SCREENS ---
         function HomeScreen({ campaigns, onCampaignSelect, onLike, likedItems }) {
             const [selectedCategory, setSelectedCategory] = useState('All');
             const categories = ['All', 'Outerwear', 'Blazers', 'Trousers', 'Tops', 'Denim', 'Dresses', 'Accessories'];
@@ -424,13 +458,116 @@
                     </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredCampaigns.map(campaign => ( <CampaignCard key={campaign.id} campaign={campaign} onSelect={onCampaignSelect} onLike={onLike} isLiked={likedItems.includes(campaign.id)} /> ))}
+                    {filteredCampaigns.map(campaign => ( <CampaignCard key={campaign.id} campaign={campaign} onSelect={onCampaignSelect} onLike={onLike} isLiked={likedItems.some(item => item.id === campaign.id)} /> ))}
                 </div>
                 </div>
             );
         };
 
-        function CampaignDetailModal({ campaign, onPledge, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, isNestedModalOpen }) {
+        function DashboardScreen({ pledgedItems, waitingListItems, likedItems, productionSteps, activeView, onNavigate, onCampaignSelect }) {
+            const renderContent = () => {
+                switch(activeView) {
+                    case 'My MePont':
+                        return <PledgedItemsView items={pledgedItems} productionSteps={productionSteps} />;
+                    case 'Waiting List':
+                        return <WaitingListView items={waitingListItems} onCampaignSelect={onCampaignSelect} />;
+                    case 'Liked':
+                        return <LikedItemsView items={likedItems} onCampaignSelect={onCampaignSelect} />;
+                    default:
+                        return <PledgedItemsView items={pledgedItems} productionSteps={productionSteps} />;
+                }
+            }
+
+            return (
+                <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+                    <header className="mb-8">
+                        <h1 className="text-3xl font-bold tracking-tight text-gray-900">{activeView.replace('My MePont', 'My Pledges')}</h1>
+                    </header>
+                    <div className="mb-6 border-b border-gray-200">
+                        <div className="flex space-x-4">
+                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`py-2 px-1 font-semibold ${activeView === 'My MePont' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>My Pledges</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`py-2 px-1 font-semibold ${activeView === 'Waiting List' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>Waiting List</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`py-2 px-1 font-semibold ${activeView === 'Liked' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>Liked</button>
+                        </div>
+                    </div>
+                    {renderContent()}
+                </div>
+            );
+        }
+
+        const PledgedItemsView = ({ items, productionSteps }) => {
+            if (items.length === 0) {
+                return <div className="text-center py-20 bg-white rounded-lg shadow"><p className="text-gray-500">You haven't pledged for any items yet.</p></div>;
+            }
+            return (
+                <div className="space-y-6">
+                    {items.map((item, index) => (
+                        <div key={index} className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+                                <img src={item.heroImage} alt={item.name} className="w-24 h-32 object-cover rounded-md flex-shrink-0" />
+                                <div className="flex-grow">
+                                    <p className="font-bold text-lg">{item.name}</p>
+                                    <p className="text-sm text-gray-600">Size: {item.size}</p>
+                                    <p className="text-sm text-gray-600">Price: €{item.price}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold mb-3 text-sm">Production Status</h4>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex-grow flex items-center">
+                                    {productionSteps.map((step, stepIndex) => {
+                                        const currentStepIndex = productionSteps.indexOf(item.productionStatus);
+                                        const isCompleted = stepIndex <= currentStepIndex;
+                                        const isLastStep = stepIndex === productionSteps.length - 1;
+                                        return (
+                                            <React.Fragment key={step}>
+                                            <div className="flex flex-col items-center text-center relative z-10">
+                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${isCompleted ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                                                    {isCompleted && <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                                                </div>
+                                                <p className={`text-xs mt-2 transition-colors w-20 ${isCompleted ? 'font-semibold text-blue-600' : 'text-gray-500'}`}>{step}</p>
+                                            </div>
+                                            {!isLastStep && <div className={`flex-grow h-1 transition-colors ${isCompleted ? 'bg-blue-600' : 'bg-gray-200'}`}></div>}
+                                            </React.Fragment>
+                                        );
+                                    })}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const WaitingListView = ({ items, onCampaignSelect }) => {
+             if (items.length === 0) {
+                return <div className="text-center py-20 bg-white rounded-lg shadow"><p className="text-gray-500">Your waiting list is empty.</p></div>;
+            }
+            return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {items.map(item => (
+                        <CampaignCard key={item.id} campaign={item} onSelect={onCampaignSelect} onLike={() => {}} isLiked={false} />
+                    ))}
+                </div>
+            );
+        };
+
+        const LikedItemsView = ({ items, onCampaignSelect }) => {
+             if (items.length === 0) {
+                return <div className="text-center py-20 bg-white rounded-lg shadow"><p className="text-gray-500">You haven't liked any items yet.</p></div>;
+            }
+            return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {items.map(item => (
+                        <CampaignCard key={item.id} campaign={item} onSelect={onCampaignSelect} onLike={() => {}} isLiked={true} />
+                    ))}
+                </div>
+            );
+        };
+
+        // --- MODALS ---
+        function CampaignDetailModal({ campaign, onPledge, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, isNestedModalOpen, onAddToWaitingList, isOnWaitingList }) {
             const [show, setShow] = useState(false);
             
             useEffect(() => {
@@ -460,30 +597,14 @@
                             <XIcon className="w-6 h-6" />
                         </button>
                         <div className="w-full h-full overflow-y-auto scrollbar-hide">
-                           <CampaignDetailContent campaign={campaign} onPledge={onPledge} onLike={onLike} isLiked={isLiked} hasPurchased={hasPurchased} onCommentSubmit={onCommentSubmit} onReviewSubmit={onReviewSubmit} onShow3D={onShow3D} onShowMedia={onShowMedia} />
+                           <CampaignDetailContent campaign={campaign} onPledge={onPledge} onLike={onLike} isLiked={isLiked} hasPurchased={hasPurchased} onCommentSubmit={onCommentSubmit} onReviewSubmit={onReviewSubmit} onShow3D={onShow3D} onShowMedia={onShowMedia} onAddToWaitingList={onAddToWaitingList} isOnWaitingList={isOnWaitingList} />
                         </div>
                     </div>
                 </div>
             );
         };
         
-        const AccordionItem = ({ title, children, isOpen, onToggle }) => {
-            return (
-                <div className="border-b border-gray-200">
-                    <button onClick={onToggle} className="w-full flex justify-between items-center py-4 text-left">
-                        <span className="font-semibold text-gray-800">{title}</span>
-                        {isOpen ? <MinusIcon className="w-5 h-5 text-gray-600" /> : <PlusIcon className="w-5 h-5 text-gray-600" />}
-                    </button>
-                    {isOpen && (
-                        <div className="pb-4 text-sm text-gray-700">
-                            {children}
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        function CampaignDetailContent({ campaign, onPledge, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia }) {
+        function CampaignDetailContent({ campaign, onPledge, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onAddToWaitingList, isOnWaitingList }) {
             const [activeTab, setActiveTab] = useState('Details');
             const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.sizeGuide.sizes)[0]);
             const [openAccordion, setOpenAccordion] = useState(null);
@@ -507,8 +628,9 @@
                 }
             };
             const handleTouchEnd = () => {
+                if (!hasSwiped.current) return;
                 const swipeDistance = touchStartX.current - touchEndX.current;
-                if (Math.abs(swipeDistance) > 50) { // Swipe detected
+                if (Math.abs(swipeDistance) > 50) {
                     const direction = swipeDistance > 0 ? 1 : -1;
                     const newIndex = Math.max(0, Math.min(currentMediaIndex + direction, mediaItems.length - 1));
                     if (newIndex !== currentMediaIndex) {
@@ -635,10 +757,9 @@
                 const MainActions = () => {
                     switch(campaign.stage) {
                         case 'DESIGN': return ( <button onClick={() => onLike(campaign.id)} className={`w-full mt-4 ${actionButtonClass} ${isLiked ? 'bg-pink-600 text-white' : 'bg-white text-pink-600 border-2 border-pink-600'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
-                        case 'SAMPLING': return ( <button className={`w-full mt-4 ${actionButtonClass} bg-cyan-600 text-white cursor-default`}> Notify Me When Live </button> );
+                        case 'SAMPLING': return ( <button onClick={() => onAddToWaitingList(campaign.id)} className={`w-full mt-4 ${actionButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
                         case 'PRE_ORDER': 
                             return (
-                                // ✅ FIX: Using items-stretch and matching styles for better alignment
                                 <div className="flex items-stretch gap-3 mt-4">
                                     <button onClick={onPledge} className={`flex-grow ${actionButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>
                                         Pledge Now for €{campaign.price}
@@ -702,43 +823,134 @@
 
                     {/* Mobile Layout */}
                     <div className="lg:hidden w-full h-full">
-                        <DetailsPanel />
-                        {/* ✅ FIX: Added pb-4 for more space at the bottom */}
-                        <div className="mb-6 px-4 pt-4 pb-4">
-                            <div 
-                                className={`relative aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
-                                onTouchStart={handleTouchStart}
-                                onTouchMove={handleTouchMove}
-                                onTouchEnd={handleTouchEnd}
-                            >
-                                <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
-                                {mediaItems[currentMediaIndex].type === 'video' ? (
-                                    <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover rounded-lg shadow-lg bg-black"></video>
-                                ) : (
-                                    <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover rounded-lg shadow-lg" />
-                                )}
+                        <div 
+                            className={`relative aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
+                        >
+                            <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
+                            {mediaItems[currentMediaIndex].type === 'video' ? (
+                                <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover rounded-lg shadow-lg bg-black"></video>
+                            ) : (
+                                <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover rounded-lg shadow-lg" />
+                            )}
+                            </button>
+                            {campaign.has3D && (
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); onShow3D(); }} 
+                                    className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"
+                                >
+                                    <CubeIcon className="w-5 h-5" />
+                                    <span>3D</span>
                                 </button>
-                                {campaign.has3D && (
-                                    <button 
-                                        onClick={(e) => { e.stopPropagation(); onShow3D(); }} 
-                                        className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"
-                                    >
-                                        <CubeIcon className="w-5 h-5" />
-                                        <span>3D</span>
-                                    </button>
-                                )}
-                            </div>
-                            <div className="flex justify-center items-center space-x-2">
-                                {mediaItems.map((_, index) => (
-                                    <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                                ))}
-                            </div>
+                            )}
                         </div>
+                        <div className="flex justify-center items-center space-x-2">
+                            {mediaItems.map((_, index) => (
+                                <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                            ))}
+                        </div>
+                         <DetailsPanel />
                     </div>
                 </div>
             );
         };
 
+        function PledgeModal({ campaign, onClose, onPledge }) {
+            const [show, setShow] = useState(false);
+            const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.preOrderDetails.sizes)[0]);
+            const isCombinedFunding = campaign.preOrderDetails.fundingType === 'COMBINED';
+            useEffect(() => { const timer = setTimeout(() => setShow(true), 10); return () => clearTimeout(timer); }, []);
+            const handleClose = () => { setShow(false); setTimeout(onClose, 300); };
+            let combinedProgress = 0; let totalFunded = 0;
+            if (isCombinedFunding) { totalFunded = Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0); combinedProgress = campaign.preOrderDetails.overallMoq > 0 ? (totalFunded / campaign.preOrderDetails.overallMoq) * 100 : 0; }
+            return (
+                <div className={`fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"> <XIcon className="w-6 h-6" /> </button>
+                        <h2 className="font-bold text-2xl mb-2">{campaign.name}</h2>
+                        <p className="text-lg text-gray-600 mb-6">€{campaign.price}</p>
+                        {isCombinedFunding && ( <div className="mb-4"> <h3 className="font-semibold text-sm mb-2">Overall Funding Progress</h3> <div className="w-full bg-gray-200 rounded-full h-2.5"> <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${combinedProgress}%` }}></div> </div> <div className="flex justify-between items-center text-xs text-gray-600 mt-1"> <span>{totalFunded} / {campaign.preOrderDetails.overallMoq} Funded</span> <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span> </div> </div> )}
+                        <div className="mb-4"> <h3 className="font-semibold text-sm mb-3">{isCombinedFunding ? 'Pledges by Size' : 'Funding Progress by Size'}</h3> <div className="space-y-3"> {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => { if (isCombinedFunding) { return ( <div key={size} className="flex justify-between items-center text-sm py-1"> <span className="font-medium text-gray-800">{size}</span> <span className="text-gray-600 font-semibold">{data.funded} pledged</span> </div> ) } const moq = data.moq; const progress = moq ? (data.funded / moq) * 100 : 0; const isFunded = moq && progress >= 100; return ( <div key={size}> <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}> <span className="font-semibold">{size}</span> {moq && <span>{data.funded} / {moq}</span>} </div> {moq && <div className="w-full bg-gray-200 rounded-full h-2"> <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div> </div>} </div> ); })} </div> </div>
+                        <div className="mb-6"> <h3 className="font-semibold text-sm mb-2">Select Size to Pledge For</h3> <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide"> {Object.keys(campaign.preOrderDetails.sizes).map(size => ( <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}> {size} </button> ))} </div> </div>
+                        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-r-lg mb-6"> <p className="text-sm text-blue-800">Your card will only be charged if the funding goal is met.</p> </div>
+                        <button onClick={() => onPledge(campaign, selectedSize)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all"> Confirm Pledge for Size {selectedSize} </button>
+                    </div>
+                </div>
+            );
+        };
+
+        function ThreeDModal({ onClose }) {
+            const [show, setShow] = useState(false);
+            useEffect(() => { const timer = setTimeout(() => setShow(true), 10); return () => clearTimeout(timer); }, []);
+            const handleClose = () => { setShow(false); setTimeout(onClose, 300); };
+            return (
+                <div className={`fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <div className={`w-full h-full max-w-4xl max-h-[80vh] bg-slate-200 rounded-2xl shadow-2xl relative transform transition-all duration-300 ease-in-out overflow-hidden ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-800 bg-white/50 rounded-full p-2 hover:bg-white z-10"> <XIcon className="w-6 h-6" /> </button>
+                        <ThreeDViewer />
+                    </div>
+                </div>
+            );
+        }
+
+        function MediaViewerModal({ campaign, startIndex, onClose }) {
+            const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
+            const [currentIndex, setCurrentIndex] = useState(startIndex);
+            const [show, setShow] = useState(false);
+
+            useEffect(() => {
+                const timer = setTimeout(() => setShow(true), 10);
+                return () => clearTimeout(timer);
+            }, []);
+
+            const handleClose = () => {
+                setShow(false);
+                setTimeout(onClose, 300);
+            };
+
+            return (
+                <div className={`fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <button onClick={handleClose} className="absolute top-4 right-4 text-white bg-black/30 rounded-full p-2 hover:bg-black/50 z-10">
+                        <XIcon className="w-6 h-6" />
+                    </button>
+                    <div className={`w-full h-full max-w-5xl max-h-[80vh] flex items-center justify-center transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                        {mediaItems[currentIndex].type === 'video' ? (
+                            <video key={mediaItems[currentIndex].url} src={mediaItems[currentIndex].url} controls autoPlay className="max-w-full max-h-full object-contain rounded-lg"></video>
+                        ) : (
+                            <img src={mediaItems[currentIndex].url} alt="Full screen product view" className="max-w-full max-h-full object-contain rounded-lg" />
+                        )}
+                    </div>
+                    <div className={`mt-4 flex space-x-2 overflow-x-auto scrollbar-hide transform transition-all duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={(e) => e.stopPropagation()}>
+                        {mediaItems.map((media, index) => (
+                            <button key={index} onClick={() => setCurrentIndex(index)} className={`w-16 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 relative ${currentIndex === index ? 'border-white' : 'border-transparent'}`}>
+                                <img src={media.thumbnail} alt={media.type} className="w-full h-full object-cover" />
+                                {media.type === 'video' && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><PlayIcon className="w-6 h-6 text-white" /></div>}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // --- REUSABLE UI COMPONENTS ---
+        const AccordionItem = ({ title, children, isOpen, onToggle }) => {
+            return (
+                <div className="border-b border-gray-200">
+                    <button onClick={onToggle} className="w-full flex justify-between items-center py-4 text-left">
+                        <span className="font-semibold text-gray-800">{title}</span>
+                        {isOpen ? <MinusIcon className="w-5 h-5 text-gray-600" /> : <PlusIcon className="w-5 h-5 text-gray-600" />}
+                    </button>
+                    {isOpen && (
+                        <div className="pb-4 text-sm text-gray-700">
+                            {children}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+        
         function CommentForm({ campaignId, onSubmit }) {
             const [comment, setComment] = useState('');
             const handleSubmit = (e) => {
@@ -837,7 +1049,7 @@
                                     </div>
                                 </>
                             );
-                        } else { // INDEPENDENT funding type
+                        } else {
                             const fundedSizes = Object.values(sizes).filter(s => s.funded >= s.moq).length;
                             const totalSizes = Object.keys(sizes).length;
                             return (
@@ -872,7 +1084,7 @@
             };
 
             return (
-                <div onClick={(e) => onSelect(campaign)} className="bg-white/40 backdrop-blur-lg border border-white/50 rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 group">
+                <div onClick={() => onSelect(campaign)} className="bg-white/40 backdrop-blur-lg border border-white/50 rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 group">
                 <div className="h-80 relative">
                     <img src={campaign.heroImage} alt={campaign.name} className="w-full h-full object-cover" />
                     <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm text-xs font-bold px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-sm">
@@ -905,84 +1117,8 @@
                 </div>
             );
         };
-
-        function ThreeDModal({ onClose }) {
-            const [show, setShow] = useState(false);
-            useEffect(() => { const timer = setTimeout(() => setShow(true), 10); return () => clearTimeout(timer); }, []);
-            const handleClose = () => { setShow(false); setTimeout(onClose, 300); };
-            return (
-                <div className={`fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <div className={`w-full h-full max-w-4xl max-h-[80vh] bg-slate-200 rounded-2xl shadow-2xl relative transform transition-all duration-300 ease-in-out overflow-hidden ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
-                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-800 bg-white/50 rounded-full p-2 hover:bg-white z-10"> <XIcon className="w-6 h-6" /> </button>
-                        <ThreeDViewer />
-                    </div>
-                </div>
-            );
-        }
-
-        function MediaViewerModal({ campaign, startIndex, onClose }) {
-            const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
-            const [currentIndex, setCurrentIndex] = useState(startIndex);
-            const [show, setShow] = useState(false);
-
-            useEffect(() => {
-                const timer = setTimeout(() => setShow(true), 10);
-                return () => clearTimeout(timer);
-            }, []);
-
-            const handleClose = () => {
-                setShow(false);
-                setTimeout(onClose, 300);
-            };
-
-            return (
-                <div className={`fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <button onClick={handleClose} className="absolute top-4 right-4 text-white bg-black/30 rounded-full p-2 hover:bg-black/50 z-10">
-                        <XIcon className="w-6 h-6" />
-                    </button>
-                    <div className={`w-full h-full max-w-5xl max-h-[80vh] flex items-center justify-center transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
-                        {mediaItems[currentIndex].type === 'video' ? (
-                            <video key={mediaItems[currentIndex].url} src={mediaItems[currentIndex].url} controls autoPlay className="max-w-full max-h-full object-contain rounded-lg"></video>
-                        ) : (
-                            <img src={mediaItems[currentIndex].url} alt="Full screen product view" className="max-w-full max-h-full object-contain rounded-lg" />
-                        )}
-                    </div>
-                    <div className={`mt-4 flex space-x-2 overflow-x-auto scrollbar-hide transform transition-all duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={(e) => e.stopPropagation()}>
-                        {mediaItems.map((media, index) => (
-                            <button key={index} onClick={() => setCurrentIndex(index)} className={`w-16 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 relative ${currentIndex === index ? 'border-white' : 'border-transparent'}`}>
-                                <img src={media.thumbnail} alt={media.type} className="w-full h-full object-cover" />
-                                {media.type === 'video' && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><PlayIcon className="w-6 h-6 text-white" /></div>}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-
-        function PledgeModal({ campaign, onClose, onPledge }) {
-            const [show, setShow] = useState(false);
-            const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.preOrderDetails.sizes)[0]);
-            const isCombinedFunding = campaign.preOrderDetails.fundingType === 'COMBINED';
-            useEffect(() => { const timer = setTimeout(() => setShow(true), 10); return () => clearTimeout(timer); }, []);
-            const handleClose = () => { setShow(false); setTimeout(onClose, 300); };
-            let combinedProgress = 0; let totalFunded = 0;
-            if (isCombinedFunding) { totalFunded = Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0); combinedProgress = campaign.preOrderDetails.overallMoq > 0 ? (totalFunded / campaign.preOrderDetails.overallMoq) * 100 : 0; }
-            return (
-                <div className={`fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
-                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"> <XIcon className="w-6 h-6" /> </button>
-                        <h2 className="font-bold text-2xl mb-2">{campaign.name}</h2>
-                        <p className="text-lg text-gray-600 mb-6">€{campaign.price}</p>
-                        {isCombinedFunding && ( <div className="mb-4"> <h3 className="font-semibold text-sm mb-2">Overall Funding Progress</h3> <div className="w-full bg-gray-200 rounded-full h-2.5"> <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${combinedProgress}%` }}></div> </div> <div className="flex justify-between items-center text-xs text-gray-600 mt-1"> <span>{totalFunded} / {campaign.preOrderDetails.overallMoq} Funded</span> <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span> </div> </div> )}
-                        <div className="mb-4"> <h3 className="font-semibold text-sm mb-3">{isCombinedFunding ? 'Pledges by Size' : 'Funding Progress by Size'}</h3> <div className="space-y-3"> {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => { if (isCombinedFunding) { return ( <div key={size} className="flex justify-between items-center text-sm py-1"> <span className="font-medium text-gray-800">{size}</span> <span className="text-gray-600 font-semibold">{data.funded} pledged</span> </div> ) } const moq = data.moq; const progress = moq ? (data.funded / moq) * 100 : 0; const isFunded = moq && progress >= 100; return ( <div key={size}> <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}> <span className="font-semibold">{size}</span> {moq && <span>{data.funded} / {moq}</span>} </div> {moq && <div className="w-full bg-gray-200 rounded-full h-2"> <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div> </div>} </div> ); })} </div> </div>
-                        <div className="mb-6"> <h3 className="font-semibold text-sm mb-2">Select Size to Pledge For</h3> <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide"> {Object.keys(campaign.preOrderDetails.sizes).map(size => ( <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}> {size} </button> ))} </div> </div>
-                        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-r-lg mb-6"> <p className="text-sm text-blue-800">Your card will only be charged if the funding goal is met.</p> </div>
-                        <button onClick={() => onPledge(campaign, selectedSize)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all"> Confirm Pledge for Size {selectedSize} </button>
-                    </div>
-                </div>
-            );
-        };
-
+        
+        // --- NAVIGATION ---
         function TopNavBar({ onNavigate }) {
             return (
                 <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40">
@@ -994,7 +1130,9 @@
                             <div className="hidden sm:block sm:ml-6">
                                 <div className="flex space-x-4">
                                     <button onClick={() => onNavigate('Home')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Drops</button>
-                                    <button onClick={() => onNavigate('Dashboard')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">My MePont</button>
+                                    <button onClick={() => onNavigate('Dashboard', 'My MePont')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">My Pledges</button>
+                                    <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Waiting List</button>
+                                    <button onClick={() => onNavigate('Dashboard', 'Liked')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Liked</button>
                                 </div>
                             </div>
                         </div>
@@ -1003,69 +1141,26 @@
             );
         }
 
-        function BottomNavBar({ currentScreen, onNavigate }) {
+        function BottomNavBar({ currentScreen, dashboardView, onNavigate }) {
             return (
                 <div className="sm:hidden bg-white/80 backdrop-blur-sm border-t border-gray-200 flex justify-around p-2 fixed bottom-0 w-full z-40 h-16">
-                    <button onClick={() => onNavigate('Home')} className={`flex flex-col items-center justify-center space-y-1 p-2 rounded-lg w-full ${currentScreen === 'Home' ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <HomeIcon className="w-6 h-6" />
-                        <span className="text-xs font-semibold">Drops</span>
+                    <button onClick={() => onNavigate('Home')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Home' ? 'text-blue-600' : 'text-gray-500'}`}>
+                        <HomeIcon className="w-7 h-7" />
                     </button>
-                    <button onClick={() => onNavigate('Dashboard')} className={`flex flex-col items-center justify-center space-y-1 p-2 rounded-lg w-full ${currentScreen === 'Dashboard' ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <UserIcon className="w-6 h-6" />
-                        <span className="text-xs font-semibold">My MePont</span>
+                    <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Dashboard' && dashboardView === 'Waiting List' ? 'text-blue-600' : 'text-gray-500'}`}>
+                        <ListIcon className="w-7 h-7" />
+                    </button>
+                    <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Dashboard' && dashboardView === 'Liked' ? 'text-blue-600' : 'text-gray-500'}`}>
+                        <HeartIcon className="w-7 h-7" />
+                    </button>
+                    <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Dashboard' && dashboardView === 'My MePont' ? 'text-blue-600' : 'text-gray-500'}`}>
+                        <UserIcon className="w-7 h-7" />
                     </button>
                 </div>
             );
         };
 
-        function DashboardScreen({ pledgedItems, productionSteps }) {
-            return (
-                <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-                    <header className="mb-8">
-                        <h1 className="text-3xl font-bold tracking-tight text-gray-900">My MePont</h1>
-                        <p className="text-gray-500">Your pledges and orders.</p>
-                    </header>
-                    {pledgedItems.length === 0 ? (
-                        <div className="text-center py-20 bg-white rounded-lg shadow">
-                            <p className="text-gray-500">You haven't pledged for any items yet.</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            {pledgedItems.map((item, index) => (
-                                <div key={index} className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-                                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
-                                        <img src={item.heroImage} alt={item.name} className="w-24 h-32 object-cover rounded-md flex-shrink-0" />
-                                        <div className="flex-grow">
-                                            <p className="font-bold text-lg">{item.name}</p>
-                                            <p className="text-sm text-gray-600">Size: {item.size}</p>
-                                            <p className="text-sm text-gray-600">Price: €{item.price}</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold mb-3 text-sm">Production Status</h4>
-                                        <div className="flex items-start justify-between">
-                                            {productionSteps.map((step, stepIndex) => {
-                                                const currentStepIndex = productionSteps.indexOf(item.productionStatus);
-                                                const isCompleted = stepIndex <= currentStepIndex;
-                                                return (
-                                                    <div key={step} className="flex-1 flex flex-col items-center text-center">
-                                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${isCompleted ? 'bg-blue-600' : 'bg-gray-200'}`}>
-                                                            {isCompleted && <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
-                                                        </div>
-                                                        <p className={`text-xs mt-2 transition-colors ${isCompleted ? 'font-semibold text-blue-600' : 'text-gray-500'}`}>{step}</p>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
+        // --- RENDER APP ---
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>

@@ -171,14 +171,14 @@
             const addComment = (campaignId, commentText) => {
                 const newComment = { user: 'You', comment: commentText };
                 setCampaigns(prev => prev.map(c => 
-                    c.id === campaignId ? {...c, comments: [...c.comments, newComment]} : c
+                    c.id === campaignId ? {...c, comments: [...(c.comments || []), newComment]} : c
                 ));
             };
             
             const addReview = (campaignId, review) => {
                 const newReview = { user: 'You', ...review };
                 setCampaigns(prev => prev.map(c => 
-                    c.id === campaignId ? {...c, reviews: [...c.reviews, newReview]} : c
+                    c.id === campaignId ? {...c, reviews: [...(c.reviews || []), newReview]} : c
                 ));
             };
 
@@ -624,6 +624,22 @@
             );
         };
         
+        const AccordionItem = ({ title, children, isOpen, onToggle }) => {
+            return (
+                <div className="border-b border-subtle">
+                    <button onClick={onToggle} className="w-full flex justify-between items-center py-4 text-left">
+                        <span className="font-semibold text-sm text-primary">{title}</span>
+                        {isOpen ? <MinusIcon className="w-4 h-4 text-secondary" /> : <PlusIcon className="w-4 h-4 text-secondary" />}
+                    </button>
+                    {isOpen && (
+                        <div className="pb-4 text-xs text-secondary leading-relaxed">
+                            {children}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         function CampaignDetailModal({ campaign, onPledge, onBack, onLikeToggle, isLiked, onWaitlistToggle, isWaitlisted, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, isNestedModalOpen }) {
             const [show, setShow] = useState(false);
             
@@ -739,7 +755,6 @@
                             
                             {isEU && (
                                 <div className="mb-6 bg-subtle p-4 rounded-lg flex items-center gap-4">
-                                    {/* Simplified EU Flag for now */}
                                     <div className="w-6 h-4 bg-blue-800 rounded-sm"></div>
                                     <div>
                                         <h4 className="font-bold text-primary text-sm">Proudly Made in the EU</h4>
@@ -757,7 +772,8 @@
                                 
                                 return (
                                     <AccordionItem key={key} title={title} isOpen={openAccordion === key} onToggle={() => handleAccordionToggle(key)}>
-                                        {/* Render content based on key */}
+                                        {/* Simplified content for brevity */}
+                                        <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(value, null, 2)}</pre>
                                     </AccordionItem>
                                 )
                             })}

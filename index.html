@@ -263,16 +263,13 @@
                         return <DashboardScreen 
                                     pledgedItems={pledgedItems} 
                                     waitingListItems={waitingListItems}
-                                    likedItems={likedItems.map(item => campaigns.find(c => c.id === item.id)).filter(Boolean)}
+                                    likedItems={likedItems}
                                     productionSteps={productionSteps}
                                     activeView={dashboardView}
                                     onNavigate={navigateTo}
                                     onCampaignSelect={viewCampaignDetail}
+                                    onLike={handleLike}
                                 />;
-                    case 'WaitingList':
-                        return <WaitingListScreen items={waitingListItems} onCampaignSelect={viewCampaignDetail} />;
-                    case 'Liked':
-                        return <LikedItemsScreen items={likedItems} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
                     default:
                         return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
                 }
@@ -281,7 +278,7 @@
             return (
                 <div className="w-full min-h-screen">
                     <div className={isModalOpen ? 'blur-background' : ''}>
-                        <div className="max-w-7xl mx-auto pb-16 sm:pb-0">
+                        <div className="max-w-7xl mx-auto pb-20 sm:pb-0">
                             <TopNavBar onNavigate={navigateTo} />
                             <main>
                                 {renderScreen()}
@@ -318,10 +315,6 @@
         // --- 3D VIEWER COMPONENT ---
         function ThreeDViewer() {
             const mountRef = useRef(null);
-            const isDragging = useRef(false);
-            const previousPointerPosition = useRef({ x: 0, y: 0 });
-            const initialPinchDistance = useRef(0);
-
             useEffect(() => {
                 const currentMount = mountRef.current;
                 if (!currentMount) return;
@@ -345,55 +338,34 @@
                 scene.add(pointLight);
 
                 camera.position.z = 30;
-
-                const getPointerCoordinates = (event) => {
-                    return event.touches ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : { x: event.clientX, y: event.clientY };
-                };
-
-                const getPinchDistance = (event) => {
-                    const dx = event.touches[0].clientX - event.touches[1].clientX;
-                    const dy = event.touches[0].clientY - event.touches[1].clientY;
-                    return Math.sqrt(dx * dx + dy * dy);
-                };
+                
+                let isDragging = false;
+                let previousPointerPosition = { x: 0, y: 0 };
 
                 const onPointerDown = (e) => {
-                    if (e.touches && e.touches.length === 2) {
-                        initialPinchDistance.current = getPinchDistance(e);
-                        isDragging.current = false;
-                    } else {
-                        isDragging.current = true;
-                        currentMount.classList.add('cursor-grabbing');
-                        const coords = getPointerCoordinates(e);
-                        previousPointerPosition.current = { x: coords.x, y: coords.y };
-                    }
+                    isDragging = true;
+                    currentMount.classList.add('cursor-grabbing');
+                    previousPointerPosition = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
                 };
 
-                const onPointerUp = (e) => {
-                    isDragging.current = false;
-                    initialPinchDistance.current = 0;
+                const onPointerUp = () => {
+                    isDragging = false;
                     currentMount.classList.remove('cursor-grabbing');
                 };
 
                 const onPointerMove = (e) => {
-                    e.preventDefault(); 
-                    if (e.touches && e.touches.length === 2) {
-                        const newPinchDistance = getPinchDistance(e);
-                        const delta = newPinchDistance - initialPinchDistance.current;
-                        camera.position.z -= delta * 0.1;
-                        camera.position.z = Math.max(15, Math.min(camera.position.z, 50));
-                        initialPinchDistance.current = newPinchDistance;
-                    } else if (isDragging.current) {
-                        const coords = getPointerCoordinates(e);
-                        const deltaMove = {
-                            x: coords.x - previousPointerPosition.current.x,
-                            y: coords.y - previousPointerPosition.current.y
-                        };
-                        const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
-                            new THREE.Euler((deltaMove.y * Math.PI) / 180, (deltaMove.x * Math.PI) / 180, 0, 'XYZ')
-                        );
-                        torusKnot.quaternion.multiplyQuaternions(deltaRotationQuaternion, torusKnot.quaternion);
-                        previousPointerPosition.current = { x: coords.x, y: coords.y };
-                    }
+                    if (!isDragging) return;
+                    const clientX = e.clientX || e.touches[0].clientX;
+                    const clientY = e.clientY || e.touches[0].clientY;
+                    const deltaMove = {
+                        x: clientX - previousPointerPosition.x,
+                        y: clientY - previousPointerPosition.y
+                    };
+                    const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
+                        new THREE.Euler((deltaMove.y * Math.PI) / 180, (deltaMove.x * Math.PI) / 180, 0, 'XYZ')
+                    );
+                    torusKnot.quaternion.multiplyQuaternions(deltaRotationQuaternion, torusKnot.quaternion);
+                    previousPointerPosition = { x: clientX, y: clientY };
                 };
                 
                 const onWheel = (e) => {
@@ -404,11 +376,9 @@
                 currentMount.addEventListener('mousedown', onPointerDown);
                 window.addEventListener('mouseup', onPointerUp);
                 window.addEventListener('mousemove', onPointerMove);
-                
-                currentMount.addEventListener('touchstart', onPointerDown, { passive: false });
+                currentMount.addEventListener('touchstart', onPointerDown, { passive: true });
                 window.addEventListener('touchend', onPointerUp);
-                window.addEventListener('touchmove', onPointerMove, { passive: false });
-
+                window.addEventListener('touchmove', onPointerMove, { passive: true });
                 currentMount.addEventListener('wheel', onWheel, { passive: false });
 
                 const animate = function () { requestAnimationFrame(animate); renderer.render(scene, camera); };
@@ -464,15 +434,15 @@
             );
         };
 
-        function DashboardScreen({ pledgedItems, waitingListItems, likedItems, productionSteps, activeView, onNavigate, onCampaignSelect }) {
+        function DashboardScreen({ pledgedItems, waitingListItems, likedItems, productionSteps, activeView, onNavigate, onCampaignSelect, onLike }) {
             const renderContent = () => {
                 switch(activeView) {
                     case 'My MePont':
                         return <PledgedItemsView items={pledgedItems} productionSteps={productionSteps} />;
                     case 'Waiting List':
-                        return <WaitingListView items={waitingListItems} onCampaignSelect={onCampaignSelect} />;
+                        return <ItemGridView items={waitingListItems} onCampaignSelect={onCampaignSelect} onLike={onLike} likedItems={likedItems} emptyMessage="Your waiting list is empty." />;
                     case 'Liked':
-                        return <LikedItemsView items={likedItems} onCampaignSelect={onCampaignSelect} />;
+                        return <ItemGridView items={likedItems} onCampaignSelect={onCampaignSelect} onLike={onLike} likedItems={likedItems} emptyMessage="You haven't liked any items yet." />;
                     default:
                         return <PledgedItemsView items={pledgedItems} productionSteps={productionSteps} />;
                 }
@@ -484,10 +454,10 @@
                         <h1 className="text-3xl font-bold tracking-tight text-gray-900">{activeView.replace('My MePont', 'My Pledges')}</h1>
                     </header>
                     <div className="mb-6 border-b border-gray-200">
-                        <div className="flex space-x-4">
-                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`py-2 px-1 font-semibold ${activeView === 'My MePont' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>My Pledges</button>
-                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`py-2 px-1 font-semibold ${activeView === 'Waiting List' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>Waiting List</button>
-                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`py-2 px-1 font-semibold ${activeView === 'Liked' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>Liked</button>
+                        <div className="flex space-x-2 sm:space-x-4">
+                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'My MePont' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>My Pledges</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'Waiting List' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>Waiting List</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'Liked' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>Liked</button>
                         </div>
                     </div>
                     {renderContent()}
@@ -503,35 +473,35 @@
                 <div className="space-y-6">
                     {items.map((item, index) => (
                         <div key={index} className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-4">
                                 <img src={item.heroImage} alt={item.name} className="w-24 h-32 object-cover rounded-md flex-shrink-0" />
                                 <div className="flex-grow">
-                                    <p className="font-bold text-lg">{item.name}</p>
+                                    <p className="font-bold text-lg text-gray-900">{item.name}</p>
                                     <p className="text-sm text-gray-600">Size: {item.size}</p>
                                     <p className="text-sm text-gray-600">Price: €{item.price}</p>
                                 </div>
                             </div>
                             <div>
-                                <h4 className="font-semibold mb-3 text-sm">Production Status</h4>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex-grow flex items-center">
-                                    {productionSteps.map((step, stepIndex) => {
+                                <h4 className="font-semibold mb-4 text-sm text-gray-800">Production Status</h4>
+                                <div className="relative flex items-center justify-between w-full">
+                                    <div className="absolute left-0 top-1/2 w-full h-0.5 bg-gray-200 transform -translate-y-1/2"></div>
+                                    <div 
+                                        className="absolute left-0 top-1/2 h-0.5 bg-blue-600 transform -translate-y-1/2 transition-all duration-500" 
+                                        style={{width: `${(productionSteps.indexOf(item.productionStatus) / (productionSteps.length - 1)) * 100}%`}}>
+                                    </div>
+                                    {productionSteps.map((step) => {
                                         const currentStepIndex = productionSteps.indexOf(item.productionStatus);
+                                        const stepIndex = productionSteps.indexOf(step);
                                         const isCompleted = stepIndex <= currentStepIndex;
-                                        const isLastStep = stepIndex === productionSteps.length - 1;
                                         return (
-                                            <React.Fragment key={step}>
-                                            <div className="flex flex-col items-center text-center relative z-10">
-                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${isCompleted ? 'bg-blue-600' : 'bg-gray-200'}`}>
-                                                    {isCompleted && <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                                            <div key={step} className="relative z-10 flex flex-col items-center">
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors duration-300 ${isCompleted ? 'bg-blue-600' : 'bg-gray-200 border-2 border-white'}`}>
+                                                    {isCompleted && <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                                                 </div>
-                                                <p className={`text-xs mt-2 transition-colors w-20 ${isCompleted ? 'font-semibold text-blue-600' : 'text-gray-500'}`}>{step}</p>
+                                                <p className={`text-xs text-center mt-2 w-20 transition-colors duration-300 ${isCompleted ? 'font-semibold text-blue-600' : 'text-gray-500'}`}>{step}</p>
                                             </div>
-                                            {!isLastStep && <div className={`flex-grow h-1 transition-colors ${isCompleted ? 'bg-blue-600' : 'bg-gray-200'}`}></div>}
-                                            </React.Fragment>
                                         );
                                     })}
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -540,27 +510,14 @@
             );
         };
 
-        const WaitingListView = ({ items, onCampaignSelect }) => {
+        const ItemGridView = ({ items, onCampaignSelect, onLike, likedItems, emptyMessage }) => {
              if (items.length === 0) {
-                return <div className="text-center py-20 bg-white rounded-lg shadow"><p className="text-gray-500">Your waiting list is empty.</p></div>;
+                return <div className="text-center py-20 bg-white rounded-lg shadow"><p className="text-gray-500">{emptyMessage}</p></div>;
             }
             return (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {items.map(item => (
-                        <CampaignCard key={item.id} campaign={item} onSelect={onCampaignSelect} onLike={() => {}} isLiked={false} />
-                    ))}
-                </div>
-            );
-        };
-
-        const LikedItemsView = ({ items, onCampaignSelect }) => {
-             if (items.length === 0) {
-                return <div className="text-center py-20 bg-white rounded-lg shadow"><p className="text-gray-500">You haven't liked any items yet.</p></div>;
-            }
-            return (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {items.map(item => (
-                        <CampaignCard key={item.id} campaign={item} onSelect={onCampaignSelect} onLike={() => {}} isLiked={true} />
+                        <CampaignCard key={item.id} campaign={item} onSelect={onCampaignSelect} onLike={onLike} isLiked={likedItems.some(li => li.id === item.id)} />
                     ))}
                 </div>
             );
@@ -586,19 +543,29 @@
             
             return (
                 <div 
-                    className={`fixed top-0 left-0 right-0 bottom-16 sm:inset-0 z-50 flex items-center justify-center p-2 sm:p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
+                    className={`fixed top-0 left-0 right-0 bottom-16 sm:inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
                     onClick={handleClose}
                 >
                     <div 
-                        className={`w-full h-full bg-white/80 backdrop-blur-xl shadow-2xl transform transition-all duration-300 ease-in-out relative overflow-hidden rounded-2xl ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`}
+                        className={`w-full h-full bg-white/80 backdrop-blur-xl shadow-2xl transform transition-all duration-300 ease-in-out relative flex flex-col sm:rounded-2xl ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <button onClick={handleClose} className="absolute top-4 right-4 text-gray-600 bg-white/50 rounded-full p-2 hover:bg-white z-20">
                             <XIcon className="w-6 h-6" />
                         </button>
-                        <div className="w-full h-full overflow-y-auto scrollbar-hide">
-                           <CampaignDetailContent campaign={campaign} onPledge={onPledge} onLike={onLike} isLiked={isLiked} hasPurchased={hasPurchased} onCommentSubmit={onCommentSubmit} onReviewSubmit={onReviewSubmit} onShow3D={onShow3D} onShowMedia={onShowMedia} onAddToWaitingList={onAddToWaitingList} isOnWaitingList={isOnWaitingList} />
-                        </div>
+                        <CampaignDetailContent 
+                            campaign={campaign} 
+                            onPledge={onPledge} 
+                            onLike={onLike} 
+                            isLiked={isLiked} 
+                            hasPurchased={hasPurchased} 
+                            onCommentSubmit={onCommentSubmit} 
+                            onReviewSubmit={onReviewSubmit} 
+                            onShow3D={onShow3D} 
+                            onShowMedia={onShowMedia} 
+                            onAddToWaitingList={onAddToWaitingList} 
+                            isOnWaitingList={isOnWaitingList}
+                        />
                     </div>
                 </div>
             );
@@ -653,33 +620,39 @@
                 setOpenAccordion(openAccordion === title ? null : title);
             };
 
-            const DetailsPanel = () => (
-                <div className="bg-transparent">
-                    <div className="p-5 lg:p-6 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <p className="text-sm text-gray-800">{campaign.designer}</p>
-                        </div>
-                        <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
-                    </div>
-                    
-                    {renderTopSection()}
-                    
-                    <div className="px-5 lg:px-6 pb-5">
-                        <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
-                            {['Details', 'Price Breakdown', 'Size & Fit', 'Community'].map(tab => (
-                                <button key={tab} onClick={() => setActiveTab(tab)} className={`py-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}>
-                                    {tab}
+            const MainActions = () => {
+                const actionButtonClass = "font-bold py-3 sm:py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 w-full";
+                switch(campaign.stage) {
+                    case 'DESIGN': return ( <button onClick={() => onLike(campaign.id)} className={`${actionButtonClass} ${isLiked ? 'bg-pink-600 text-white' : 'bg-white text-pink-600 border-2 border-pink-600'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
+                    case 'SAMPLING': return ( <button onClick={() => onAddToWaitingList(campaign.id)} className={`${actionButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
+                    case 'PRE_ORDER': 
+                        return (
+                            <div className="flex items-stretch gap-3 w-full">
+                                <button onClick={onPledge} className={`flex-grow ${actionButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>
+                                    Pledge Now for €{campaign.price}
                                 </button>
-                            ))}
-                        </div>
-                        <div className="py-4">
-                        {renderTabContent()}
-                        </div>
+                                <div className="flex items-center justify-center text-sm font-bold text-gray-800 bg-gray-200/80 px-4 rounded-xl whitespace-nowrap">
+                                    R{campaign.productionRound}
+                                </div>
+                            </div>
+                        );
+                    default: return null;
+                }
+            }
+
+            const TopSection = () => (
+                 <div className="p-5 lg:p-6 border-b border-gray-200">
+                    {campaign.stage === 'PRE_ORDER' && ( campaign.preOrderDetails.fundingType === 'COMBINED' ? ( <> <div className="w-full bg-gray-200 rounded-full h-2.5"> <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0) / campaign.preOrderDetails.overallMoq) * 100}%` }}></div> </div> <div className="flex justify-between items-center text-sm text-gray-600 mt-2"> <span>{Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0)} / {campaign.preOrderDetails.overallMoq} Funded</span> <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span> </div> </> ) : ( <> <div className="flex justify-between items-center text-sm text-gray-600 mb-4"> <span className="font-semibold">Funding Ends in {campaign.preOrderDetails.daysLeft} days</span> <span className="font-bold text-lg">€{campaign.price}</span> </div> <div className="space-y-3 mb-4"> <h4 className="font-semibold text-sm text-gray-800">Fund each size independently:</h4> {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => { const progress = (data.funded / data.moq) * 100; const isFunded = progress >= 100; return ( <div key={size}> <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}> <span className="font-semibold">{size}</span> <span>{data.funded} / {data.moq}</span> </div> <div className="w-full bg-gray-200 rounded-full h-2"> <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div> </div> </div> ); })} </div> </> ) )}
+                    {campaign.stage === 'DESIGN' && ( <> <div className="w-full bg-gray-200 rounded-full h-2"> <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${(campaign.likes / campaign.targetLikes) * 100}%` }}></div> </div> <div className="flex justify-between items-center text-sm text-gray-600 mt-2"> <span>{campaign.likes} / {campaign.targetLikes} likes to sample</span> </div> </> )}
+                    {campaign.stage === 'SAMPLING' && ( <div className="bg-cyan-50 text-cyan-800 p-4 rounded-lg text-center"> <p className="font-semibold">Sample in Progress</p> <p className="text-sm">{campaign.samplingDaysLeft} days until reveal</p> </div> )}
+                    
+                    <div className="hidden lg:block mt-4">
+                        <MainActions />
                     </div>
                 </div>
             );
 
-            const renderTabContent = () => {
+            const TabContent = () => {
                 const { digitalPassport, manufacturer } = campaign;
                 const euCountries = ["Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", "Slovenia", "Spain", "Sweden"];
                 const isEU = euCountries.includes(manufacturer.country);
@@ -707,7 +680,6 @@
                                     <div className="flex justify-between"><span className="text-gray-500">Unique ID</span><span className="font-mono text-xs text-right bg-gray-200 px-1 py-0.5 rounded">{digitalPassport.uniqueId}</span></div>
                                 </div>
                             </AccordionItem>
-
                             <AccordionItem title="Supply Chain Traceability" isOpen={openAccordion === 'supply'} onToggle={() => handleAccordionToggle('supply')}>
                                 <div className="space-y-4">
                                 {digitalPassport.supplyChain.map((item, index) => (
@@ -722,7 +694,6 @@
                                 ))}
                                 </div>
                             </AccordionItem>
-
                             <AccordionItem title="Sustainability & Circularity" isOpen={openAccordion === 'sustainability'} onToggle={() => handleAccordionToggle('sustainability')}>
                                 <div className="space-y-2">
                                     <div className="flex justify-between"><span className="text-gray-500">Recycled Content</span><span className="font-medium text-right">{digitalPassport.sustainability.recycledContent}</span></div>
@@ -731,7 +702,6 @@
                                     <div className="flex justify-between items-start"><span className="text-gray-500">End-of-Life</span><div className="text-right"><p className="font-medium">{digitalPassport.sustainability.endOfLife.recyclable ? 'Recyclable' : 'Non-recyclable'}</p><p className="text-xs text-gray-500">{digitalPassport.sustainability.endOfLife.instructions}</p></div></div>
                                 </div>
                              </AccordionItem>
-
                              <AccordionItem title="Compliance & Certifications" isOpen={openAccordion === 'compliance'} onToggle={() => handleAccordionToggle('compliance')}>
                                 <div className="space-y-2">
                                     <div className="flex justify-between"><span className="text-gray-500">SVHC Declaration</span><span className="font-medium text-right">{digitalPassport.compliance.svhc}</span></div>
@@ -750,42 +720,11 @@
                     default: return null;
                 }
             };
-            
-            const renderTopSection = () => {
-                const actionButtonClass = "font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2";
-                
-                const MainActions = () => {
-                    switch(campaign.stage) {
-                        case 'DESIGN': return ( <button onClick={() => onLike(campaign.id)} className={`w-full mt-4 ${actionButtonClass} ${isLiked ? 'bg-pink-600 text-white' : 'bg-white text-pink-600 border-2 border-pink-600'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
-                        case 'SAMPLING': return ( <button onClick={() => onAddToWaitingList(campaign.id)} className={`w-full mt-4 ${actionButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
-                        case 'PRE_ORDER': 
-                            return (
-                                <div className="flex items-stretch gap-3 mt-4">
-                                    <button onClick={onPledge} className={`flex-grow ${actionButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>
-                                        Pledge Now for €{campaign.price}
-                                    </button>
-                                    <div className="flex items-center justify-center text-sm font-bold text-gray-800 bg-gray-200/80 px-4 rounded-xl whitespace-nowrap">
-                                        R{campaign.productionRound}
-                                    </div>
-                                </div>
-                            );
-                        default: return null;
-                    }
-                }
-
-                return (
-                    <div className="p-5 lg:p-6 border-b border-gray-200">
-                        {campaign.stage === 'PRE_ORDER' && ( campaign.preOrderDetails.fundingType === 'COMBINED' ? ( <> <div className="w-full bg-gray-200 rounded-full h-2.5"> <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0) / campaign.preOrderDetails.overallMoq) * 100}%` }}></div> </div> <div className="flex justify-between items-center text-sm text-gray-600 mt-2"> <span>{Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0)} / {campaign.preOrderDetails.overallMoq} Funded</span> <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span> </div> </> ) : ( <> <div className="flex justify-between items-center text-sm text-gray-600 mb-4"> <span className="font-semibold">Funding Ends in {campaign.preOrderDetails.daysLeft} days</span> <span className="font-bold text-lg">€{campaign.price}</span> </div> <div className="space-y-3 mb-4"> <h4 className="font-semibold text-sm text-gray-800">Fund each size independently:</h4> {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => { const progress = (data.funded / data.moq) * 100; const isFunded = progress >= 100; return ( <div key={size}> <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}> <span className="font-semibold">{size}</span> <span>{data.funded} / {data.moq}</span> </div> <div className="w-full bg-gray-200 rounded-full h-2"> <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div> </div> </div> ); })} </div> </> ) )}
-                        {campaign.stage === 'DESIGN' && ( <> <div className="w-full bg-gray-200 rounded-full h-2"> <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${(campaign.likes / campaign.targetLikes) * 100}%` }}></div> </div> <div className="flex justify-between items-center text-sm text-gray-600 mt-2"> <span>{campaign.likes} / {campaign.targetLikes} likes to sample</span> </div> </> )}
-                        {campaign.stage === 'SAMPLING' && ( <div className="bg-cyan-50 text-cyan-800 p-4 rounded-lg text-center"> <p className="font-semibold">Sample in Progress</p> <p className="text-sm">{campaign.samplingDaysLeft} days until reveal</p> </div> )}
-                        
-                        <MainActions />
-                    </div>
-                );
-            };
 
             return (
-                <div className="w-full h-full pt-12 md:pt-0">
+                <>
+                {/* Scrollable Content */}
+                <div className="flex-grow overflow-y-auto scrollbar-hide lg:pb-0 pb-24">
                     {/* Desktop Layout */}
                     <div className="hidden lg:grid lg:grid-cols-5 w-full h-full">
                         <div className="lg:col-span-3 h-full p-4 flex gap-4">
@@ -817,7 +756,27 @@
                             </div>
                         </div>
                         <div className="lg:col-span-2 h-full overflow-y-auto scrollbar-hide">
-                           <DetailsPanel />
+                           <div className="bg-transparent">
+                                <div className="p-5 lg:p-6 border-b border-gray-200">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-sm text-gray-800">{campaign.designer}</p>
+                                    </div>
+                                    <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
+                                </div>
+                                <TopSection />
+                                <div className="px-5 lg:px-6 pb-5">
+                                    <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
+                                        {['Details', 'Price Breakdown', 'Size & Fit', 'Community'].map(tab => (
+                                            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}>
+                                                {tab}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="py-4">
+                                        <TabContent />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -851,9 +810,34 @@
                                 <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                             ))}
                         </div>
-                         <DetailsPanel />
+                         <div className="bg-transparent">
+                            <div className="p-5 lg:p-6">
+                                <div className="flex justify-between items-center">
+                                    <p className="text-sm text-gray-800">{campaign.designer}</p>
+                                </div>
+                                <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
+                            </div>
+                            <TopSection />
+                            <div className="px-5 lg:px-6 pb-5">
+                                <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
+                                    {['Details', 'Price Breakdown', 'Size & Fit', 'Community'].map(tab => (
+                                        <button key={tab} onClick={() => setActiveTab(tab)} className={`py-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}>
+                                            {tab}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="py-4">
+                                    <TabContent />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                {/* Sticky CTA Bar for Mobile */}
+                <div className="lg:hidden absolute bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
+                    <MainActions />
+                </div>
+                </>
             );
         };
 
@@ -1145,16 +1129,16 @@
             return (
                 <div className="sm:hidden bg-white/80 backdrop-blur-sm border-t border-gray-200 flex justify-around p-2 fixed bottom-0 w-full z-40 h-16">
                     <button onClick={() => onNavigate('Home')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Home' ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <HomeIcon className="w-7 h-7" />
+                        <HomeIcon className="w-6 h-6" />
                     </button>
                     <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Dashboard' && dashboardView === 'Waiting List' ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <ListIcon className="w-7 h-7" />
+                        <ListIcon className="w-6 h-6" />
                     </button>
                     <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Dashboard' && dashboardView === 'Liked' ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <HeartIcon className="w-7 h-7" />
+                        <HeartIcon className="w-6 h-6" />
                     </button>
                     <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Dashboard' && dashboardView === 'My MePont' ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <UserIcon className="w-7 h-7" />
+                        <UserIcon className="w-6 h-6" />
                     </button>
                 </div>
             );

@@ -278,15 +278,13 @@
             return (
                 <div className="w-full min-h-screen">
                     <div className={isModalOpen ? 'blur-background' : ''}>
-                        <div className="max-w-7xl mx-auto pb-20 sm:pb-0">
-                            <TopNavBar onNavigate={navigateTo} />
+                        <TopNavBar onNavigate={navigateTo} currentScreen={currentScreen} dashboardView={dashboardView} />
+                        <div className="max-w-7xl mx-auto pt-16">
                             <main>
                                 {renderScreen()}
                             </main>
                         </div>
                     </div>
-
-                    <BottomNavBar currentScreen={currentScreen} dashboardView={dashboardView} onNavigate={navigateTo} />
                     
                     {showCampaignModal && 
                         <CampaignDetailModal 
@@ -543,7 +541,7 @@
             
             return (
                 <div 
-                    className={`fixed top-0 left-0 right-0 bottom-16 sm:inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
+                    className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
                     onClick={handleClose}
                 >
                     <div 
@@ -1077,46 +1075,47 @@
         };
         
         // --- NAVIGATION ---
-        function TopNavBar({ onNavigate }) {
+        function TopNavBar({ onNavigate, currentScreen, dashboardView }) {
             return (
-                <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40">
-                    <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between items-center h-16">
-                            <div className="flex-shrink-0">
-                                <button onClick={() => onNavigate('Home')} className="text-2xl font-bold text-gray-900">MePont</button>
-                            </div>
-                            <div className="hidden sm:block sm:ml-6">
-                                <div className="flex space-x-4">
-                                    <button onClick={() => onNavigate('Home')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Drops</button>
-                                    <button onClick={() => onNavigate('Dashboard', 'My MePont')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">My Pledges</button>
-                                    <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Waiting List</button>
-                                    <button onClick={() => onNavigate('Dashboard', 'Liked')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Liked</button>
-                                </div>
-                            </div>
+                <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 fixed top-0 w-full z-40">
+                    {/* Desktop Nav */}
+                    <nav className="hidden sm:flex max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 justify-between items-center h-16">
+                        <div className="flex-shrink-0">
+                            <button onClick={() => onNavigate('Home')} className="text-2xl font-bold text-gray-900">MePont</button>
                         </div>
+                        <div className="flex space-x-4">
+                            <button onClick={() => onNavigate('Home')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Drops</button>
+                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">My Pledges</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Waiting List</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Liked</button>
+                        </div>
+                    </nav>
+
+                    {/* Mobile Nav */}
+                    <nav className="sm:hidden flex justify-between items-center h-16 px-4">
+                         <div className="flex items-center space-x-4">
+                             <button onClick={() => onNavigate('Home')} className={`p-2 rounded-lg ${currentScreen === 'Home' ? 'text-blue-600' : 'text-gray-500'}`}>
+                                <HomeIcon className="w-6 h-6" />
+                            </button>
+                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`p-2 rounded-lg ${currentScreen === 'Dashboard' && dashboardView === 'Waiting List' ? 'text-blue-600' : 'text-gray-500'}`}>
+                                <ListIcon className="w-6 h-6" />
+                            </button>
+                         </div>
+                         <div className="flex-shrink-0">
+                            <button onClick={() => onNavigate('Home')} className="text-2xl font-bold text-gray-900">MePont</button>
+                        </div>
+                         <div className="flex items-center space-x-4">
+                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`p-2 rounded-lg ${currentScreen === 'Dashboard' && dashboardView === 'Liked' ? 'text-blue-600' : 'text-gray-500'}`}>
+                                <HeartIcon className="w-6 h-6" />
+                            </button>
+                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`p-2 rounded-lg ${currentScreen === 'Dashboard' && dashboardView === 'My MePont' ? 'text-blue-600' : 'text-gray-500'}`}>
+                                <UserIcon className="w-6 h-6" />
+                            </button>
+                         </div>
                     </nav>
                 </header>
             );
         }
-
-        function BottomNavBar({ currentScreen, dashboardView, onNavigate }) {
-            return (
-                <div className="sm:hidden bg-white/80 backdrop-blur-sm border-t border-gray-200 flex justify-around p-2 fixed bottom-0 w-full z-40 h-16">
-                    <button onClick={() => onNavigate('Home')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Home' ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <HomeIcon className="w-6 h-6" />
-                    </button>
-                    <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Dashboard' && dashboardView === 'Waiting List' ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <ListIcon className="w-6 h-6" />
-                    </button>
-                    <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Dashboard' && dashboardView === 'Liked' ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <HeartIcon className="w-6 h-6" />
-                    </button>
-                    <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`flex flex-col items-center justify-center p-2 rounded-lg w-full ${currentScreen === 'Dashboard' && dashboardView === 'My MePont' ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <UserIcon className="w-6 h-6" />
-                    </button>
-                </div>
-            );
-        };
 
         // --- RENDER APP ---
         const root = ReactDOM.createRoot(document.getElementById('root'));

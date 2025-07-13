@@ -1080,7 +1080,7 @@
                 <header className="fixed top-0 left-0 right-0 z-40 p-2 sm:p-4">
                     <div className="max-w-7xl mx-auto flex justify-center">
                         {/* Desktop Nav */}
-                        <nav className="hidden sm:flex items-center gap-2 bg-black/80 backdrop-blur-lg text-white rounded-full p-2 shadow-lg">
+                        <nav className="hidden sm:flex items-center gap-2 bg-gray-900/75 backdrop-blur-lg text-white rounded-full p-2 shadow-lg">
                             <button onClick={() => onNavigate('Home')} className="text-lg font-bold px-4 py-1">MePont</button>
                             <div className="h-6 w-px bg-gray-600"></div>
                             <button onClick={() => onNavigate('Home')} className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${currentScreen === 'Home' ? 'bg-gray-700' : 'hover:bg-gray-800'}`}>Drops</button>
@@ -1090,7 +1090,7 @@
                         </nav>
 
                         {/* Mobile Nav */}
-                        <nav className="sm:hidden flex justify-between items-center w-full max-w-sm bg-black/80 backdrop-blur-lg text-white rounded-full p-2 shadow-lg">
+                        <nav className="sm:hidden flex justify-between items-center w-full max-w-sm bg-gray-900/75 backdrop-blur-lg text-white rounded-full p-2 shadow-lg">
                             <button onClick={() => onNavigate('Home')} className={`p-2 rounded-full ${currentScreen === 'Home' ? 'bg-gray-700' : ''}`}>
                                 <HomeIcon className="w-6 h-6" />
                             </button>

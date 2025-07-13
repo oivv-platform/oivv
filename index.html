@@ -279,7 +279,7 @@
                 <div className="w-full min-h-screen">
                     <div className={isModalOpen ? 'blur-background' : ''}>
                         <TopNavBar onNavigate={navigateTo} currentScreen={currentScreen} dashboardView={dashboardView} />
-                        <div className="max-w-7xl mx-auto pt-16">
+                        <div className="max-w-7xl mx-auto pt-24">
                             <main>
                                 {renderScreen()}
                             </main>
@@ -297,7 +297,7 @@
                             onCommentSubmit={addComment}
                             onReviewSubmit={addReview}
                             onShow3D={() => setShow3DModal(true)}
-                            onShowMedia={(startIndex) => setShowMediaModal({ visible: true, startIndex })}
+                            onShowMedia={(startIndex) => setShowMediaModal({ visible: true, startIndex: 0 })}
                             isNestedModalOpen={isNestedModalOpen}
                             onAddToWaitingList={handleAddToWaitingList}
                             isOnWaitingList={waitingListItems.some(item => item.id === showCampaignModal.id)}
@@ -748,64 +748,62 @@
                     </div>
 
                     {/* Details Column (Right) */}
-                    <div className="lg:col-span-2 h-full flex flex-col">
-                        <div className="flex-1 relative">
-                            <div className="absolute inset-0 overflow-y-auto scrollbar-hide">
-                                 {/* Mobile Media */}
-                                <div className="lg:hidden">
-                                    <div 
-                                        className={`relative aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
-                                        onTouchStart={handleTouchStart}
-                                        onTouchMove={handleTouchMove}
-                                        onTouchEnd={handleTouchEnd}
-                                    >
-                                        <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
-                                        {mediaItems[currentMediaIndex].type === 'video' ? (
-                                            <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover bg-black"></video>
-                                        ) : (
-                                            <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover" />
-                                        )}
+                    <div className="lg:col-span-2 h-full flex flex-col relative">
+                        <div className="flex-grow overflow-y-auto scrollbar-hide">
+                             {/* Mobile Media */}
+                            <div className="lg:hidden">
+                                <div 
+                                    className={`relative aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
+                                    onTouchStart={handleTouchStart}
+                                    onTouchMove={handleTouchMove}
+                                    onTouchEnd={handleTouchEnd}
+                                >
+                                    <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
+                                    {mediaItems[currentMediaIndex].type === 'video' ? (
+                                        <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover bg-black"></video>
+                                    ) : (
+                                        <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover" />
+                                    )}
+                                    </button>
+                                    {campaign.has3D && (
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); onShow3D(); }} 
+                                            className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"
+                                        >
+                                            <CubeIcon className="w-5 h-5" />
+                                            <span>3D</span>
                                         </button>
-                                        {campaign.has3D && (
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); onShow3D(); }} 
-                                                className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"
-                                            >
-                                                <CubeIcon className="w-5 h-5" />
-                                                <span>3D</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                    <div className="flex justify-center items-center space-x-2">
-                                        {mediaItems.map((_, index) => (
-                                            <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                                        ))}
-                                    </div>
+                                    )}
                                 </div>
-                                {/* Common Details */}
-                                <div className="p-5 lg:p-6">
-                                    <div className="flex justify-between items-center">
-                                        <p className="text-sm text-gray-800">{campaign.designer}</p>
-                                    </div>
-                                    <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
+                                <div className="flex justify-center items-center space-x-2">
+                                    {mediaItems.map((_, index) => (
+                                        <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                    ))}
                                 </div>
-                                <TopSection />
-                                <div className="px-5 lg:px-6 pb-24">
-                                    <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
-                                        {['Details', 'Price Breakdown', 'Size & Fit', 'Community'].map(tab => (
-                                            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}>
-                                                {tab}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div className="py-4">
-                                        <TabContent />
-                                    </div>
+                            </div>
+                            {/* Common Details */}
+                            <div className="p-5 lg:p-6">
+                                <div className="flex justify-between items-center">
+                                    <p className="text-sm text-gray-800">{campaign.designer}</p>
+                                </div>
+                                <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
+                            </div>
+                            <TopSection />
+                            <div className="px-5 lg:px-6 pb-24">
+                                <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
+                                    {['Details', 'Price Breakdown', 'Size & Fit', 'Community'].map(tab => (
+                                        <button key={tab} onClick={() => setActiveTab(tab)} className={`py-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}>
+                                            {tab}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="py-4">
+                                    <TabContent />
                                 </div>
                             </div>
                         </div>
                         {/* Sticky CTA Bar */}
-                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
+                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
                             <MainActions />
                         </div>
                     </div>
@@ -1077,42 +1075,35 @@
         // --- NAVIGATION ---
         function TopNavBar({ onNavigate, currentScreen, dashboardView }) {
             return (
-                <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 fixed top-0 w-full z-40">
-                    {/* Desktop Nav */}
-                    <nav className="hidden sm:flex max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 justify-between items-center h-16">
-                        <div className="flex-shrink-0">
-                            <button onClick={() => onNavigate('Home')} className="text-2xl font-bold text-gray-900">MePont</button>
-                        </div>
-                        <div className="flex space-x-4">
-                            <button onClick={() => onNavigate('Home')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Drops</button>
-                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">My Pledges</button>
-                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Waiting List</button>
-                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Liked</button>
-                        </div>
-                    </nav>
+                <header className="fixed top-0 left-0 right-0 z-40 p-2 sm:p-4">
+                    <div className="max-w-7xl mx-auto flex justify-center">
+                        {/* Desktop Nav */}
+                        <nav className="hidden sm:flex items-center gap-2 bg-black/80 backdrop-blur-lg text-white rounded-full p-2 shadow-lg">
+                            <button onClick={() => onNavigate('Home')} className="text-lg font-bold px-4 py-1">MePont</button>
+                            <div className="h-6 w-px bg-gray-600"></div>
+                            <button onClick={() => onNavigate('Home')} className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${currentScreen === 'Home' ? 'bg-gray-700' : 'hover:bg-gray-800'}`}>Drops</button>
+                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${currentScreen === 'Dashboard' && dashboardView === 'My MePont' ? 'bg-gray-700' : 'hover:bg-gray-800'}`}>My Pledges</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${currentScreen === 'Dashboard' && dashboardView === 'Waiting List' ? 'bg-gray-700' : 'hover:bg-gray-800'}`}>Waiting List</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${currentScreen === 'Dashboard' && dashboardView === 'Liked' ? 'bg-gray-700' : 'hover:bg-gray-800'}`}>Liked</button>
+                        </nav>
 
-                    {/* Mobile Nav */}
-                    <nav className="sm:hidden flex justify-between items-center h-16 px-4">
-                         <div className="flex items-center space-x-4">
-                             <button onClick={() => onNavigate('Home')} className={`p-2 rounded-lg ${currentScreen === 'Home' ? 'text-blue-600' : 'text-gray-500'}`}>
+                        {/* Mobile Nav */}
+                        <nav className="sm:hidden flex justify-between items-center w-full max-w-sm bg-black/80 backdrop-blur-lg text-white rounded-full p-2 shadow-lg">
+                            <button onClick={() => onNavigate('Home')} className={`p-2 rounded-full ${currentScreen === 'Home' ? 'bg-gray-700' : ''}`}>
                                 <HomeIcon className="w-6 h-6" />
                             </button>
-                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`p-2 rounded-lg ${currentScreen === 'Dashboard' && dashboardView === 'Waiting List' ? 'text-blue-600' : 'text-gray-500'}`}>
+                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`p-2 rounded-full ${currentScreen === 'Dashboard' && dashboardView === 'Waiting List' ? 'bg-gray-700' : ''}`}>
                                 <ListIcon className="w-6 h-6" />
                             </button>
-                         </div>
-                         <div className="flex-shrink-0">
-                            <button onClick={() => onNavigate('Home')} className="text-2xl font-bold text-gray-900">MePont</button>
-                        </div>
-                         <div className="flex items-center space-x-4">
-                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`p-2 rounded-lg ${currentScreen === 'Dashboard' && dashboardView === 'Liked' ? 'text-blue-600' : 'text-gray-500'}`}>
+                            <button onClick={() => onNavigate('Home')} className="text-xl font-bold">MePont</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`p-2 rounded-full ${currentScreen === 'Dashboard' && dashboardView === 'Liked' ? 'bg-gray-700' : ''}`}>
                                 <HeartIcon className="w-6 h-6" />
                             </button>
-                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`p-2 rounded-lg ${currentScreen === 'Dashboard' && dashboardView === 'My MePont' ? 'text-blue-600' : 'text-gray-500'}`}>
+                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`p-2 rounded-full ${currentScreen === 'Dashboard' && dashboardView === 'My MePont' ? 'bg-gray-700' : ''}`}>
                                 <UserIcon className="w-6 h-6" />
                             </button>
-                         </div>
-                    </nav>
+                        </nav>
+                    </div>
                 </header>
             );
         }

@@ -645,10 +645,6 @@
                     {campaign.stage === 'PRE_ORDER' && ( campaign.preOrderDetails.fundingType === 'COMBINED' ? ( <> <div className="w-full bg-gray-200 rounded-full h-2.5"> <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0) / campaign.preOrderDetails.overallMoq) * 100}%` }}></div> </div> <div className="flex justify-between items-center text-sm text-gray-600 mt-2"> <span>{Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0)} / {campaign.preOrderDetails.overallMoq} Funded</span> <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span> </div> </> ) : ( <> <div className="flex justify-between items-center text-sm text-gray-600 mb-4"> <span className="font-semibold">Funding Ends in {campaign.preOrderDetails.daysLeft} days</span> <span className="font-bold text-lg">€{campaign.price}</span> </div> <div className="space-y-3 mb-4"> <h4 className="font-semibold text-sm text-gray-800">Fund each size independently:</h4> {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => { const progress = (data.funded / data.moq) * 100; const isFunded = progress >= 100; return ( <div key={size}> <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}> <span className="font-semibold">{size}</span> <span>{data.funded} / {data.moq}</span> </div> <div className="w-full bg-gray-200 rounded-full h-2"> <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div> </div> </div> ); })} </div> </> ) )}
                     {campaign.stage === 'DESIGN' && ( <> <div className="w-full bg-gray-200 rounded-full h-2"> <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${(campaign.likes / campaign.targetLikes) * 100}%` }}></div> </div> <div className="flex justify-between items-center text-sm text-gray-600 mt-2"> <span>{campaign.likes} / {campaign.targetLikes} likes to sample</span> </div> </> )}
                     {campaign.stage === 'SAMPLING' && ( <div className="bg-cyan-50 text-cyan-800 p-4 rounded-lg text-center"> <p className="font-semibold">Sample in Progress</p> <p className="text-sm">{campaign.samplingDaysLeft} days until reveal</p> </div> )}
-                    
-                    <div className="hidden lg:block mt-4">
-                        <MainActions />
-                    </div>
                 </div>
             );
 
@@ -722,78 +718,24 @@
             };
 
             return (
-                <>
-                {/* Scrollable Content */}
-                <div className="flex-grow overflow-y-auto scrollbar-hide lg:pb-0 pb-24">
-                    {/* Desktop Layout */}
-                    <div className="hidden lg:grid lg:grid-cols-5 w-full h-full">
-                        <div className="lg:col-span-3 h-full p-4 flex gap-4">
-                            <div className="flex flex-col space-y-2 pt-1 overflow-y-auto scrollbar-hide">
-                                {mediaItems.map((media, index) => (
-                                    <button key={index} onClick={() => setCurrentMediaIndex(index)} className={`w-16 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 relative ${currentMediaIndex === index ? 'border-blue-600' : 'border-transparent'}`}>
-                                        <img src={media.thumbnail} alt={media.type} className="w-full h-full object-cover" />
-                                        {media.type === 'video' && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><PlayIcon className="w-6 h-6 text-white" /></div>}
-                                    </button>
-                                ))}
-                            </div>
-                            <div className="relative flex-1 h-full">
-                                <button className="w-full h-full rounded-lg overflow-hidden" onClick={() => onShowMedia(currentMediaIndex)}>
-                                    {mediaItems[currentMediaIndex].type === 'video' ? (
-                                        <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-cover bg-black"></video>
-                                    ) : (
-                                        <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover" />
-                                    )}
+                <div className="w-full h-full lg:grid lg:grid-cols-5">
+                    {/* Media Column (Left) */}
+                    <div className="lg:col-span-3 h-full p-4 hidden lg:flex gap-4">
+                        <div className="flex flex-col space-y-2 pt-1 overflow-y-auto scrollbar-hide">
+                            {mediaItems.map((media, index) => (
+                                <button key={index} onClick={() => setCurrentMediaIndex(index)} className={`w-16 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 relative ${currentMediaIndex === index ? 'border-blue-600' : 'border-transparent'}`}>
+                                    <img src={media.thumbnail} alt={media.type} className="w-full h-full object-cover" />
+                                    {media.type === 'video' && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><PlayIcon className="w-6 h-6 text-white" /></div>}
                                 </button>
-                                {campaign.has3D && (
-                                    <button 
-                                        onClick={(e) => { e.stopPropagation(); onShow3D(); }} 
-                                        className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"
-                                    >
-                                        <CubeIcon className="w-5 h-5" />
-                                        <span>3D</span>
-                                    </button>
+                            ))}
+                        </div>
+                        <div className="relative flex-1 h-full">
+                            <button className="w-full h-full rounded-lg overflow-hidden" onClick={() => onShowMedia(currentMediaIndex)}>
+                                {mediaItems[currentMediaIndex].type === 'video' ? (
+                                    <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-cover bg-black"></video>
+                                ) : (
+                                    <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover" />
                                 )}
-                            </div>
-                        </div>
-                        <div className="lg:col-span-2 h-full overflow-y-auto scrollbar-hide">
-                           <div className="bg-transparent">
-                                <div className="p-5 lg:p-6 border-b border-gray-200">
-                                    <div className="flex justify-between items-center">
-                                        <p className="text-sm text-gray-800">{campaign.designer}</p>
-                                    </div>
-                                    <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
-                                </div>
-                                <TopSection />
-                                <div className="px-5 lg:px-6 pb-5">
-                                    <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
-                                        {['Details', 'Price Breakdown', 'Size & Fit', 'Community'].map(tab => (
-                                            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}>
-                                                {tab}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div className="py-4">
-                                        <TabContent />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Mobile Layout */}
-                    <div className="lg:hidden w-full h-full">
-                        <div 
-                            className={`relative aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
-                            onTouchStart={handleTouchStart}
-                            onTouchMove={handleTouchMove}
-                            onTouchEnd={handleTouchEnd}
-                        >
-                            <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
-                            {mediaItems[currentMediaIndex].type === 'video' ? (
-                                <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover rounded-lg shadow-lg bg-black"></video>
-                            ) : (
-                                <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover rounded-lg shadow-lg" />
-                            )}
                             </button>
                             {campaign.has3D && (
                                 <button 
@@ -805,12 +747,43 @@
                                 </button>
                             )}
                         </div>
-                        <div className="flex justify-center items-center space-x-2">
-                            {mediaItems.map((_, index) => (
-                                <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                            ))}
-                        </div>
-                         <div className="bg-transparent">
+                    </div>
+
+                    {/* Details Column (Right) */}
+                    <div className="lg:col-span-2 h-full flex flex-col">
+                        <div className="flex-grow overflow-y-auto scrollbar-hide pb-24 lg:pb-0">
+                             {/* Mobile Media */}
+                            <div className="lg:hidden">
+                                <div 
+                                    className={`relative aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
+                                    onTouchStart={handleTouchStart}
+                                    onTouchMove={handleTouchMove}
+                                    onTouchEnd={handleTouchEnd}
+                                >
+                                    <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
+                                    {mediaItems[currentMediaIndex].type === 'video' ? (
+                                        <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover bg-black"></video>
+                                    ) : (
+                                        <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover" />
+                                    )}
+                                    </button>
+                                    {campaign.has3D && (
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); onShow3D(); }} 
+                                            className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"
+                                        >
+                                            <CubeIcon className="w-5 h-5" />
+                                            <span>3D</span>
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="flex justify-center items-center space-x-2">
+                                    {mediaItems.map((_, index) => (
+                                        <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                    ))}
+                                </div>
+                            </div>
+                            {/* Common Details */}
                             <div className="p-5 lg:p-6">
                                 <div className="flex justify-between items-center">
                                     <p className="text-sm text-gray-800">{campaign.designer}</p>
@@ -831,13 +804,12 @@
                                 </div>
                             </div>
                         </div>
+                        {/* Sticky CTA Bar */}
+                        <div className="absolute bottom-0 left-0 right-0 lg:static p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
+                            <MainActions />
+                        </div>
                     </div>
                 </div>
-                {/* Sticky CTA Bar for Mobile */}
-                <div className="lg:hidden absolute bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
-                    <MainActions />
-                </div>
-                </>
             );
         };
 

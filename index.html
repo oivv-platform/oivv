@@ -34,24 +34,25 @@
             filter: blur(4px);
             transition: filter 0.3s ease-in-out;
         }
-        /* Animation for Toast */
-        .toast-enter {
-            opacity: 0;
-            transform: translateY(20px);
+        
+        /* Keyframes for the island notification */
+        @keyframes island-notify-bg {
+            0%, 100% { background-color: #111827; } /* bg-gray-900 */
+            10%, 90% { background-color: #059669; } /* bg-emerald-600 */
         }
-        .toast-enter-active {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 300ms, transform 300ms;
+
+        @keyframes island-notify-text {
+            0% { transform: translateX(100%); opacity: 0; }
+            10%, 90% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(-100%); opacity: 0; }
         }
-        .toast-exit {
-            opacity: 1;
-            transform: translateY(0);
+
+        .island-notification-bg-animate {
+            animation: island-notify-bg 3s ease-in-out forwards;
         }
-        .toast-exit-active {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 300ms, transform 300ms;
+        
+        .island-notification-text-animate {
+            animation: island-notify-text 3s ease-in-out forwards;
         }
     </style>
 </head>
@@ -157,8 +158,11 @@
         ];
 
         // --- UI ICONS ---
-        const PlusIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
-        const MinusIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
+        const InfoIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>;
+        const ShirtIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>;
+        const TagIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2z"></path><path d="M7 7h.01"></path></svg>;
+        const RulerIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L3 8.4a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0L15.3 9"></path><path d="m14.5 12.5 2-2"></path><path d="m11.5 9.5 2-2"></path><path d="m8.5 6.5 2-2"></path><path d="m17.5 15.5 2-2"></path></svg>;
+        const UsersIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
         const PlayIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path d="M8 5v14l11-7z"></path></svg>;
         const CubeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>;
         const HomeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>;
@@ -184,24 +188,14 @@
             const [showMediaModal, setShowMediaModal] = useState({ visible: false, startIndex: 0 });
             const [showCampaignModal, setShowCampaignModal] = useState(null);
             const [dashboardView, setDashboardView] = useState('My MePont'); 
-            const [toast, setToast] = useState({ visible: false, message: '' });
 
             useEffect(() => {
-                // Simulate data fetching
                 setTimeout(() => {
                     setCampaigns(MOCK_CAMPAIGNS);
-                    // Pre-populate some liked items for demo
                     setLikedItems(MOCK_CAMPAIGNS.filter(c => c.id === 3));
                     setIsLoading(false);
                 }, 1500);
             }, []);
-            
-            const showToast = (message) => {
-                setToast({ visible: true, message });
-                setTimeout(() => {
-                    setToast({ visible: false, message: '' });
-                }, 3000);
-            };
 
             const isModalOpen = showPledgeModal || show3DModal || showMediaModal.visible || !!showCampaignModal;
             const isNestedModalOpen = (!!showCampaignModal) && (showPledgeModal || show3DModal || showMediaModal.visible);
@@ -250,7 +244,7 @@
                 setShowCampaignModal(campaign);
             };
             
-            const handleLike = (campaignId) => {
+            const handleLike = (campaignId, showNotification) => {
                 const campaign = campaigns.find(c => c.id === campaignId);
                 let isNowLiked = false;
                 setLikedItems(prev => {
@@ -269,10 +263,10 @@
                     }
                     return c;
                 }));
-                showToast(isNowLiked ? `Added ${campaign.name} to liked items!` : `Removed ${campaign.name} from liked items.`);
+                if(showNotification) showNotification(isNowLiked ? `Added to Liked Items` : `Removed from Liked`);
             };
 
-            const handleAddToWaitingList = (campaignId) => {
+            const handleAddToWaitingList = (campaignId, showNotification) => {
                 const campaign = campaigns.find(c => c.id === campaignId);
                 let isNowOnList = false;
                 setWaitingListItems(prev => {
@@ -285,10 +279,10 @@
                         return [...prev, campaign];
                     }
                 });
-                showToast(isNowOnList ? 'Added to waiting list!' : 'Removed from waiting list.');
+                if(showNotification) showNotification(isNowOnList ? 'Added to Waiting List' : 'Removed from List');
             };
 
-            const handlePledge = (campaign, size) => {
+            const handlePledge = (campaign, size, showNotification) => {
                 const newPledge = { ...campaign, size, productionStatus: 'Confirmed' };
                 setPledgedItems(prev => [...prev, newPledge]);
                 setCampaigns(prevCampaigns =>
@@ -306,23 +300,23 @@
                     })
                 );
                 setShowPledgeModal(false);
-                showToast(`Pledge for ${campaign.name} (Size ${size}) confirmed!`);
+                if(showNotification) showNotification(`Pledge for Size ${size} Confirmed!`);
             };
             
-            const addComment = (campaignId, commentText) => {
+            const addComment = (campaignId, commentText, showNotification) => {
                 const newComment = { user: 'You', comment: commentText };
                 setCampaigns(prev => prev.map(c => 
                     c.id === campaignId ? {...c, comments: [...c.comments, newComment]} : c
                 ));
-                 showToast('Comment posted!');
+                 if(showNotification) showNotification('Comment Posted!');
             };
             
-            const addReview = (campaignId, review) => {
+            const addReview = (campaignId, review, showNotification) => {
                 const newReview = { user: 'You', ...review };
                 setCampaigns(prev => prev.map(c => 
                     c.id === campaignId ? {...c, reviews: [...c.reviews, newReview]} : c
                 ));
-                showToast('Review submitted!');
+                if(showNotification) showNotification('Review Submitted!');
             };
 
             const renderScreen = () => {
@@ -331,7 +325,7 @@
                 }
                 switch (currentScreen) {
                     case 'Home':
-                        return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
+                        return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={(id) => handleLike(id, null)} likedItems={likedItems} />;
                     case 'Dashboard':
                         return <DashboardScreen 
                                     pledgedItems={pledgedItems} 
@@ -341,10 +335,10 @@
                                     activeView={dashboardView}
                                     onNavigate={navigateTo}
                                     onCampaignSelect={viewCampaignDetail}
-                                    onLike={handleLike}
+                                    onLike={(id) => handleLike(id, null)}
                                 />;
                     default:
-                        return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
+                        return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={(id) => handleLike(id, null)} likedItems={likedItems} />;
                 }
             };
 
@@ -376,11 +370,9 @@
                             isOnWaitingList={waitingListItems.some(item => item.id === showCampaignModal.id)}
                         />
                     }
-                    {showPledgeModal && <PledgeModal campaign={showCampaignModal} onClose={() => setShowPledgeModal(false)} onPledge={handlePledge} />}
+                    {showPledgeModal && <PledgeModal campaign={showCampaignModal} onClose={() => setShowPledgeModal(false)} onPledge={(campaign, size) => handlePledge(campaign, size, null)} />}
                     {show3DModal && <ThreeDModal onClose={() => setShow3DModal(false)} />}
                     {showMediaModal.visible && <MediaViewerModal campaign={showCampaignModal} startIndex={showMediaModal.startIndex} onClose={() => setShowMediaModal({ visible: false, startIndex: 0 })} />}
-                    
-                    <Toast message={toast.message} visible={toast.visible} />
                 </div>
             );
         }
@@ -629,6 +621,11 @@
         // --- MODALS ---
         function CampaignDetailModal({ campaign, onPledge, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, isNestedModalOpen, onAddToWaitingList, isOnWaitingList }) {
             const [show, setShow] = useState(false);
+            const [islandNotification, setIslandNotification] = useState({ key: 0, message: '' });
+
+            const showIslandNotification = (message) => {
+                setIslandNotification({ key: Date.now(), message });
+            };
             
             useEffect(() => {
                 const timer = setTimeout(() => setShow(true), 10);
@@ -653,31 +650,30 @@
                         className={`w-full h-full bg-white/80 backdrop-blur-xl shadow-2xl transform transition-all duration-300 ease-in-out relative flex flex-col sm:rounded-2xl sm:overflow-hidden ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-600 bg-white/50 rounded-full p-2 hover:bg-white z-20">
+                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-600 bg-white/50 rounded-full p-2 hover:bg-white z-30">
                             <XIcon className="w-6 h-6" />
                         </button>
                         <CampaignDetailContent 
                             campaign={campaign} 
-                            onPledge={onPledge} 
-                            onLike={onLike} 
+                            onPledge={() => onPledge(campaign.id, null, showIslandNotification)} // Size will be handled in pledge modal
+                            onLike={() => onLike(campaign.id, showIslandNotification)} 
                             isLiked={isLiked} 
                             hasPurchased={hasPurchased} 
-                            onCommentSubmit={onCommentSubmit} 
-                            onReviewSubmit={onReviewSubmit} 
+                            onCommentSubmit={(id, text) => onCommentSubmit(id, text, showIslandNotification)} 
+                            onReviewSubmit={(id, review) => onReviewSubmit(id, review, showIslandNotification)} 
                             onShow3D={onShow3D} 
                             onShowMedia={onShowMedia} 
-                            onAddToWaitingList={onAddToWaitingList} 
+                            onAddToWaitingList={() => onAddToWaitingList(campaign.id, showIslandNotification)} 
                             isOnWaitingList={isOnWaitingList}
+                            islandNotification={islandNotification}
                         />
                     </div>
                 </div>
             );
         };
         
-        function CampaignDetailContent({ campaign, onPledge, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onAddToWaitingList, isOnWaitingList }) {
-            const [activeTab, setActiveTab] = useState('Details');
+        function CampaignDetailContent({ campaign, onPledge, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onAddToWaitingList, isOnWaitingList, islandNotification }) {
             const [selectedSize, setSelectedSize] = useState(campaign.sizeGuide.sizes && Object.keys(campaign.sizeGuide.sizes).length > 0 ? Object.keys(campaign.sizeGuide.sizes)[0] : null);
-            const [openAccordion, setOpenAccordion] = useState(null);
             
             const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
             const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -686,6 +682,15 @@
             const touchStartX = useRef(0);
             const touchEndX = useRef(0);
             const hasSwiped = useRef(false);
+
+            const contentRef = useRef(null);
+            const sectionRefs = {
+                details: useRef(null),
+                care: useRef(null),
+                price: useRef(null),
+                size: useRef(null),
+                community: useRef(null),
+            };
 
             const handleTouchStart = (e) => {
                 touchStartX.current = e.targetTouches[0].clientX;
@@ -718,16 +723,12 @@
                     onShowMedia(index);
                 }
             };
-            
-            const handleAccordionToggle = (title) => {
-                setOpenAccordion(openAccordion === title ? null : title);
-            };
 
             const MainActions = () => {
                 const actionButtonClass = "font-bold py-3 sm:py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 w-full disabled:opacity-50 disabled:cursor-not-allowed";
                 switch(campaign.stage) {
-                    case 'DESIGN': return ( <button onClick={() => onLike(campaign.id)} className={`${actionButtonClass} ${isLiked ? 'bg-pink-600 text-white' : 'bg-white text-pink-600 border-2 border-pink-600'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
-                    case 'SAMPLING': return ( <button onClick={() => onAddToWaitingList(campaign.id)} className={`${actionButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
+                    case 'DESIGN': return ( <button onClick={onLike} className={`${actionButtonClass} ${isLiked ? 'bg-pink-600 text-white' : 'bg-white text-pink-600 border-2 border-pink-600'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
+                    case 'SAMPLING': return ( <button onClick={onAddToWaitingList} className={`${actionButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
                     case 'PRE_ORDER': 
                         return (
                             <div className="flex items-stretch gap-3 w-full">
@@ -753,203 +754,6 @@
                     {campaign.stage === 'CONFIRMED' && ( <div className="bg-green-50 text-green-800 p-4 rounded-lg text-center flex items-center justify-center gap-2"> <CheckCircleIcon className="w-5 h-5" /> <p className="font-semibold">Funding Goal Reached!</p> <p className="text-sm">Production starting soon.</p> </div> )}
                 </div>
             );
-
-            const TabContent = () => {
-                const { digitalPassport, manufacturer, garmentCare, designerUpdates } = campaign;
-                const euCountries = ["Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", "Slovenia", "Spain", "Sweden"];
-                const isEU = manufacturer && euCountries.includes(manufacturer.country);
-
-                const tabData = {
-                    'Details': (
-                        <div>
-                            <p className="text-gray-700 mb-6">{campaign.details}</p>
-                            {isEU && (
-                                <div className="mb-6 bg-blue-50 border border-blue-200 p-4 rounded-lg flex items-center gap-4">
-                                    <EUFlagIcon />
-                                    <div>
-                                        <h4 className="font-bold text-blue-900">Proudly Made in the EU</h4>
-                                        <p className="text-sm text-blue-800">This product is manufactured in {manufacturer.country}, supporting local craftsmanship and ensuring high labor standards.</p>
-                                    </div>
-                                </div>
-                            )}
-                            {designerUpdates && designerUpdates.length > 0 && (
-                                <div className="mb-6">
-                                    <h3 className="font-bold text-md mb-3 text-gray-800">Designer's Updates</h3>
-                                    <div className="space-y-4">
-                                        {designerUpdates.map((update, index) => (
-                                            <div key={index} className="relative pl-6 border-l-2 border-gray-200">
-                                                <div className="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-gray-300 rounded-full"></div>
-                                                <p className="text-xs text-gray-500">{update.date}</p>
-                                                <p className="font-semibold text-gray-800">{update.title}</p>
-                                                <p className="text-sm text-gray-600">{update.text}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                             {digitalPassport && (
-                                <>
-                                <AccordionItem title="Manufacturer & Origin" isOpen={openAccordion === 'origin'} onToggle={() => handleAccordionToggle('origin')}>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between"><span className="text-gray-500">Manufacturer</span><span className="font-medium text-right">{digitalPassport.manufacturerInfo.name}</span></div>
-                                        <div className="flex justify-between"><span className="text-gray-500">Address</span><span className="font-medium text-right">{digitalPassport.manufacturerInfo.address}</span></div>
-                                        <div className="flex justify-between"><span className="text-gray-500">Contact</span><span className="font-medium text-right">{digitalPassport.manufacturerInfo.contact}</span></div>
-                                        <div className="flex justify-between"><span className="text-gray-500">Unique ID</span><span className="font-mono text-xs text-right bg-gray-200 px-1 py-0.5 rounded">{digitalPassport.uniqueId}</span></div>
-                                    </div>
-                                </AccordionItem>
-                                <AccordionItem title="Supply Chain Traceability" isOpen={openAccordion === 'supply'} onToggle={() => handleAccordionToggle('supply')}>
-                                    <div className="space-y-4">
-                                    {digitalPassport.supplyChain.map((item, index) => (
-                                        <div key={index} className="border-t border-gray-200 pt-3 first:border-t-0 first:pt-0">
-                                            <p className="font-semibold mb-2">{item.component}</p>
-                                            <div className="space-y-1 pl-2">
-                                                <div className="flex justify-between"><span className="text-gray-500">Material</span><span className="font-medium text-right">{item.material}</span></div>
-                                                <div className="flex justify-between"><span className="text-gray-500">Supplier</span><span className="font-medium text-right">{item.supplier}</span></div>
-                                                <div className="flex justify-between"><span className="text-gray-500">Origin</span><span className="font-medium text-right">{item.origin}</span></div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    </div>
-                                </AccordionItem>
-                                <AccordionItem title="Sustainability & Circularity" isOpen={openAccordion === 'sustainability'} onToggle={() => handleAccordionToggle('sustainability')}>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between"><span className="text-gray-500">Recycled Content</span><span className="font-medium text-right">{digitalPassport.sustainability.recycledContent}</span></div>
-                                        <div className="flex justify-between"><span className="text-gray-500">Durability</span><span className="font-medium text-right">{digitalPassport.sustainability.durability}</span></div>
-                                        <div className="flex justify-between items-start"><span className="text-gray-500">Repairability</span><div className="text-right"><p className="font-medium">{digitalPassport.sustainability.repairability.score}</p><p className="text-xs text-gray-500">{digitalPassport.sustainability.repairability.details}</p></div></div>
-                                        <div className="flex justify-between items-start"><span className="text-gray-500">End-of-Life</span><div className="text-right"><p className="font-medium">{digitalPassport.sustainability.endOfLife.recyclable ? 'Recyclable' : 'Non-recyclable'}</p><p className="text-xs text-gray-500">{digitalPassport.sustainability.endOfLife.instructions}</p></div></div>
-                                    </div>
-                                 </AccordionItem>
-                                 <AccordionItem title="Compliance & Certifications" isOpen={openAccordion === 'compliance'} onToggle={() => handleAccordionToggle('compliance')}>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between"><span className="text-gray-500">SVHC Declaration</span><span className="font-medium text-right">{digitalPassport.compliance.svhc}</span></div>
-                                        <div className="flex justify-between"><span className="text-gray-500">Certifications</span>
-                                            <ul className="text-right">
-                                                {digitalPassport.compliance.certifications.map(cert => <li key={cert} className="font-medium">{cert}</li>)}
-                                            </ul>
-                                        </div>
-                                    </div>
-                                 </AccordionItem>
-                                </>
-                             )}
-                        </div>
-                    ),
-                    'Care & Composition': (
-                        <div>
-                            <div className="bg-gray-100/80 p-4 rounded-lg space-y-2 text-sm">
-                                <h5 className="font-bold mb-2 text-gray-800">Composition</h5>
-                                <p className="text-gray-700">{garmentCare.composition}</p>
-                            </div>
-                            <div className="mt-4 bg-gray-100/80 p-4 rounded-lg space-y-2 text-sm">
-                                <h5 className="font-bold mb-2 text-gray-800">Care Instructions</h5>
-                                <ul className="list-disc list-inside text-gray-700">
-                                    {garmentCare.instructions.map((instruction, index) => <li key={index}>{instruction}</li>)}
-                                </ul>
-                            </div>
-                        </div>
-                    ),
-                    'Price Breakdown': (
-                        <div>
-                            <p className="text-gray-700 mb-4 text-sm">We believe in radical transparency. Here's the true cost of making this garment.</p>
-                            <div className="space-y-3 mb-6">
-                                {Object.entries(campaign.priceBreakdown).map(([key, value]) => {
-                                    const percentage = (value / campaign.price) * 100;
-                                    return (
-                                        <div key={key}>
-                                            <div className="flex justify-between text-sm mb-1">
-                                                <span className="capitalize text-gray-600">{key}</span>
-                                                <span className="font-semibold text-gray-900">€{value.toFixed(2)}</span>
-                                            </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div className="bg-blue-500 h-2 rounded-full" style={{width: `${percentage}%`}}></div>
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                            <div className="border-t border-gray-200 pt-4">
-                                <div className="flex justify-between text-sm mb-2">
-                                    <span className="text-gray-600">True Cost</span>
-                                    <span className="font-semibold text-gray-900">€{Object.values(campaign.priceBreakdown).reduce((sum, val) => sum + val, 0).toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between text-md font-bold text-gray-900">
-                                    <span>Our Price</span>
-                                    <span>€{campaign.price.toFixed(2)}</span>
-                                </div>
-                            </div>
-                            <div className="mt-6 bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800">
-                                <p><strong>Please Note:</strong> The final price at checkout will include an estimate for shipping and any applicable import duties based on your delivery address. This will be clearly displayed before you confirm your pledge.</p>
-                            </div>
-                        </div>
-                    ),
-                    'Size & Fit': (
-                        <div>
-                            <p className="text-gray-700 mb-4">{campaign.sizeGuide.fitDetails}</p>
-                            {selectedSize ? (
-                                <>
-                                <div className="flex space-x-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
-                                    {Object.keys(campaign.sizeGuide.sizes).map(size => (
-                                        <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
-                                            {size}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="bg-gray-100/80 p-4 rounded-lg space-y-2 text-sm">
-                                    <h5 className="font-bold mb-2 text-gray-800">Measurements for Size {selectedSize}</h5>
-                                    {Object.entries(campaign.sizeGuide.sizes[selectedSize]).map(([key, value]) => (
-                                        <div key={key} className="flex justify-between">
-                                            <span className="text-gray-600">{key}</span>
-                                            <span className="font-semibold text-gray-900">{value}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                </>
-                            ) : <p className="text-gray-500 text-sm">Size guide coming soon.</p>}
-                        </div>
-                    ),
-                    'Community': (
-                        <div className="space-y-6">
-                            <div>
-                                <h4 className="font-bold text-md mb-3 text-gray-800">Reviews</h4>
-                                {campaign.reviews.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {campaign.reviews.map((review, index) => (
-                                            <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
-                                                <div className="flex items-center mb-1">
-                                                    {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-yellow-500" isFilled={i < review.rating} />)}
-                                                    <span className="ml-2 font-bold text-gray-800">{review.user}</span>
-                                                </div>
-                                                <p className="text-gray-700">{review.comment}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-gray-500 text-sm py-2">No reviews yet.</p>
-                                )}
-                                {hasPurchased && <ReviewForm campaignId={campaign.id} onSubmit={onReviewSubmit} />}
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-md mb-3 text-gray-800">Comments</h4>
-                                {campaign.comments.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {campaign.comments.map((comment, index) => (
-                                            <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
-                                                <p className="font-bold text-sm text-gray-800">{comment.user}</p>
-                                                <p className="text-gray-700">{comment.comment}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-gray-500 text-sm py-2">No comments yet. Be the first!</p>
-                                )}
-                                <CommentForm campaignId={campaign.id} onSubmit={onCommentSubmit} />
-                            </div>
-                        </div>
-                    ),
-                };
-                return tabData[activeTab];
-            };
-
-            const TABS = ['Details', 'Care & Composition', 'Price Breakdown', 'Size & Fit', 'Community'];
 
             return (
                 <div className="w-full h-full lg:grid lg:grid-cols-5">
@@ -986,7 +790,7 @@
                     {/* Details Column (Right) */}
                     <div className="lg:col-span-2 h-full flex flex-col">
                         <div className="flex-1 relative">
-                            <div className="absolute inset-0 overflow-y-auto scrollbar-hide">
+                            <div ref={contentRef} className="absolute inset-0 overflow-y-auto scrollbar-hide">
                                  {/* Mobile Media */}
                                 <div className="lg:hidden">
                                     <div 
@@ -1018,27 +822,158 @@
                                         ))}
                                     </div>
                                 </div>
+                                
                                 {/* Common Details */}
-                                <div className="p-5 lg:p-6">
+                                <div className="p-5 lg:p-6 lg:pt-20"> {/* Add padding for sticky island */}
                                     <div className="flex justify-between items-center">
                                         <p className="text-sm text-gray-800">{campaign.designer}</p>
                                     </div>
                                     <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
                                 </div>
                                 <TopSection />
-                                <div className="px-5 lg:px-6 pb-24">
-                                    <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
-                                        {TABS.map(tab => (
-                                            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}>
-                                                {tab}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div className="py-4">
-                                        <TabContent />
-                                    </div>
+
+                                <div className="px-5 lg:px-6 pb-24 space-y-8">
+                                    <ContentSection id="details" title="Details" ref={sectionRefs.details}>
+                                        <p className="text-gray-700 mb-6">{campaign.details}</p>
+                                        {campaign.manufacturer && campaign.manufacturer.country !== 'TBD' && ["Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", "Slovenia", "Spain", "Sweden"].includes(campaign.manufacturer.country) && (
+                                            <div className="mb-6 bg-blue-50 border border-blue-200 p-4 rounded-lg flex items-center gap-4">
+                                                <EUFlagIcon />
+                                                <div>
+                                                    <h4 className="font-bold text-blue-900">Proudly Made in the EU</h4>
+                                                    <p className="text-sm text-blue-800">This product is manufactured in {campaign.manufacturer.country}, supporting local craftsmanship and ensuring high labor standards.</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {campaign.designerUpdates && campaign.designerUpdates.length > 0 && (
+                                            <div className="mb-6">
+                                                <h3 className="font-bold text-md mb-3 text-gray-800">Designer's Updates</h3>
+                                                <div className="space-y-4">
+                                                    {campaign.designerUpdates.map((update, index) => (
+                                                        <div key={index} className="relative pl-6 border-l-2 border-gray-200">
+                                                            <div className="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-gray-300 rounded-full"></div>
+                                                            <p className="text-xs text-gray-500">{update.date}</p>
+                                                            <p className="font-semibold text-gray-800">{update.title}</p>
+                                                            <p className="text-sm text-gray-600">{update.text}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </ContentSection>
+
+                                    <ContentSection id="care" title="Care & Composition" ref={sectionRefs.care}>
+                                        <div className="bg-gray-100/80 p-4 rounded-lg space-y-2 text-sm">
+                                            <h5 className="font-bold mb-2 text-gray-800">Composition</h5>
+                                            <p className="text-gray-700">{campaign.garmentCare.composition}</p>
+                                        </div>
+                                        <div className="mt-4 bg-gray-100/80 p-4 rounded-lg space-y-2 text-sm">
+                                            <h5 className="font-bold mb-2 text-gray-800">Care Instructions</h5>
+                                            <ul className="list-disc list-inside text-gray-700">
+                                                {campaign.garmentCare.instructions.map((instruction, index) => <li key={index}>{instruction}</li>)}
+                                            </ul>
+                                        </div>
+                                    </ContentSection>
+
+                                    <ContentSection id="price" title="Price Breakdown" ref={sectionRefs.price}>
+                                        <p className="text-gray-700 mb-4 text-sm">We believe in radical transparency. Here's the true cost of making this garment.</p>
+                                        <div className="space-y-3 mb-6">
+                                            {Object.entries(campaign.priceBreakdown).map(([key, value]) => {
+                                                const percentage = (value / campaign.price) * 100;
+                                                return (
+                                                    <div key={key}>
+                                                        <div className="flex justify-between text-sm mb-1">
+                                                            <span className="capitalize text-gray-600">{key}</span>
+                                                            <span className="font-semibold text-gray-900">€{value.toFixed(2)}</span>
+                                                        </div>
+                                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                                            <div className="bg-blue-500 h-2 rounded-full" style={{width: `${percentage}%`}}></div>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                        <div className="border-t border-gray-200 pt-4">
+                                            <div className="flex justify-between text-sm mb-2">
+                                                <span className="text-gray-600">True Cost</span>
+                                                <span className="font-semibold text-gray-900">€{Object.values(campaign.priceBreakdown).reduce((sum, val) => sum + val, 0).toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-md font-bold text-gray-900">
+                                                <span>Our Price</span>
+                                                <span>€{campaign.price.toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="mt-6 bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800">
+                                            <p><strong>Please Note:</strong> The final price at checkout will include an estimate for shipping and any applicable import duties based on your delivery address. This will be clearly displayed before you confirm your pledge.</p>
+                                        </div>
+                                    </ContentSection>
+
+                                    <ContentSection id="size" title="Size & Fit" ref={sectionRefs.size}>
+                                        <p className="text-gray-700 mb-4">{campaign.sizeGuide.fitDetails}</p>
+                                        {selectedSize ? (
+                                            <>
+                                            <div className="flex space-x-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                                                {Object.keys(campaign.sizeGuide.sizes).map(size => (
+                                                    <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                                        {size}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="bg-gray-100/80 p-4 rounded-lg space-y-2 text-sm">
+                                                <h5 className="font-bold mb-2 text-gray-800">Measurements for Size {selectedSize}</h5>
+                                                {Object.entries(campaign.sizeGuide.sizes[selectedSize]).map(([key, value]) => (
+                                                    <div key={key} className="flex justify-between">
+                                                        <span className="text-gray-600">{key}</span>
+                                                        <span className="font-semibold text-gray-900">{value}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            </>
+                                        ) : <p className="text-gray-500 text-sm">Size guide coming soon.</p>}
+                                    </ContentSection>
+
+                                    <ContentSection id="community" title="Community" ref={sectionRefs.community}>
+                                        <h4 className="font-bold text-md mb-3 text-gray-800">Reviews</h4>
+                                        {campaign.reviews.length > 0 ? (
+                                            <div className="space-y-4">
+                                                {campaign.reviews.map((review, index) => (
+                                                    <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                                                        <div className="flex items-center mb-1">
+                                                            {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-yellow-500" isFilled={i < review.rating} />)}
+                                                            <span className="ml-2 font-bold text-gray-800">{review.user}</span>
+                                                        </div>
+                                                        <p className="text-gray-700">{review.comment}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-gray-500 text-sm py-2">No reviews yet.</p>
+                                        )}
+                                        {hasPurchased && <ReviewForm campaignId={campaign.id} onSubmit={onReviewSubmit} />}
+                                        
+                                        <h4 className="font-bold text-md mt-6 mb-3 text-gray-800">Comments</h4>
+                                        {campaign.comments.length > 0 ? (
+                                            <div className="space-y-4">
+                                                {campaign.comments.map((comment, index) => (
+                                                    <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                                                        <p className="font-bold text-sm text-gray-800">{comment.user}</p>
+                                                        <p className="text-gray-700">{comment.comment}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-gray-500 text-sm py-2">No comments yet. Be the first!</p>
+                                        )}
+                                        <CommentForm campaignId={campaign.id} onSubmit={onCommentSubmit} />
+                                    </ContentSection>
                                 </div>
                             </div>
+                             <DetailIsland 
+                                campaignName={campaign.name}
+                                designerName={campaign.designer}
+                                sectionRefs={sectionRefs}
+                                containerRef={contentRef}
+                                notification={islandNotification}
+                             />
                         </div>
                         {/* Sticky CTA Bar */}
                         <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
@@ -1048,6 +983,13 @@
                 </div>
             );
         };
+
+        const ContentSection = React.forwardRef(({ id, title, children }, ref) => (
+            <div id={id} ref={ref} className="scroll-mt-24">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{title}</h3>
+                {children}
+            </div>
+        ));
 
         function PledgeModal({ campaign, onClose, onPledge }) {
             const [show, setShow] = useState(false);
@@ -1127,22 +1069,6 @@
         }
 
         // --- REUSABLE UI COMPONENTS ---
-        const AccordionItem = ({ title, children, isOpen, onToggle }) => {
-            return (
-                <div className="border-b border-gray-200 last:border-b-0">
-                    <button onClick={onToggle} className="w-full flex justify-between items-center py-4 text-left">
-                        <span className="font-semibold text-gray-800">{title}</span>
-                        {isOpen ? <MinusIcon className="w-5 h-5 text-gray-600" /> : <PlusIcon className="w-5 h-5 text-gray-600" />}
-                    </button>
-                    {isOpen && (
-                        <div className="pb-4 text-sm text-gray-700">
-                            {children}
-                        </div>
-                    )}
-                </div>
-            );
-        };
-        
         function CommentForm({ campaignId, onSubmit }) {
             const [comment, setComment] = useState('');
             const handleSubmit = (e) => {
@@ -1305,27 +1231,6 @@
                 </div>
             );
         };
-
-        const Toast = ({ message, visible }) => {
-            const [isRendered, setIsRendered] = useState(visible);
-
-            useEffect(() => {
-                if (visible) {
-                    setIsRendered(true);
-                } else {
-                    const timer = setTimeout(() => setIsRendered(false), 300); // Match exit animation duration
-                    return () => clearTimeout(timer);
-                }
-            }, [visible]);
-
-            if (!isRendered) return null;
-
-            return (
-                <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] bg-gray-900/80 backdrop-blur-sm text-white font-semibold py-3 px-6 rounded-full shadow-lg ${visible ? 'toast-enter-active' : 'toast-exit-active'}`}>
-                    {message}
-                </div>
-            );
-        };
         
         // --- SKELETON LOADERS ---
         const CampaignCardSkeleton = () => (
@@ -1395,6 +1300,93 @@
                 </header>
             );
         }
+
+        const DetailIsland = ({ campaignName, designerName, sectionRefs, containerRef, notification }) => {
+            const [activeSection, setActiveSection] = useState('details');
+            const islandRef = useRef(null);
+
+            const SECTIONS = [
+                { id: 'details', icon: InfoIcon, label: 'Details' },
+                { id: 'care', icon: ShirtIcon, label: 'Care' },
+                { id: 'price', icon: TagIcon, label: 'Price' },
+                { id: 'size', icon: RulerIcon, label: 'Size' },
+                { id: 'community', icon: UsersIcon, label: 'Community' },
+            ];
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                setActiveSection(entry.target.id);
+                            }
+                        });
+                    },
+                    { root: containerRef.current, rootMargin: "-50% 0px -50% 0px", threshold: 0 }
+                );
+
+                const refs = sectionRefs;
+                Object.values(refs).forEach(ref => {
+                    if (ref.current) observer.observe(ref.current);
+                });
+
+                return () => {
+                    Object.values(refs).forEach(ref => {
+                        if (ref.current) observer.unobserve(ref.current);
+                    });
+                };
+            }, [sectionRefs, containerRef]);
+
+            const handleNavClick = (id) => {
+                sectionRefs[id].current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+
+            return (
+                <div className="absolute top-0 left-0 right-0 p-4 lg:p-6 z-20">
+                    <div 
+                        ref={islandRef}
+                        key={notification.key}
+                        className={`
+                            relative flex items-center justify-between h-14 px-2 lg:px-4 
+                            bg-gray-900 rounded-2xl shadow-2xl overflow-hidden
+                            ${notification.message ? 'island-notification-bg-animate' : ''}
+                        `}
+                    >
+                        {/* Default view: Title and Nav Icons */}
+                        <div className={`flex items-center justify-between w-full transition-opacity duration-300 ${notification.message ? 'opacity-0' : 'opacity-100'}`}>
+                            <div className="hidden lg:block">
+                                <p className="text-white font-bold truncate">{campaignName}</p>
+                                <p className="text-gray-400 text-sm truncate">{designerName}</p>
+                            </div>
+                            <div className="flex items-center justify-center lg:justify-end flex-grow gap-x-2">
+                                {SECTIONS.map(({ id, icon: Icon, label }) => (
+                                    <button 
+                                        key={id} 
+                                        onClick={() => handleNavClick(id)}
+                                        className={`
+                                            p-2 rounded-full transition-colors duration-200
+                                            ${activeSection === id ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'}
+                                        `}
+                                        aria-label={label}
+                                    >
+                                        <Icon className="w-5 h-5" />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Notification view */}
+                        {notification.message && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <p className="text-white font-semibold whitespace-nowrap island-notification-text-animate">
+                                    {notification.message}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
 
         // --- RENDER APP ---
         const root = ReactDOM.createRoot(document.getElementById('root'));

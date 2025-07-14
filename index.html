@@ -37,8 +37,8 @@
         
         /* Keyframes for the island notification */
         @keyframes island-notify-bg {
-            0%, 100% { background-color: #111827; } /* bg-gray-900 */
-            10%, 90% { background-color: #059669; } /* bg-emerald-600 */
+            0%, 100% { background-color: rgba(17, 24, 39, 0.75); } /* bg-gray-900/75 */
+            10%, 90% { background-color: rgba(5, 150, 105, 0.85); } /* bg-emerald-600 with more opacity */
         }
 
         @keyframes island-notify-text {
@@ -650,9 +650,6 @@
                         className={`w-full h-full bg-white/80 backdrop-blur-xl shadow-2xl transform transition-all duration-300 ease-in-out relative flex flex-col sm:rounded-2xl sm:overflow-hidden ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-600 bg-white/50 rounded-full p-2 hover:bg-white z-30">
-                            <XIcon className="w-6 h-6" />
-                        </button>
                         <CampaignDetailContent 
                             campaign={campaign} 
                             onPledge={() => onPledge(campaign.id, null, showIslandNotification)} // Size will be handled in pledge modal
@@ -666,13 +663,14 @@
                             onAddToWaitingList={() => onAddToWaitingList(campaign.id, showIslandNotification)} 
                             isOnWaitingList={isOnWaitingList}
                             islandNotification={islandNotification}
+                            onClose={handleClose}
                         />
                     </div>
                 </div>
             );
         };
         
-        function CampaignDetailContent({ campaign, onPledge, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onAddToWaitingList, isOnWaitingList, islandNotification }) {
+        function CampaignDetailContent({ campaign, onPledge, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onAddToWaitingList, isOnWaitingList, islandNotification, onClose }) {
             const [selectedSize, setSelectedSize] = useState(campaign.sizeGuide.sizes && Object.keys(campaign.sizeGuide.sizes).length > 0 ? Object.keys(campaign.sizeGuide.sizes)[0] : null);
             
             const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
@@ -824,7 +822,7 @@
                                 </div>
                                 
                                 {/* Common Details */}
-                                <div className="p-5 lg:p-6 lg:pt-20"> {/* Add padding for sticky island */}
+                                <div className="p-5 lg:p-6 lg:pt-24"> {/* Add padding for sticky island */}
                                     <div className="flex justify-between items-center">
                                         <p className="text-sm text-gray-800">{campaign.designer}</p>
                                     </div>
@@ -967,13 +965,18 @@
                                     </ContentSection>
                                 </div>
                             </div>
-                             <DetailIsland 
-                                campaignName={campaign.name}
-                                designerName={campaign.designer}
-                                sectionRefs={sectionRefs}
-                                containerRef={contentRef}
-                                notification={islandNotification}
-                             />
+                            <div className="absolute top-0 left-0 right-0 p-4 z-20 flex justify-center items-start gap-2">
+                                <DetailIsland 
+                                    campaignName={campaign.name}
+                                    designerName={campaign.designer}
+                                    sectionRefs={sectionRefs}
+                                    containerRef={contentRef}
+                                    notification={islandNotification}
+                                />
+                                <button onClick={onClose} className="flex-shrink-0 bg-gray-900/75 backdrop-blur-lg text-white rounded-full p-3 shadow-lg hover:bg-gray-700/75 transition-colors">
+                                    <XIcon className="w-6 h-6" />
+                                </button>
+                            </div>
                         </div>
                         {/* Sticky CTA Bar */}
                         <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
@@ -1342,48 +1345,46 @@
             };
 
             return (
-                <div className="absolute top-0 left-0 right-0 p-4 lg:p-6 z-20">
-                    <div 
-                        ref={islandRef}
-                        key={notification.key}
-                        className={`
-                            relative flex items-center justify-between h-14 px-2 lg:px-4 
-                            bg-gray-900 rounded-2xl shadow-2xl overflow-hidden
-                            ${notification.message ? 'island-notification-bg-animate' : ''}
-                        `}
-                    >
-                        {/* Default view: Title and Nav Icons */}
-                        <div className={`flex items-center justify-between w-full transition-opacity duration-300 ${notification.message ? 'opacity-0' : 'opacity-100'}`}>
-                            <div className="hidden lg:block">
-                                <p className="text-white font-bold truncate">{campaignName}</p>
-                                <p className="text-gray-400 text-sm truncate">{designerName}</p>
-                            </div>
-                            <div className="flex items-center justify-center lg:justify-end flex-grow gap-x-2">
-                                {SECTIONS.map(({ id, icon: Icon, label }) => (
-                                    <button 
-                                        key={id} 
-                                        onClick={() => handleNavClick(id)}
-                                        className={`
-                                            p-2 rounded-full transition-colors duration-200
-                                            ${activeSection === id ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'}
-                                        `}
-                                        aria-label={label}
-                                    >
-                                        <Icon className="w-5 h-5" />
-                                    </button>
-                                ))}
-                            </div>
+                <div 
+                    ref={islandRef}
+                    key={notification.key}
+                    className={`
+                        relative flex-grow lg:flex-grow-0 flex items-center justify-between h-14 px-4
+                        bg-gray-900/75 backdrop-blur-lg rounded-full shadow-2xl overflow-hidden
+                        ${notification.message ? 'island-notification-bg-animate' : ''}
+                    `}
+                >
+                    {/* Default view: Title and Nav Icons */}
+                    <div className={`flex items-center justify-between w-full transition-opacity duration-300 ${notification.message ? 'opacity-0' : 'opacity-100'}`}>
+                        <div className="hidden lg:block mr-6">
+                            <p className="text-white font-bold truncate">{campaignName}</p>
+                            <p className="text-gray-400 text-sm truncate">{designerName}</p>
                         </div>
-
-                        {/* Notification view */}
-                        {notification.message && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <p className="text-white font-semibold whitespace-nowrap island-notification-text-animate">
-                                    {notification.message}
-                                </p>
-                            </div>
-                        )}
+                        <div className="flex items-center justify-center lg:justify-end flex-grow gap-x-2">
+                            {SECTIONS.map(({ id, icon: Icon, label }) => (
+                                <button 
+                                    key={id} 
+                                    onClick={() => handleNavClick(id)}
+                                    className={`
+                                        p-2 rounded-full transition-colors duration-200
+                                        ${activeSection === id ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'}
+                                    `}
+                                    aria-label={label}
+                                >
+                                    <Icon className="w-5 h-5" />
+                                </button>
+                            ))}
+                        </div>
                     </div>
+
+                    {/* Notification view */}
+                    {notification.message && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <p className="text-white font-semibold whitespace-nowrap island-notification-text-animate">
+                                {notification.message}
+                            </p>
+                        </div>
+                    )}
                 </div>
             );
         };

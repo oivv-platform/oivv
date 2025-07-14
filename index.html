@@ -34,15 +34,34 @@
             filter: blur(4px);
             transition: filter 0.3s ease-in-out;
         }
+        /* Animation for Toast */
+        .toast-enter {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .toast-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 300ms, transform 300ms;
+        }
+        .toast-exit {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast-exit-active {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 300ms, transform 300ms;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useMemo } = React;
 
-        // --- MOCK DATA ---
+        // --- MOCK DATA (ENHANCED) ---
         const MOCK_CAMPAIGNS = [
             { 
                 id: 1, 
@@ -51,7 +70,8 @@
                 price: 85, 
                 stage: 'PRE_ORDER', 
                 productionRound: 2, 
-                category: 'Blazers', 
+                category: 'Blazers',
+                dateAdded: '2024-06-20T10:00:00Z',
                 heroImage: 'https://images.unsplash.com/photo-1594938384914-29a4491a9599?q=80&w=800', 
                 images: [ 'https://images.unsplash.com/photo-1594938384914-29a4491a9599?q=80&w=800', 'https://images.unsplash.com/photo-1617137968427-4dd4bf633758?q=80&w=800', 'https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=800' ], 
                 video: {thumbnail: 'https://placehold.co/800x1000/64748b/ffffff?text=Video', url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4'}, 
@@ -59,30 +79,12 @@
                 preOrderDetails: { fundingType: 'INDEPENDENT', daysLeft: 12, sizes: { 'S': { moq: 50, funded: 50 }, 'M': { moq: 100, funded: 98 }, 'L': { moq: 100, funded: 35 }, 'XL': { moq: 50, funded: 2 } } }, 
                 priceBreakdown: { materials: 35, manufacturing: 31, designer: 10, platform: 8.5 }, 
                 sizeGuide: { fitDetails: 'Relaxed, unstructured fit. Designed to be worn comfortably over a shirt. Consider sizing down for a slimmer fit.', sizes: { 'S': { 'Chest': '38"', 'Sleeve': '25"', 'Length': '28"' }, 'M': { 'Chest': '40"', 'Sleeve': '25.5"', 'Length': '28.5"' }, 'L': { 'Chest': '42"', 'Sleeve': '26"', 'Length': '29"' }, 'XL': { 'Chest': '44"', 'Sleeve': '26.5"', 'Length': '29.5"' }, } }, 
+                garmentCare: { composition: '100% Organic Linen, 100% Cupro Lining', instructions: ['Dry clean only', 'Iron on low heat', 'Do not tumble dry'] },
                 comments: [{user: 'Julia S.', comment: 'So excited for Round 2!'}], 
                 reviews: [ { user: 'Alex R.', rating: 5, comment: 'Received this from the first round. The quality is absolutely insane for the price. The linen is soft, not scratchy at all.'}, { user: 'Beatrice L.', rating: 4, comment: 'Beautiful blazer, though it runs a little large. I would recommend sizing down if you are between sizes.'}, ], 
                 has3D: true,
                 manufacturer: { name: 'Artisan Tailors Lda', country: 'Portugal' },
-                digitalPassport: {
-                    uniqueId: 'MEP-2025-0001',
-                    manufacturerInfo: { name: 'Artisan Tailors Lda', address: 'Rua das Flores 123, 4050-262 Porto, Portugal', contact: 'production@artisans.pt' },
-                    supplyChain: [
-                        { component: 'Main Fabric', material: '100% Organic Linen', supplier: 'Solbiati S.r.l.', origin: 'Emilia-Romagna, Italy' },
-                        { component: 'Lining', material: '50% Cupro, 50% Viscose', supplier: 'Manifattura Pezzetti', origin: 'Como, Italy' },
-                        { component: 'Buttons', material: 'Natural Horn', supplier: 'Bottonificio Padano', origin: 'Parma, Italy' },
-                        { component: 'Sewing Thread', material: '100% Recycled Polyester', supplier: 'Coats Group plc', origin: 'United Kingdom' }
-                    ],
-                    sustainability: {
-                        recycledContent: '10% (sewing thread)',
-                        durability: 'High resistance to pilling. Tested for 50+ wash cycles.',
-                        repairability: { score: '8/10', details: 'Spare buttons included. Fabric patches available upon request. Standard seam construction allows for easy alterations.' },
-                        endOfLife: { instructions: 'Fabric is biodegradable and compostable. Please remove buttons before disposal. Consider donating or returning via our take-back program.', recyclable: true }
-                    },
-                    compliance: {
-                        svhc: 'None',
-                        certifications: ['European Flax® Certified', 'OEKO-TEX Standard 100 (Lining)']
-                    }
-                }
+                digitalPassport: { uniqueId: 'MEP-2025-0001', manufacturerInfo: { name: 'Artisan Tailors Lda', address: 'Rua das Flores 123, 4050-262 Porto, Portugal', contact: 'production@artisans.pt' }, supplyChain: [ { component: 'Main Fabric', material: '100% Organic Linen', supplier: 'Solbiati S.r.l.', origin: 'Emilia-Romagna, Italy' }, { component: 'Lining', material: '50% Cupro, 50% Viscose', supplier: 'Manifattura Pezzetti', origin: 'Como, Italy' }, { component: 'Buttons', material: 'Natural Horn', supplier: 'Bottonificio Padano', origin: 'Parma, Italy' }, { component: 'Sewing Thread', material: '100% Recycled Polyester', supplier: 'Coats Group plc', origin: 'United Kingdom' } ], sustainability: { recycledContent: '10% (sewing thread)', durability: 'High resistance to pilling. Tested for 50+ wash cycles.', repairability: { score: '8/10', details: 'Spare buttons included. Fabric patches available upon request. Standard seam construction allows for easy alterations.' }, endOfLife: { instructions: 'Fabric is biodegradable and compostable. Please remove buttons before disposal. Consider donating or returning via our take-back program.', recyclable: true } }, compliance: { svhc: 'None', certifications: ['European Flax® Certified', 'OEKO-TEX Standard 100 (Lining)'] } }
             },
             { 
                 id: 7, 
@@ -90,38 +92,67 @@
                 designer: 'Wayfarer Co.', 
                 price: 65, 
                 stage: 'SAMPLING', 
-                samplingDaysLeft: 15,
                 productionRound: 1, 
                 category: 'Tops', 
+                dateAdded: '2024-07-01T10:00:00Z',
                 heroImage: 'https://images.unsplash.com/photo-1603252109360-778ba9913158?q=80&w=800', 
                 images: ['https://images.unsplash.com/photo-1603252109360-778ba9913158?q=80&w=800', 'https://images.unsplash.com/photo-1564859228273-204232441043?q=80&w=800', 'https://images.unsplash.com/photo-1589902860377-128a3e284873?q=80&w=800'], 
                 video: {thumbnail: 'https://placehold.co/800x1000/9ca3af/ffffff?text=Video', url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4'}, 
-                details: 'The only shirt you need. Made from a technical merino wool blend that is wrinkle-resistant, anti-odor, and temperature regulating.', 
+                details: 'The only shirt you need. Made from a technical merino wool blend that is wrinkle-resistant, anti-odor, and temperature regulating.',
+                designerUpdates: [ { date: '3 days ago', title: 'First Sample Arrived!', text: 'The first physical sample is here and it feels incredible. The merino blend is super soft. We are now testing the fit and making minor adjustments to the collar.' }, { date: '1 week ago', title: 'Fabric Confirmed', text: 'We have officially confirmed the 87/13 Merino/Nylon blend from Nippon Wool Co. The quality is exceptional and perfect for our requirements.' } ],
                 preOrderDetails: { fundingType: 'COMBINED', daysLeft: 18, overallMoq: 200, sizes: { 'S': { funded: 30 }, 'M': { funded: 65 }, 'L': { funded: 40 }, 'XL': { funded: 15 } } },
                 priceBreakdown: { materials: 25, manufacturing: 22, designer: 10, platform: 6.5 }, 
                 sizeGuide: { fitDetails: 'Modern athletic fit. Not too slim, not too loose.', sizes: { 'S': { 'Chest': '38"', 'Length': '28"' }, 'M': { 'Chest': '40"', 'Length': '29"' }, 'L': { 'Chest': '42"', 'Length': '30"' }, 'XL': { 'Chest': '44"', 'Length': '30.5"' }, } }, 
+                garmentCare: { composition: '87% Merino Wool, 13% Nylon', instructions: ['Machine wash cold, gentle cycle', 'Lay flat to dry', 'Do not bleach'] },
                 comments: [], 
                 reviews: [], 
                 has3D: false,
                 manufacturer: { name: 'TechFabrics Vietnam', country: 'Vietnam' },
-                digitalPassport: {
-                    uniqueId: 'MEP-2025-0007',
-                    manufacturerInfo: { name: 'TechFabrics Vietnam Co., Ltd.', address: 'Lot 4, Tan Thuan EPZ, Ho Chi Minh City, Vietnam', contact: 'compliance@techfab.vn' },
-                    supplyChain: [
-                        { component: 'Main Fabric', material: '87% Merino Wool, 13% Nylon', supplier: 'Nippon Wool Co.', origin: 'Japan (Milling)' },
-                        { component: 'Wool Fiber', material: '100% Merino Wool', supplier: 'Australian Wool Network', origin: 'Australia' }
-                    ],
-                    sustainability: {
-                        recycledContent: 'None',
-                        durability: 'Excellent wrinkle and odor resistance.',
-                        repairability: { score: '6/10', details: 'Standard repairs possible by any tailor.' },
-                        endOfLife: { instructions: 'Fabric is recyclable where textile recycling facilities exist.', recyclable: true }
-                    },
-                    compliance: {
-                        svhc: 'None',
-                        certifications: ['Responsible Wool Standard (RWS)']
-                    }
-                }
+                digitalPassport: { uniqueId: 'MEP-2025-0007', manufacturerInfo: { name: 'TechFabrics Vietnam Co., Ltd.', address: 'Lot 4, Tan Thuan EPZ, Ho Chi Minh City, Vietnam', contact: 'compliance@techfab.vn' }, supplyChain: [ { component: 'Main Fabric', material: '87% Merino Wool, 13% Nylon', supplier: 'Nippon Wool Co.', origin: 'Japan (Milling)' }, { component: 'Wool Fiber', material: '100% Merino Wool', supplier: 'Australian Wool Network', origin: 'Australia' } ], sustainability: { recycledContent: 'None', durability: 'Excellent wrinkle and odor resistance.', repairability: { score: '6/10', details: 'Standard repairs possible by any tailor.' }, endOfLife: { instructions: 'Fabric is recyclable where textile recycling facilities exist.', recyclable: true } }, compliance: { svhc: 'None', certifications: ['Responsible Wool Standard (RWS)'] } }
+            },
+            {
+                id: 3,
+                name: 'The Urban Explorer Trouser',
+                designer: 'Concrete Collective',
+                price: 75,
+                stage: 'DESIGN',
+                category: 'Trousers',
+                dateAdded: '2024-07-10T10:00:00Z',
+                heroImage: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800',
+                images: ['https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800'],
+                details: 'A modern, technical trouser designed for life on the move. Constructed from a durable, water-repellent stretch canvas, it features a gusseted crotch for freedom of movement and a secure zip pocket for your essentials.',
+                likes: 184,
+                targetLikes: 250,
+                priceBreakdown: { materials: 30, manufacturing: 25, designer: 12, platform: 8 },
+                sizeGuide: { fitDetails: 'Slim-tapered fit. Articulated knees for ease of movement.', sizes: { 'S': {}, 'M': {}, 'L': {}, 'XL': {} } },
+                garmentCare: { composition: '98% Cotton, 2% Elastane with DWR finish', instructions: ['Machine wash cold', 'Tumble dry low', 'Do not use fabric softener'] },
+                comments: [],
+                reviews: [],
+                has3D: false,
+                manufacturer: { name: 'To be determined', country: 'TBD' },
+                digitalPassport: null
+            },
+            { 
+                id: 4, 
+                name: 'The Essential Pima Tee', 
+                designer: 'Plain Goods', 
+                price: 35, 
+                stage: 'CONFIRMED', 
+                productionRound: 1, 
+                category: 'Tops', 
+                dateAdded: '2024-06-15T10:00:00Z',
+                heroImage: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800', 
+                images: ['https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800'], 
+                details: 'The perfect t-shirt does exist. Made from 100% Peruvian Pima cotton, known for its exceptional softness and durability. A classic crewneck silhouette with a modern, tailored fit.', 
+                preOrderDetails: { fundingType: 'COMBINED', daysLeft: 0, overallMoq: 300, sizes: { 'S': { funded: 80 }, 'M': { funded: 150 }, 'L': { funded: 100 }, 'XL': { funded: 50 } } },
+                priceBreakdown: { materials: 12, manufacturing: 10, designer: 5, platform: 3.5 }, 
+                sizeGuide: { fitDetails: 'Tailored fit. Size up for a more relaxed feel.', sizes: { 'S': { 'Chest': '38"', 'Length': '28"' }, 'M': { 'Chest': '40"', 'Length': '29"' }, 'L': { 'Chest': '42"', 'Length': '30"' }, 'XL': { 'Chest': '44"', 'Length': '30.5"' }, } }, 
+                garmentCare: { composition: '100% Pima Cotton', instructions: ['Machine wash cold with like colors', 'Tumble dry low', 'Warm iron if needed'] },
+                comments: [], 
+                reviews: [], 
+                has3D: false,
+                manufacturer: { name: 'Cotton Experts S.A.C.', country: 'Peru' },
+                digitalPassport: { uniqueId: 'MEP-2025-0004', manufacturerInfo: { name: 'Cotton Experts S.A.C.', address: 'Av. Industrial 150, Ate, Lima, Peru', contact: 'contact@cottonexperts.pe' }, supplyChain: [ { component: 'Main Fabric', material: '100% Pima Cotton', supplier: 'IncaCotton', origin: 'Piura, Peru' } ], sustainability: { recycledContent: 'None', durability: 'High', repairability: { score: '7/10', details: 'Standard repairs possible.' }, endOfLife: { instructions: 'Fabric is biodegradable.', recyclable: true } }, compliance: { svhc: 'None', certifications: ['Peruvian Pima Cotton Certified'] } }
             },
         ];
 
@@ -138,17 +169,13 @@
         const ArrowRightIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
         const StarIcon = ({ className, isFilled }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={isFilled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
         const EUFlagIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40" width="24" height="16"><path fill="#003399" d="M0 0h60v40H0z"/><g transform="translate(30,20) scale(1.3)"><g id="s"><g id="c"><path id="t" d="M0,-12 V0 H6 Z" transform="rotate(18 0 -12)" fill="#FFCC00"/><use href="#t" transform="scale(-1,1)"/></g><use href="#c" transform="rotate(72)"/><use href="#c" transform="rotate(144)"/><use href="#c" transform="rotate(216)"/><use href="#c" transform="rotate(288)"/></g></g></svg>;
-        const InfoIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>;
-        const UsersIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
-        const DollarSignIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>;
-        const RulerIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 4v18"></path><path d="M16 4v4"></path><path d="M8 4v4"></path></svg>;
-        const ImageIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>;
-        const TrendingUpIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>;
+        const CheckCircleIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
 
         // --- MAIN APP COMPONENT ---
         function App() {
+            const [isLoading, setIsLoading] = useState(true);
             const [currentScreen, setCurrentScreen] = useState('Home');
-            const [campaigns, setCampaigns] = useState(MOCK_CAMPAIGNS);
+            const [campaigns, setCampaigns] = useState([]);
             const [pledgedItems, setPledgedItems] = useState([]);
             const [waitingListItems, setWaitingListItems] = useState([]);
             const [likedItems, setLikedItems] = useState([]);
@@ -157,6 +184,24 @@
             const [showMediaModal, setShowMediaModal] = useState({ visible: false, startIndex: 0 });
             const [showCampaignModal, setShowCampaignModal] = useState(null);
             const [dashboardView, setDashboardView] = useState('My MePont'); 
+            const [toast, setToast] = useState({ visible: false, message: '' });
+
+            useEffect(() => {
+                // Simulate data fetching
+                setTimeout(() => {
+                    setCampaigns(MOCK_CAMPAIGNS);
+                    // Pre-populate some liked items for demo
+                    setLikedItems(MOCK_CAMPAIGNS.filter(c => c.id === 3));
+                    setIsLoading(false);
+                }, 1500);
+            }, []);
+            
+            const showToast = (message) => {
+                setToast({ visible: true, message });
+                setTimeout(() => {
+                    setToast({ visible: false, message: '' });
+                }, 3000);
+            };
 
             const isModalOpen = showPledgeModal || show3DModal || showMediaModal.visible || !!showCampaignModal;
             const isNestedModalOpen = (!!showCampaignModal) && (showPledgeModal || show3DModal || showMediaModal.visible);
@@ -164,7 +209,7 @@
             useEffect(() => {
                 const updatedCampaigns = campaigns.map(c => {
                     if (c.stage === 'DESIGN' && c.likes >= c.targetLikes) {
-                        return { ...c, stage: 'SAMPLING', samplingDaysLeft: 21 }; 
+                        return { ...c, stage: 'SAMPLING' }; 
                     }
                     return c;
                 });
@@ -173,13 +218,13 @@
                 }
             }, [campaigns]);
 
-            const productionSteps = ['Funded', 'Fabric Sourced', 'In Production', 'Quality Check', 'Shipped'];
+            const productionSteps = ['Confirmed', 'Fabric Sourced', 'In Production', 'Quality Check', 'Shipped'];
             useEffect(() => {
                 const interval = setInterval(() => {
                     setPledgedItems(prevItems =>
                         prevItems.map(item => {
                             const currentStepIndex = productionSteps.indexOf(item.productionStatus);
-                            if (currentStepIndex < productionSteps.length - 1 && Math.random() < 0.2) {
+                            if (item.productionStatus !== 'Shipped' && Math.random() < 0.2) {
                                 const nextStepIndex = currentStepIndex + 1;
                                 return { ...item, productionStatus: productionSteps[nextStepIndex] };
                             }
@@ -207,30 +252,44 @@
             
             const handleLike = (campaignId) => {
                 const campaign = campaigns.find(c => c.id === campaignId);
+                let isNowLiked = false;
                 setLikedItems(prev => {
                     const isLiked = prev.some(item => item.id === campaignId);
                     if (isLiked) {
+                        isNowLiked = false;
                         return prev.filter(item => item.id !== campaignId);
                     } else {
+                        isNowLiked = true;
                         return [...prev, campaign];
                     }
                 });
+                setCampaigns(prev => prev.map(c => {
+                    if (c.id === campaignId && c.stage === 'DESIGN') {
+                        return {...c, likes: isNowLiked ? c.likes + 1 : c.likes - 1};
+                    }
+                    return c;
+                }));
+                showToast(isNowLiked ? `Added ${campaign.name} to liked items!` : `Removed ${campaign.name} from liked items.`);
             };
 
             const handleAddToWaitingList = (campaignId) => {
                 const campaign = campaigns.find(c => c.id === campaignId);
+                let isNowOnList = false;
                 setWaitingListItems(prev => {
                     const isOnList = prev.some(item => item.id === campaignId);
                     if (isOnList) {
+                        isNowOnList = false;
                         return prev.filter(item => item.id !== campaignId);
                     } else {
+                        isNowOnList = true;
                         return [...prev, campaign];
                     }
                 });
+                showToast(isNowOnList ? 'Added to waiting list!' : 'Removed from waiting list.');
             };
 
             const handlePledge = (campaign, size) => {
-                const newPledge = { ...campaign, size, productionStatus: 'Funded' };
+                const newPledge = { ...campaign, size, productionStatus: 'Confirmed' };
                 setPledgedItems(prev => [...prev, newPledge]);
                 setCampaigns(prevCampaigns =>
                     prevCampaigns.map(c => {
@@ -239,12 +298,15 @@
                             if(updatedSizes[size]) {
                                 updatedSizes[size].funded += 1;
                             }
-                            return { ...c, preOrderDetails: { ...c.preOrderDetails, sizes: updatedSizes }};
+                            const totalFunded = Object.values(updatedSizes).reduce((acc, s) => acc + s.funded, 0);
+                            const newStage = c.preOrderDetails.fundingType === 'COMBINED' && totalFunded >= c.preOrderDetails.overallMoq ? 'CONFIRMED' : c.stage;
+                            return { ...c, stage: newStage, preOrderDetails: { ...c.preOrderDetails, sizes: updatedSizes }};
                         }
                         return c;
                     })
                 );
                 setShowPledgeModal(false);
+                showToast(`Pledge for ${campaign.name} (Size ${size}) confirmed!`);
             };
             
             const addComment = (campaignId, commentText) => {
@@ -252,6 +314,7 @@
                 setCampaigns(prev => prev.map(c => 
                     c.id === campaignId ? {...c, comments: [...c.comments, newComment]} : c
                 ));
+                 showToast('Comment posted!');
             };
             
             const addReview = (campaignId, review) => {
@@ -259,9 +322,13 @@
                 setCampaigns(prev => prev.map(c => 
                     c.id === campaignId ? {...c, reviews: [...c.reviews, newReview]} : c
                 ));
+                showToast('Review submitted!');
             };
 
             const renderScreen = () => {
+                if (isLoading) {
+                    return <HomeScreenSkeleton />;
+                }
                 switch (currentScreen) {
                     case 'Home':
                         return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={handleLike} likedItems={likedItems} />;
@@ -303,7 +370,7 @@
                             onCommentSubmit={addComment}
                             onReviewSubmit={addReview}
                             onShow3D={() => setShow3DModal(true)}
-                            onShowMedia={(startIndex) => setShowMediaModal({ visible: true, startIndex: 0 })}
+                            onShowMedia={(startIndex) => setShowMediaModal({ visible: true, startIndex: startIndex })}
                             isNestedModalOpen={isNestedModalOpen}
                             onAddToWaitingList={handleAddToWaitingList}
                             isOnWaitingList={waitingListItems.some(item => item.id === showCampaignModal.id)}
@@ -312,6 +379,8 @@
                     {showPledgeModal && <PledgeModal campaign={showCampaignModal} onClose={() => setShowPledgeModal(false)} onPledge={handlePledge} />}
                     {show3DModal && <ThreeDModal onClose={() => setShow3DModal(false)} />}
                     {showMediaModal.visible && <MediaViewerModal campaign={showCampaignModal} startIndex={showMediaModal.startIndex} onClose={() => setShowMediaModal({ visible: false, startIndex: 0 })} />}
+                    
+                    <Toast message={toast.message} visible={toast.visible} />
                 </div>
             );
         }
@@ -414,26 +483,56 @@
         // --- SCREENS ---
         function HomeScreen({ campaigns, onCampaignSelect, onLike, likedItems }) {
             const [selectedCategory, setSelectedCategory] = useState('All');
+            const [sortBy, setSortBy] = useState('Newest');
+
             const categories = ['All', 'Outerwear', 'Blazers', 'Trousers', 'Tops', 'Denim', 'Dresses', 'Accessories'];
-            const filteredCampaigns = campaigns.filter(campaign => selectedCategory === 'All' || campaign.category === selectedCategory);
+            
+            const sortedAndFilteredCampaigns = useMemo(() => {
+                let filtered = campaigns.filter(campaign => selectedCategory === 'All' || campaign.category === selectedCategory);
+                
+                switch(sortBy) {
+                    case 'Newest':
+                        return filtered.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+                    case 'Ending Soon':
+                        return filtered.sort((a, b) => (a.preOrderDetails?.daysLeft || Infinity) - (b.preOrderDetails?.daysLeft || Infinity));
+                    case 'Price: Low to High':
+                        return filtered.sort((a, b) => a.price - b.price);
+                    case 'Price: High to Low':
+                        return filtered.sort((a, b) => b.price - a.price);
+                    default:
+                        return filtered;
+                }
+            }, [campaigns, selectedCategory, sortBy]);
+
             return (
                 <div className="p-4 sm:p-6 lg:p-8">
-                <header className="mb-8 text-center">
-                    <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">MePont</h1>
-                    <p className="mt-2 text-lg text-gray-600">Community-powered fashion. Sell then make.</p>
-                </header>
-                <div className="mb-8">
-                    <div className="flex justify-center flex-wrap gap-2">
-                    {categories.map(category => (
-                        <button key={category} onClick={() => setSelectedCategory(category)} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors whitespace-nowrap ${selectedCategory === category ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 shadow-sm hover:bg-gray-50'}`}>
-                        {category}
-                        </button>
-                    ))}
+                    <header className="mb-8 text-center">
+                        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">MePont</h1>
+                        <p className="mt-2 text-lg text-gray-600">Community-powered fashion. Sell then make.</p>
+                    </header>
+                    <div className="mb-4">
+                        <div className="flex justify-center flex-wrap gap-2">
+                        {categories.map(category => (
+                            <button key={category} onClick={() => setSelectedCategory(category)} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors whitespace-nowrap ${selectedCategory === category ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 shadow-sm hover:bg-gray-50'}`}>
+                            {category}
+                            </button>
+                        ))}
+                        </div>
                     </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredCampaigns.map(campaign => ( <CampaignCard key={campaign.id} campaign={campaign} onSelect={onCampaignSelect} onLike={onLike} isLiked={likedItems.some(item => item.id === campaign.id)} /> ))}
-                </div>
+                    <div className="mb-8 flex justify-center">
+                        <div className="flex items-center gap-2 bg-white p-1 rounded-full shadow-sm">
+                            <span className="text-sm font-semibold text-gray-600 pl-2">Sort by:</span>
+                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-transparent font-semibold text-blue-600 rounded-full py-1 pr-8 border-none focus:ring-0 text-sm">
+                                <option>Newest</option>
+                                <option>Ending Soon</option>
+                                <option>Price: Low to High</option>
+                                <option>Price: High to Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {sortedAndFilteredCampaigns.map(campaign => ( <CampaignCard key={campaign.id} campaign={campaign} onSelect={onCampaignSelect} onLike={onLike} isLiked={likedItems.some(item => item.id === campaign.id)} /> ))}
+                    </div>
                 </div>
             );
         };
@@ -576,8 +675,8 @@
         };
         
         function CampaignDetailContent({ campaign, onPledge, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onAddToWaitingList, isOnWaitingList }) {
-            const [activeDetailView, setActiveDetailView] = useState('Gallery');
-            const [showFundingDetails, setShowFundingDetails] = useState(true);
+            const [activeTab, setActiveTab] = useState('Details');
+            const [selectedSize, setSelectedSize] = useState(campaign.sizeGuide.sizes && Object.keys(campaign.sizeGuide.sizes).length > 0 ? Object.keys(campaign.sizeGuide.sizes)[0] : null);
             const [openAccordion, setOpenAccordion] = useState(null);
             
             const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
@@ -603,7 +702,7 @@
                 const swipeDistance = touchStartX.current - touchEndX.current;
                 if (Math.abs(swipeDistance) > 50) {
                     const direction = swipeDistance > 0 ? 1 : -1;
-                    const newIndex = Math.max(0, Math.min(currentMediaIndex + direction, mediaItems.length - 1));
+                    const newIndex = (currentMediaIndex + direction + mediaItems.length) % mediaItems.length;
                     if (newIndex !== currentMediaIndex) {
                         setIsFading(true);
                         setTimeout(() => {
@@ -625,7 +724,7 @@
             };
 
             const MainActions = () => {
-                const actionButtonClass = "font-bold py-3 sm:py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 w-full";
+                const actionButtonClass = "font-bold py-3 sm:py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 w-full disabled:opacity-50 disabled:cursor-not-allowed";
                 switch(campaign.stage) {
                     case 'DESIGN': return ( <button onClick={() => onLike(campaign.id)} className={`${actionButtonClass} ${isLiked ? 'bg-pink-600 text-white' : 'bg-white text-pink-600 border-2 border-pink-600'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
                     case 'SAMPLING': return ( <button onClick={() => onAddToWaitingList(campaign.id)} className={`${actionButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
@@ -640,6 +739,8 @@
                                 </div>
                             </div>
                         );
+                    case 'CONFIRMED':
+                        return <button disabled className={`${actionButtonClass} bg-green-600 text-white`}> <CheckCircleIcon className="w-6 h-6" /> <span>Fully Funded!</span> </button>;
                     default: return null;
                 }
             }
@@ -648,20 +749,20 @@
                  <div className="p-5 lg:p-6 border-b border-gray-200">
                     {campaign.stage === 'PRE_ORDER' && ( campaign.preOrderDetails.fundingType === 'COMBINED' ? ( <> <div className="w-full bg-gray-200 rounded-full h-2.5"> <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0) / campaign.preOrderDetails.overallMoq) * 100}%` }}></div> </div> <div className="flex justify-between items-center text-sm text-gray-600 mt-2"> <span>{Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0)} / {campaign.preOrderDetails.overallMoq} Funded</span> <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span> </div> </> ) : ( <> <div className="flex justify-between items-center text-sm text-gray-600 mb-4"> <span className="font-semibold">Funding Ends in {campaign.preOrderDetails.daysLeft} days</span> <span className="font-bold text-lg">€{campaign.price}</span> </div> <div className="space-y-3 mb-4"> <h4 className="font-semibold text-sm text-gray-800">Fund each size independently:</h4> {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => { const progress = (data.funded / data.moq) * 100; const isFunded = progress >= 100; return ( <div key={size}> <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}> <span className="font-semibold">{size}</span> <span>{data.funded} / {data.moq}</span> </div> <div className="w-full bg-gray-200 rounded-full h-2"> <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div> </div> </div> ); })} </div> </> ) )}
                     {campaign.stage === 'DESIGN' && ( <> <div className="w-full bg-gray-200 rounded-full h-2"> <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${(campaign.likes / campaign.targetLikes) * 100}%` }}></div> </div> <div className="flex justify-between items-center text-sm text-gray-600 mt-2"> <span>{campaign.likes} / {campaign.targetLikes} likes to sample</span> </div> </> )}
-                    {campaign.stage === 'SAMPLING' && ( <div className="bg-cyan-50 text-cyan-800 p-4 rounded-lg text-center"> <p className="font-semibold">Sample in Progress</p> <p className="text-sm">{campaign.samplingDaysLeft} days until reveal</p> </div> )}
+                    {campaign.stage === 'SAMPLING' && ( <div className="bg-cyan-50 text-cyan-800 p-4 rounded-lg text-center"> <p className="font-semibold">Sample in Progress</p> <p className="text-sm">Pre-orders will open soon.</p> </div> )}
+                    {campaign.stage === 'CONFIRMED' && ( <div className="bg-green-50 text-green-800 p-4 rounded-lg text-center flex items-center justify-center gap-2"> <CheckCircleIcon className="w-5 h-5" /> <p className="font-semibold">Funding Goal Reached!</p> <p className="text-sm">Production starting soon.</p> </div> )}
                 </div>
             );
 
             const TabContent = () => {
-                const { digitalPassport, manufacturer } = campaign;
+                const { digitalPassport, manufacturer, garmentCare, designerUpdates } = campaign;
                 const euCountries = ["Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", "Slovenia", "Spain", "Sweden"];
-                const isEU = euCountries.includes(manufacturer.country);
+                const isEU = manufacturer && euCountries.includes(manufacturer.country);
 
-                switch(activeDetailView) {
-                    case 'Details': return (
-                        <div className="px-5 lg:px-6 pb-5">
+                const tabData = {
+                    'Details': (
+                        <div>
                             <p className="text-gray-700 mb-6">{campaign.details}</p>
-                            
                             {isEU && (
                                 <div className="mb-6 bg-blue-50 border border-blue-200 p-4 rounded-lg flex items-center gap-4">
                                     <EUFlagIcon />
@@ -671,88 +772,184 @@
                                     </div>
                                 </div>
                             )}
-                            
-                            <AccordionItem title="Manufacturer & Origin" isOpen={openAccordion === 'origin'} onToggle={() => handleAccordionToggle('origin')}>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between"><span className="text-gray-500">Manufacturer</span><span className="font-medium text-right">{digitalPassport.manufacturerInfo.name}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-500">Address</span><span className="font-medium text-right">{digitalPassport.manufacturerInfo.address}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-500">Contact</span><span className="font-medium text-right">{digitalPassport.manufacturerInfo.contact}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-500">Unique ID</span><span className="font-mono text-xs text-right bg-gray-200 px-1 py-0.5 rounded">{digitalPassport.uniqueId}</span></div>
+                            {designerUpdates && designerUpdates.length > 0 && (
+                                <div className="mb-6">
+                                    <h3 className="font-bold text-md mb-3 text-gray-800">Designer's Updates</h3>
+                                    <div className="space-y-4">
+                                        {designerUpdates.map((update, index) => (
+                                            <div key={index} className="relative pl-6 border-l-2 border-gray-200">
+                                                <div className="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-gray-300 rounded-full"></div>
+                                                <p className="text-xs text-gray-500">{update.date}</p>
+                                                <p className="font-semibold text-gray-800">{update.title}</p>
+                                                <p className="text-sm text-gray-600">{update.text}</p>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </AccordionItem>
-                            <AccordionItem title="Supply Chain Traceability" isOpen={openAccordion === 'supply'} onToggle={() => handleAccordionToggle('supply')}>
-                                <div className="space-y-4">
-                                {digitalPassport.supplyChain.map((item, index) => (
-                                    <div key={index} className="border-t border-gray-200 pt-3 first:border-t-0 first:pt-0">
-                                        <p className="font-semibold mb-2">{item.component}</p>
-                                        <div className="space-y-1 pl-2">
-                                            <div className="flex justify-between"><span className="text-gray-500">Material</span><span className="font-medium text-right">{item.material}</span></div>
-                                            <div className="flex justify-between"><span className="text-gray-500">Supplier</span><span className="font-medium text-right">{item.supplier}</span></div>
-                                            <div className="flex justify-between"><span className="text-gray-500">Origin</span><span className="font-medium text-right">{item.origin}</span></div>
+                            )}
+                             {digitalPassport && (
+                                <>
+                                <AccordionItem title="Manufacturer & Origin" isOpen={openAccordion === 'origin'} onToggle={() => handleAccordionToggle('origin')}>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between"><span className="text-gray-500">Manufacturer</span><span className="font-medium text-right">{digitalPassport.manufacturerInfo.name}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-500">Address</span><span className="font-medium text-right">{digitalPassport.manufacturerInfo.address}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-500">Contact</span><span className="font-medium text-right">{digitalPassport.manufacturerInfo.contact}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-500">Unique ID</span><span className="font-mono text-xs text-right bg-gray-200 px-1 py-0.5 rounded">{digitalPassport.uniqueId}</span></div>
+                                    </div>
+                                </AccordionItem>
+                                <AccordionItem title="Supply Chain Traceability" isOpen={openAccordion === 'supply'} onToggle={() => handleAccordionToggle('supply')}>
+                                    <div className="space-y-4">
+                                    {digitalPassport.supplyChain.map((item, index) => (
+                                        <div key={index} className="border-t border-gray-200 pt-3 first:border-t-0 first:pt-0">
+                                            <p className="font-semibold mb-2">{item.component}</p>
+                                            <div className="space-y-1 pl-2">
+                                                <div className="flex justify-between"><span className="text-gray-500">Material</span><span className="font-medium text-right">{item.material}</span></div>
+                                                <div className="flex justify-between"><span className="text-gray-500">Supplier</span><span className="font-medium text-right">{item.supplier}</span></div>
+                                                <div className="flex justify-between"><span className="text-gray-500">Origin</span><span className="font-medium text-right">{item.origin}</span></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    </div>
+                                </AccordionItem>
+                                <AccordionItem title="Sustainability & Circularity" isOpen={openAccordion === 'sustainability'} onToggle={() => handleAccordionToggle('sustainability')}>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between"><span className="text-gray-500">Recycled Content</span><span className="font-medium text-right">{digitalPassport.sustainability.recycledContent}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-500">Durability</span><span className="font-medium text-right">{digitalPassport.sustainability.durability}</span></div>
+                                        <div className="flex justify-between items-start"><span className="text-gray-500">Repairability</span><div className="text-right"><p className="font-medium">{digitalPassport.sustainability.repairability.score}</p><p className="text-xs text-gray-500">{digitalPassport.sustainability.repairability.details}</p></div></div>
+                                        <div className="flex justify-between items-start"><span className="text-gray-500">End-of-Life</span><div className="text-right"><p className="font-medium">{digitalPassport.sustainability.endOfLife.recyclable ? 'Recyclable' : 'Non-recyclable'}</p><p className="text-xs text-gray-500">{digitalPassport.sustainability.endOfLife.instructions}</p></div></div>
+                                    </div>
+                                 </AccordionItem>
+                                 <AccordionItem title="Compliance & Certifications" isOpen={openAccordion === 'compliance'} onToggle={() => handleAccordionToggle('compliance')}>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between"><span className="text-gray-500">SVHC Declaration</span><span className="font-medium text-right">{digitalPassport.compliance.svhc}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-500">Certifications</span>
+                                            <ul className="text-right">
+                                                {digitalPassport.compliance.certifications.map(cert => <li key={cert} className="font-medium">{cert}</li>)}
+                                            </ul>
                                         </div>
                                     </div>
-                                ))}
-                                </div>
-                            </AccordionItem>
-                            <AccordionItem title="Sustainability & Circularity" isOpen={openAccordion === 'sustainability'} onToggle={() => handleAccordionToggle('sustainability')}>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between"><span className="text-gray-500">Recycled Content</span><span className="font-medium text-right">{digitalPassport.sustainability.recycledContent}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-500">Durability</span><span className="font-medium text-right">{digitalPassport.sustainability.durability}</span></div>
-                                    <div className="flex justify-between items-start"><span className="text-gray-500">Repairability</span><div className="text-right"><p className="font-medium">{digitalPassport.sustainability.repairability.score}</p><p className="text-xs text-gray-500">{digitalPassport.sustainability.repairability.details}</p></div></div>
-                                    <div className="flex justify-between items-start"><span className="text-gray-500">End-of-Life</span><div className="text-right"><p className="font-medium">{digitalPassport.sustainability.endOfLife.recyclable ? 'Recyclable' : 'Non-recyclable'}</p><p className="text-xs text-gray-500">{digitalPassport.sustainability.endOfLife.instructions}</p></div></div>
-                                </div>
-                             </AccordionItem>
-                             <AccordionItem title="Compliance & Certifications" isOpen={openAccordion === 'compliance'} onToggle={() => handleAccordionToggle('compliance')}>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between"><span className="text-gray-500">SVHC Declaration</span><span className="font-medium text-right">{digitalPassport.compliance.svhc}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-500">Certifications</span>
-                                        <ul className="text-right">
-                                            {digitalPassport.compliance.certifications.map(cert => <li key={cert} className="font-medium">{cert}</li>)}
-                                        </ul>
-                                    </div>
-                                </div>
-                             </AccordionItem>
+                                 </AccordionItem>
+                                </>
+                             )}
                         </div>
-                    );
-                    case 'Price': const totalCost = Object.values(campaign.priceBreakdown).reduce((sum, val) => sum + val, 0); return ( <div className="px-5 lg:px-6 pb-5"> <p className="text-gray-700 mb-4 text-sm">We believe in radical transparency. Here's the true cost of making this garment.</p> <div className="space-y-3 mb-6"> {Object.entries(campaign.priceBreakdown).map(([key, value]) => { const percentage = (value / campaign.price) * 100; return ( <div key={key}> <div className="flex justify-between text-sm mb-1"> <span className="capitalize text-gray-600">{key}</span> <span className="font-semibold text-gray-900">€{value.toFixed(2)}</span> </div> <div className="w-full bg-gray-200 rounded-full h-2"> <div className="bg-blue-500 h-2 rounded-full" style={{width: `${percentage}%`}}></div> </div> </div> ) })} </div> <div className="border-t border-gray-200 pt-4"> <div className="flex justify-between text-sm mb-2"> <span className="text-gray-600">True Cost</span> <span className="font-semibold text-gray-900">€{totalCost.toFixed(2)}</span> </div> <div className="flex justify-between text-md font-bold text-gray-900"> <span>Our Price</span> <span>€{campaign.price.toFixed(2)}</span> </div> </div> <div className="mt-6 bg-gray-100/80 p-3 rounded-lg text-sm text-gray-600"> <p><strong>Please Note:</strong> The final price at checkout will include an estimate for shipping and any applicable import duties based on your delivery address. This will be clearly displayed before you confirm your pledge.</p> </div> </div> );
-                    case 'Size': return ( <div className="px-5 lg:px-6 pb-5"> <p className="text-gray-700 mb-4">{campaign.sizeGuide.fitDetails}</p> <div className="flex space-x-2 mb-4 overflow-x-auto pb-2 scrollbar-hide"> {Object.keys(campaign.sizeGuide.sizes).map(size => ( <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}> {size} </button> ))} </div> <div className="bg-gray-100/80 p-4 rounded-lg space-y-2 text-sm"> <h5 className="font-bold mb-2 text-gray-800">Measurements for Size {selectedSize}</h5> {Object.entries(campaign.sizeGuide.sizes[selectedSize]).map(([key, value]) => ( <div key={key} className="flex justify-between"> <span className="text-gray-600">{key}</span> <span className="font-semibold text-gray-900">{value}</span> </div> ))} </div> </div> );
-                    case 'Community': return ( <div className="px-5 lg:px-6 pb-5 space-y-6"> <div> <h4 className="font-bold text-md mb-3 text-gray-800">Reviews</h4> {campaign.reviews.length > 0 ? ( <div className="space-y-4"> {campaign.reviews.map((review, index) => ( <div key={index} className="border-b border-gray-200 pb-4"> <div className="flex items-center mb-1"> {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-yellow-500" isFilled={i < review.rating} />)} <span className="ml-2 font-bold text-gray-800">{review.user}</span> </div> <p className="text-gray-700">{review.comment}</p> </div> ))} </div> ) : ( <p className="text-gray-500 text-sm py-2">No reviews yet.</p> )} {hasPurchased && <ReviewForm campaignId={campaign.id} onSubmit={onReviewSubmit} />} </div> <div> <h4 className="font-bold text-md mb-3 text-gray-800">Comments</h4> {campaign.comments.length > 0 ? ( <div className="space-y-4"> {campaign.comments.map((comment, index) => ( <div key={index} className="border-b border-gray-200 pb-4"> <p className="font-bold text-sm text-gray-800">{comment.user}</p> <p className="text-gray-700">{comment.comment}</p> </div> ))} </div> ) : ( <p className="text-gray-500 text-sm py-2">No comments yet. Be the first!</p> )} <CommentForm campaignId={campaign.id} onSubmit={onCommentSubmit} /> </div> </div> );
-                    default: return null;
-                }
+                    ),
+                    'Care & Composition': (
+                        <div>
+                            <div className="bg-gray-100/80 p-4 rounded-lg space-y-2 text-sm">
+                                <h5 className="font-bold mb-2 text-gray-800">Composition</h5>
+                                <p className="text-gray-700">{garmentCare.composition}</p>
+                            </div>
+                            <div className="mt-4 bg-gray-100/80 p-4 rounded-lg space-y-2 text-sm">
+                                <h5 className="font-bold mb-2 text-gray-800">Care Instructions</h5>
+                                <ul className="list-disc list-inside text-gray-700">
+                                    {garmentCare.instructions.map((instruction, index) => <li key={index}>{instruction}</li>)}
+                                </ul>
+                            </div>
+                        </div>
+                    ),
+                    'Price Breakdown': (
+                        <div>
+                            <p className="text-gray-700 mb-4 text-sm">We believe in radical transparency. Here's the true cost of making this garment.</p>
+                            <div className="space-y-3 mb-6">
+                                {Object.entries(campaign.priceBreakdown).map(([key, value]) => {
+                                    const percentage = (value / campaign.price) * 100;
+                                    return (
+                                        <div key={key}>
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span className="capitalize text-gray-600">{key}</span>
+                                                <span className="font-semibold text-gray-900">€{value.toFixed(2)}</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className="bg-blue-500 h-2 rounded-full" style={{width: `${percentage}%`}}></div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            <div className="border-t border-gray-200 pt-4">
+                                <div className="flex justify-between text-sm mb-2">
+                                    <span className="text-gray-600">True Cost</span>
+                                    <span className="font-semibold text-gray-900">€{Object.values(campaign.priceBreakdown).reduce((sum, val) => sum + val, 0).toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-md font-bold text-gray-900">
+                                    <span>Our Price</span>
+                                    <span>€{campaign.price.toFixed(2)}</span>
+                                </div>
+                            </div>
+                            <div className="mt-6 bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800">
+                                <p><strong>Please Note:</strong> The final price at checkout will include an estimate for shipping and any applicable import duties based on your delivery address. This will be clearly displayed before you confirm your pledge.</p>
+                            </div>
+                        </div>
+                    ),
+                    'Size & Fit': (
+                        <div>
+                            <p className="text-gray-700 mb-4">{campaign.sizeGuide.fitDetails}</p>
+                            {selectedSize ? (
+                                <>
+                                <div className="flex space-x-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                                    {Object.keys(campaign.sizeGuide.sizes).map(size => (
+                                        <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                            {size}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="bg-gray-100/80 p-4 rounded-lg space-y-2 text-sm">
+                                    <h5 className="font-bold mb-2 text-gray-800">Measurements for Size {selectedSize}</h5>
+                                    {Object.entries(campaign.sizeGuide.sizes[selectedSize]).map(([key, value]) => (
+                                        <div key={key} className="flex justify-between">
+                                            <span className="text-gray-600">{key}</span>
+                                            <span className="font-semibold text-gray-900">{value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                </>
+                            ) : <p className="text-gray-500 text-sm">Size guide coming soon.</p>}
+                        </div>
+                    ),
+                    'Community': (
+                        <div className="space-y-6">
+                            <div>
+                                <h4 className="font-bold text-md mb-3 text-gray-800">Reviews</h4>
+                                {campaign.reviews.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {campaign.reviews.map((review, index) => (
+                                            <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                                                <div className="flex items-center mb-1">
+                                                    {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-yellow-500" isFilled={i < review.rating} />)}
+                                                    <span className="ml-2 font-bold text-gray-800">{review.user}</span>
+                                                </div>
+                                                <p className="text-gray-700">{review.comment}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 text-sm py-2">No reviews yet.</p>
+                                )}
+                                {hasPurchased && <ReviewForm campaignId={campaign.id} onSubmit={onReviewSubmit} />}
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-md mb-3 text-gray-800">Comments</h4>
+                                {campaign.comments.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {campaign.comments.map((comment, index) => (
+                                            <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                                                <p className="font-bold text-sm text-gray-800">{comment.user}</p>
+                                                <p className="text-gray-700">{comment.comment}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 text-sm py-2">No comments yet. Be the first!</p>
+                                )}
+                                <CommentForm campaignId={campaign.id} onSubmit={onCommentSubmit} />
+                            </div>
+                        </div>
+                    ),
+                };
+                return tabData[activeTab];
             };
-            
-            const GalleryView = () => (
-                <div className="w-full h-full">
-                    <div 
-                        className={`relative w-full h-full transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                    >
-                        <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
-                        {mediaItems[currentMediaIndex].type === 'video' ? (
-                            <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls autoPlay loop muted playsInline className="w-full h-full object-cover"></video>
-                        ) : (
-                            <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover" />
-                        )}
-                        </button>
-                        {campaign.has3D && (
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); onShow3D(); }} 
-                                className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"
-                            >
-                                <CubeIcon className="w-5 h-5" />
-                                <span>3D</span>
-                            </button>
-                        )}
-                    </div>
-                    <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center space-x-2">
-                        {mediaItems.map((_, index) => (
-                            <button key={index} onClick={() => setCurrentMediaIndex(index)} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></button>
-                        ))}
-                    </div>
-                </div>
-            )
+
+            const TABS = ['Details', 'Care & Composition', 'Price Breakdown', 'Size & Fit', 'Community'];
 
             return (
                 <div className="w-full h-full lg:grid lg:grid-cols-5">
@@ -791,52 +988,60 @@
                         <div className="flex-1 relative">
                             <div className="absolute inset-0 overflow-y-auto scrollbar-hide">
                                  {/* Mobile Media */}
-                                <div className="lg:hidden h-full">
-                                    {activeDetailView === 'Gallery' ? <GalleryView /> : (
-                                        <div className="pt-20">
-                                            {showFundingDetails && <TopSection />}
-                                            <div className="p-5 lg:p-6">
-                                                <div className="flex justify-between items-center">
-                                                    <p className="text-sm text-gray-800">{campaign.designer}</p>
-                                                </div>
-                                                <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
-                                            </div>
-                                            <TabContent />
-                                        </div>
-                                    )}
-                                </div>
-                                {/* Desktop View */}
-                                <div className="hidden lg:block h-full">
-                                    <div className="p-5 lg:p-6">
-                                        <div className="flex justify-between items-center">
-                                            <p className="text-sm text-gray-800">{campaign.designer}</p>
-                                        </div>
-                                        <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
+                                <div className="lg:hidden">
+                                    <div 
+                                        className={`relative aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
+                                        onTouchStart={handleTouchStart}
+                                        onTouchMove={handleTouchMove}
+                                        onTouchEnd={handleTouchEnd}
+                                    >
+                                        <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
+                                        {mediaItems[currentMediaIndex].type === 'video' ? (
+                                            <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} controls className="w-full h-full object-cover bg-black"></video>
+                                        ) : (
+                                            <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover" />
+                                        )}
+                                        </button>
+                                        {campaign.has3D && (
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); onShow3D(); }} 
+                                                className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"
+                                            >
+                                                <CubeIcon className="w-5 h-5" />
+                                                <span>3D</span>
+                                            </button>
+                                        )}
                                     </div>
-                                    <TopSection />
-                                    <div className="px-5 lg:px-6 pb-24">
-                                        <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
-                                            {['Details', 'Price Breakdown', 'Size & Fit', 'Community'].map(tab => (
-                                                <button key={tab} onClick={() => setActiveDetailView(tab)} className={`py-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors ${activeDetailView === tab ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}>
-                                                    {tab}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <div className="py-4">
-                                            <TabContent />
-                                        </div>
+                                    <div className="flex justify-center items-center space-x-2">
+                                        {mediaItems.map((_, index) => (
+                                            <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                        ))}
+                                    </div>
+                                </div>
+                                {/* Common Details */}
+                                <div className="p-5 lg:p-6">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-sm text-gray-800">{campaign.designer}</p>
+                                    </div>
+                                    <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
+                                </div>
+                                <TopSection />
+                                <div className="px-5 lg:px-6 pb-24">
+                                    <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
+                                        {TABS.map(tab => (
+                                            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-3 px-4 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}>
+                                                {tab}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="py-4">
+                                        <TabContent />
                                     </div>
                                 </div>
                             </div>
                         </div>
-                         {/* Sticky Footer */}
-                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200 space-y-2">
-                            <div className="sm:hidden flex justify-around items-center w-full max-w-sm mx-auto bg-gray-900/75 backdrop-blur-lg text-white rounded-full p-1 shadow-lg">
-                                 <button onClick={() => setActiveDetailView('Gallery')} className={`p-2 rounded-full ${activeDetailView === 'Gallery' ? 'bg-gray-700' : ''}`}><ImageIcon className="w-5 h-5" /></button>
-                                 <button onClick={() => setActiveDetailView('Details')} className={`p-2 rounded-full ${activeDetailView === 'Details' ? 'bg-gray-700' : ''}`}><InfoIcon className="w-5 h-5" /></button>
-                                 <button onClick={() => setShowFundingDetails(!showFundingDetails)} className={`p-2 rounded-full ${showFundingDetails ? 'bg-gray-700' : ''}`}><TrendingUpIcon className="w-5 h-5" /></button>
-                                 <button onClick={() => setActiveDetailView('Community')} className={`p-2 rounded-full ${activeDetailView === 'Community' ? 'bg-gray-700' : ''}`}><UsersIcon className="w-5 h-5" /></button>
-                            </div>
+                        {/* Sticky CTA Bar */}
+                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
                             <MainActions />
                         </div>
                     </div>
@@ -924,7 +1129,7 @@
         // --- REUSABLE UI COMPONENTS ---
         const AccordionItem = ({ title, children, isOpen, onToggle }) => {
             return (
-                <div className="border-b border-gray-200">
+                <div className="border-b border-gray-200 last:border-b-0">
                     <button onClick={onToggle} className="w-full flex justify-between items-center py-4 text-left">
                         <span className="font-semibold text-gray-800">{title}</span>
                         {isOpen ? <MinusIcon className="w-5 h-5 text-gray-600" /> : <PlusIcon className="w-5 h-5 text-gray-600" />}
@@ -985,11 +1190,8 @@
                     const likeProgress = (campaign.likes / campaign.targetLikes) * 100;
                     return (
                     <div className="p-4">
-                        <div className="flex justify-between items-start">
-                            <p className="text-sm text-gray-800">{campaign.designer}</p>
-                            <span className="font-bold text-lg text-gray-900">€{campaign.price}</span>
-                        </div>
-                        <h3 className="font-bold text-xl truncate -mt-1 text-gray-900">{campaign.name}</h3>
+                        <p className="text-sm text-gray-800">{campaign.designer}</p>
+                        <h3 className="font-bold text-xl truncate text-gray-900">{campaign.name}</h3>
                         <div className="mt-4">
                         <div className="w-full bg-gray-200/70 rounded-full h-2">
                             <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${likeProgress}%` }}></div>
@@ -1007,14 +1209,11 @@
                 case 'SAMPLING':
                     return (
                     <div className="p-4">
-                        <div className="flex justify-between items-start">
-                            <p className="text-sm text-gray-800">{campaign.designer}</p>
-                            <span className="font-bold text-lg text-gray-900">€{campaign.price}</span>
-                        </div>
-                        <h3 className="font-bold text-xl truncate -mt-1 text-gray-900">{campaign.name}</h3>
+                        <p className="text-sm text-gray-800">{campaign.designer}</p>
+                        <h3 className="font-bold text-xl truncate text-gray-900">{campaign.name}</h3>
                         <div className="mt-4 bg-cyan-50/80 text-cyan-800 p-3 rounded-lg text-center">
                         <p className="font-semibold">Sample in Progress</p>
-                        <p className="text-sm">{campaign.samplingDaysLeft} days until reveal</p>
+                        <p className="text-sm">Pre-orders coming soon</p>
                         </div>
                     </div>
                     );
@@ -1065,6 +1264,17 @@
                             </div>
                         </div>
                     );
+                case 'CONFIRMED':
+                     return (
+                        <div className="p-4">
+                            <p className="text-sm text-gray-800">{campaign.designer}</p>
+                            <h3 className="font-bold text-xl truncate text-gray-900">{campaign.name}</h3>
+                            <div className="mt-4 bg-green-50/80 text-green-800 p-3 rounded-lg text-center">
+                                <p className="font-semibold">Fully Funded!</p>
+                                <p className="text-sm">Production starting soon</p>
+                            </div>
+                        </div>
+                    );
                 default:
                     return null;
                 }
@@ -1078,21 +1288,12 @@
                     <span className={
                         campaign.stage === 'DESIGN' ? 'text-pink-600' :
                         campaign.stage === 'SAMPLING' ? 'text-cyan-600' :
+                        campaign.stage === 'CONFIRMED' ? 'text-green-600' :
                         'text-blue-600'
                     }>{campaign.stage.replace('_', ' ')}</span>
                     
-                    {campaign.stage === 'DESIGN' && (
-                        <>
-                        <ArrowRightIcon className="w-4 h-4 text-gray-400" />
-                        <span className="text-gray-500">SAMPLING</span>
-                        </>
-                    )}
-                    {campaign.stage === 'SAMPLING' && (
-                        <>
-                        <ArrowRightIcon className="w-4 h-4 text-gray-400" />
-                        <span className="text-gray-500">PRE-ORDER</span>
-                        </>
-                    )}
+                    {campaign.stage === 'DESIGN' && ( <> <ArrowRightIcon className="w-4 h-4 text-gray-400" /> <span className="text-gray-500">SAMPLING</span> </> )}
+                    {campaign.stage === 'SAMPLING' && ( <> <ArrowRightIcon className="w-4 h-4 text-gray-400" /> <span className="text-gray-500">PRE-ORDER</span> </> )}
                     </div>
                     {campaign.stage === 'PRE_ORDER' && (
                         <div className="absolute bottom-3 left-3 bg-white/80 backdrop-blur-sm text-xs font-bold px-2 py-1 rounded-full shadow-sm">
@@ -1104,6 +1305,60 @@
                 </div>
             );
         };
+
+        const Toast = ({ message, visible }) => {
+            const [isRendered, setIsRendered] = useState(visible);
+
+            useEffect(() => {
+                if (visible) {
+                    setIsRendered(true);
+                } else {
+                    const timer = setTimeout(() => setIsRendered(false), 300); // Match exit animation duration
+                    return () => clearTimeout(timer);
+                }
+            }, [visible]);
+
+            if (!isRendered) return null;
+
+            return (
+                <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] bg-gray-900/80 backdrop-blur-sm text-white font-semibold py-3 px-6 rounded-full shadow-lg ${visible ? 'toast-enter-active' : 'toast-exit-active'}`}>
+                    {message}
+                </div>
+            );
+        };
+        
+        // --- SKELETON LOADERS ---
+        const CampaignCardSkeleton = () => (
+            <div className="bg-white/40 rounded-xl shadow-lg overflow-hidden animate-pulse">
+                <div className="h-80 bg-gray-300"></div>
+                <div className="p-4">
+                    <div className="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                    <div className="h-6 bg-gray-300 rounded w-3/4 mb-4"></div>
+                    <div className="h-2 bg-gray-300 rounded w-full mb-2"></div>
+                    <div className="flex justify-between">
+                        <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                        <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const HomeScreenSkeleton = () => (
+            <div className="p-4 sm:p-6 lg:p-8">
+                <header className="mb-8 text-center">
+                    <div className="h-12 bg-gray-300 rounded w-1/2 mx-auto animate-pulse"></div>
+                    <div className="h-6 bg-gray-300 rounded w-1/3 mx-auto mt-4 animate-pulse"></div>
+                </header>
+                <div className="mb-8">
+                    <div className="flex justify-center flex-wrap gap-2">
+                        {[...Array(5)].map((_, i) => <div key={i} className="h-10 bg-gray-300 rounded-full w-24 animate-pulse"></div>)}
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {[...Array(8)].map((_, i) => <CampaignCardSkeleton key={i} />)}
+                </div>
+            </div>
+        );
         
         // --- NAVIGATION ---
         function TopNavBar({ onNavigate, currentScreen, dashboardView }) {

@@ -678,11 +678,12 @@
             
             return (
                 <div 
-                    className={`fixed inset-0 z-50 flex items-center justify-center p-0 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
+                    className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
+                    onClick={handleClose}
                 >
-                    <div className="fixed inset-0 bg-white"></div>
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true"></div>
                     <div 
-                        className={`w-full h-full bg-white shadow-2xl transform transition-all duration-300 ease-in-out relative flex flex-col sm:rounded-2xl sm:overflow-hidden ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`}
+                        className={`relative w-full h-full max-w-7xl max-h-full sm:max-h-[90vh] bg-white/80 backdrop-blur-xl shadow-2xl transform transition-all duration-300 ease-in-out flex flex-col sm:rounded-2xl sm:overflow-hidden ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <CampaignDetailContent 
@@ -760,7 +761,7 @@
             };
 
             const MainActions = () => {
-                const baseButtonClass = "font-bold py-3 sm:py-4 rounded-lg shadow-md transition-all flex items-center justify-center space-x-2 w-full disabled:opacity-50 disabled:cursor-not-allowed";
+                const baseButtonClass = "font-bold py-3 sm:py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 w-full disabled:opacity-50 disabled:cursor-not-allowed";
                 switch(campaign.stage) {
                     case 'DESIGN': return ( <button onClick={onLike} className={`${baseButtonClass} ${isLiked ? 'bg-pink-600 text-white hover:bg-pink-700' : 'bg-white text-pink-600 border-2 border-pink-600 hover:bg-pink-50'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
                     case 'SAMPLING': return ( <button onClick={onAddToWaitingList} className={`${baseButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
@@ -770,7 +771,7 @@
                                 <button onClick={onOpenPledgeModal} className={`flex-grow ${baseButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>
                                     Select Size & Pledge
                                 </button>
-                                <div className="flex items-center justify-center text-sm font-bold text-gray-800 bg-gray-200 px-4 rounded-lg whitespace-nowrap">
+                                <div className="flex items-center justify-center text-sm font-bold text-gray-800 bg-gray-200 px-4 rounded-xl whitespace-nowrap">
                                     R{campaign.productionRound}
                                 </div>
                             </div>
@@ -823,7 +824,7 @@
                     </div>
 
                     {/* Details Column (Right) */}
-                    <div className="lg:col-span-2 h-full flex flex-col">
+                    <div className="lg:col-span-2 h-full flex flex-col bg-white">
                         <div className="flex-1 relative">
                             <div ref={contentRef} className="absolute inset-0 overflow-y-auto scrollbar-hide">
                                  {/* Mobile Media */}
@@ -1068,7 +1069,7 @@
                         <div className="mb-4"> <h3 className="font-semibold text-sm mb-3">{isCombinedFunding ? 'Pledges by Size' : 'Funding Progress by Size'}</h3> <div className="space-y-3"> {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => { if (isCombinedFunding) { return ( <div key={size} className="flex justify-between items-center text-sm py-1"> <span className="font-medium text-gray-800">{size}</span> <span className="text-gray-600 font-semibold">{data.funded} pledged</span> </div> ) } const moq = data.moq; const progress = moq ? (data.funded / moq) * 100 : 0; const isFunded = moq && progress >= 100; return ( <div key={size}> <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}> <span className="font-semibold">{size}</span> {moq && <span>{data.funded} / {moq}</span>} </div> {moq && <div className="w-full bg-gray-200 rounded-full h-2"> <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div> </div>} </div> ); })} </div> </div>
                         <div className="mb-6"> <h3 className="font-semibold text-sm mb-2">Select Size to Pledge For</h3> <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide"> {Object.keys(campaign.preOrderDetails.sizes).map(size => ( <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-700 border-gray-200'}`}> {size} </button> ))} </div> </div>
                         <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-lg mb-6"> <p className="text-sm text-blue-800">Your card will only be charged if the funding goal is met.</p> </div>
-                        <button onClick={() => onPledge(campaign, selectedSize, null)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg shadow-md hover:bg-blue-700 transition-all"> Confirm Pledge for Size {selectedSize} </button>
+                        <button onClick={() => onPledge(campaign, selectedSize, null)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all"> Confirm Pledge for Size {selectedSize} </button>
                     </div>
                 </div>
             );
@@ -1279,7 +1280,7 @@
                         <p className="text-sm text-gray-800">{campaign.designer}</p>
                         <h3 className="font-bold text-xl truncate text-gray-900">{campaign.name}</h3>
                         <div className="mt-4">
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-200/70 rounded-full h-2">
                             <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${likeProgress}%` }}></div>
                         </div>
                         <div className="flex justify-between items-center text-sm text-gray-700 mt-2">
@@ -1297,7 +1298,7 @@
                     <div className="p-4">
                         <p className="text-sm text-gray-800">{campaign.designer}</p>
                         <h3 className="font-bold text-xl truncate text-gray-900">{campaign.name}</h3>
-                        <div className="mt-4 bg-cyan-50 text-cyan-800 p-3 rounded-lg text-center">
+                        <div className="mt-4 bg-cyan-50/80 text-cyan-800 p-3 rounded-lg text-center">
                         <p className="font-semibold">Sample in Progress</p>
                         <p className="text-sm">Pre-orders coming soon</p>
                         </div>
@@ -1312,7 +1313,7 @@
                             const fundProgress = overallMoq > 0 ? (totalFunded / overallMoq) * 100 : 0;
                             return (
                                 <>
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="w-full bg-gray-200/70 rounded-full h-2">
                                         <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${fundProgress}%` }}></div>
                                     </div>
                                     <div className="flex justify-between text-sm text-gray-700 mt-2">
@@ -1326,7 +1327,7 @@
                             const totalSizes = Object.keys(sizes).length;
                             return (
                                 <>
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="w-full bg-gray-200/70 rounded-full h-2">
                                          <div className="bg-green-600 h-2 rounded-full" style={{ width: `${(fundedSizes / totalSizes) * 100}%` }}></div>
                                     </div>
                                     <div className="flex justify-between text-sm text-gray-700 mt-2">
@@ -1355,7 +1356,7 @@
                         <div className="p-4">
                             <p className="text-sm text-gray-800">{campaign.designer}</p>
                             <h3 className="font-bold text-xl truncate text-gray-900">{campaign.name}</h3>
-                            <div className="mt-4 bg-green-50 text-green-800 p-3 rounded-lg text-center">
+                            <div className="mt-4 bg-green-50/80 text-green-800 p-3 rounded-lg text-center">
                                 <p className="font-semibold">Fully Funded!</p>
                                 <p className="text-sm">Production starting soon</p>
                             </div>
@@ -1367,7 +1368,7 @@
             };
 
             return (
-                <div onClick={() => onSelect(campaign)} className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">
+                <div onClick={() => onSelect(campaign)} className="bg-white/40 backdrop-blur-lg border border-white/50 rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">
                 <div className="h-80 relative">
                     <img src={campaign.heroImage} alt={campaign.name} className="w-full h-full object-cover" />
                     <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm text-xs font-bold px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-sm">

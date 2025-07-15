@@ -203,7 +203,7 @@
                 }, 1500);
             }, []);
 
-            const isModalOpen = showPledgeModal || show3DModal || showMediaModal.visible || !!showCampaignModal;
+            const isModalOpen = showPledgeModal || show3DModal || showMediaModal.visible || !!showCampaignModal || showBlueprintModal || showPassportModal.visible;
             const isNestedModalOpen = (!!showCampaignModal) && (showPledgeModal || show3DModal || showMediaModal.visible || showBlueprintModal || showPassportModal.visible);
 
             useEffect(() => {
@@ -366,7 +366,7 @@
                 <div className="w-full min-h-screen">
                     <div className={isModalOpen ? 'blur-background' : ''}>
                         <TopNavBar onNavigate={navigateTo} currentScreen={currentScreen} dashboardView={dashboardView} />
-                        <div className="max-w-7xl mx-auto pt-24">
+                        <div className="max-w-7xl mx-auto pt-24 pb-12">
                             <main>
                                 {renderScreen()}
                             </main>
@@ -376,7 +376,7 @@
                     {showCampaignModal &&
                         <CampaignDetailModal
                             campaign={showCampaignModal}
-                            onPledge={() => setShowPledgeModal(true)}
+                            onOpenPledgeModal={() => setShowPledgeModal(true)}
                             onBack={() => setShowCampaignModal(null)}
                             onLike={handleLike}
                             isLiked={likedItems.some(item => item.id === showCampaignModal.id)}
@@ -522,13 +522,13 @@
             return (
                 <div className="p-4 sm:p-6 lg:p-8">
                     <header className="mb-8 text-center">
-                        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">MePont</h1>
+                        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">MePont</h1>
                         <p className="mt-2 text-lg text-gray-600">Community-powered fashion. Sell then make.</p>
                     </header>
                     <div className="mb-4">
                         <div className="flex justify-center flex-wrap gap-2">
                         {categories.map(category => (
-                            <button key={category} onClick={() => setSelectedCategory(category)} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors whitespace-nowrap ${selectedCategory === category ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 shadow-sm hover:bg-gray-50'}`}>
+                            <button key={category} onClick={() => setSelectedCategory(category)} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors whitespace-nowrap ${selectedCategory === category ? 'bg-gray-800 text-white' : 'bg-white text-gray-700 shadow-sm hover:bg-gray-50'}`}>
                             {category}
                             </button>
                         ))}
@@ -573,9 +573,9 @@
                     </header>
                     <div className="mb-6 border-b border-gray-200">
                         <div className="flex space-x-2 sm:space-x-4">
-                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'My MePont' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>My Pledges</button>
-                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'Waiting List' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>Waiting List</button>
-                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'Liked' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}>Liked</button>
+                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'My MePont' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-800'}`}>My Pledges</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'Waiting List' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-800'}`}>Waiting List</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'Liked' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-800'}`}>Liked</button>
                         </div>
                     </div>
                     {renderContent()}
@@ -585,14 +585,14 @@
 
         const PledgedItemsView = ({ items, productionSteps, onViewPassport }) => {
             if (items.length === 0) {
-                return <div className="text-center py-20 bg-white rounded-lg shadow"><p className="text-gray-500">You haven't pledged for any items yet.</p></div>;
+                return <div className="text-center py-20 bg-white rounded-xl shadow-md"><p className="text-gray-500">You haven't pledged for any items yet.</p></div>;
             }
             return (
                 <div className="space-y-6">
                     {items.map((item) => (
-                        <div key={item.provisionalId} className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+                        <div key={item.provisionalId} className="bg-white p-4 sm:p-6 rounded-xl shadow-md">
                             <div className="flex flex-col sm:flex-row items-start sm:space-x-6">
-                                <img src={item.heroImage} alt={item.name} className="w-24 h-32 object-cover rounded-md flex-shrink-0 mb-4 sm:mb-0" />
+                                <img src={item.heroImage} alt={item.name} className="w-24 h-32 object-cover rounded-lg flex-shrink-0 mb-4 sm:mb-0" />
                                 <div className="flex-grow">
                                     <p className="font-bold text-lg text-gray-900">{item.name}</p>
                                     <p className="text-sm text-gray-600">Size: {item.size}</p>
@@ -601,11 +601,12 @@
                                     <div className="bg-gray-100 p-3 rounded-lg text-sm">
                                         <p className="font-semibold text-gray-800 mb-1">Pledge ID</p>
                                         {item.digitalPassportId ? (
-                                            <button onClick={() => onViewPassport(item)} className="font-mono text-xs text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md transition-colors w-full text-left">
-                                                View Digital Passport
+                                            <button onClick={() => onViewPassport(item)} className="font-mono text-xs text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-colors w-full text-left flex items-center justify-between">
+                                                <span>View Passport</span>
+                                                <ArrowRightIcon className="w-3 h-3" />
                                             </button>
                                         ) : (
-                                            <p className="font-mono text-xs text-gray-500 bg-gray-200 px-3 py-1.5 rounded-md">{item.provisionalId}</p>
+                                            <p className="font-mono text-xs text-gray-500 bg-gray-200 px-3 py-1.5 rounded-lg">{item.provisionalId}</p>
                                         )}
                                     </div>
                                 </div>
@@ -641,7 +642,7 @@
 
         const ItemGridView = ({ items, onCampaignSelect, onLike, likedItems, emptyMessage }) => {
              if (items.length === 0) {
-                return <div className="text-center py-20 bg-white rounded-lg shadow"><p className="text-gray-500">{emptyMessage}</p></div>;
+                return <div className="text-center py-20 bg-white rounded-xl shadow-md"><p className="text-gray-500">{emptyMessage}</p></div>;
             }
             return (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -653,7 +654,7 @@
         };
 
         // --- MODALS ---
-        function CampaignDetailModal({ campaign, onPledge, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, isNestedModalOpen, onAddToWaitingList, isOnWaitingList }) {
+        function CampaignDetailModal({ campaign, onOpenPledgeModal, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, isNestedModalOpen, onAddToWaitingList, isOnWaitingList }) {
             const [show, setShow] = useState(false);
             const [islandNotification, setIslandNotification] = useState({ key: 0, message: '' });
 
@@ -677,16 +678,16 @@
             
             return (
                 <div 
-                    className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
-                    onClick={handleClose}
+                    className={`fixed inset-0 z-50 flex items-center justify-center p-0 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
                 >
+                    <div className="fixed inset-0 bg-white"></div>
                     <div 
-                        className={`w-full h-full bg-white/80 backdrop-blur-xl shadow-2xl transform transition-all duration-300 ease-in-out relative flex flex-col sm:rounded-2xl sm:overflow-hidden ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`}
+                        className={`w-full h-full bg-white shadow-2xl transform transition-all duration-300 ease-in-out relative flex flex-col sm:rounded-2xl sm:overflow-hidden ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${isNestedModalOpen ? 'blur-background' : ''}`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <CampaignDetailContent 
                             campaign={campaign} 
-                            onPledge={() => onPledge(campaign, null, showIslandNotification)}
+                            onOpenPledgeModal={onOpenPledgeModal}
                             onLike={() => onLike(campaign.id, showIslandNotification)} 
                             isLiked={isLiked} 
                             hasPurchased={hasPurchased} 
@@ -705,7 +706,7 @@
             );
         };
         
-        function CampaignDetailContent({ campaign, onPledge, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList, islandNotification, onClose }) {
+        function CampaignDetailContent({ campaign, onOpenPledgeModal, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList, islandNotification, onClose }) {
             const [selectedSize, setSelectedSize] = useState(campaign.sizeGuide.sizes && Object.keys(campaign.sizeGuide.sizes).length > 0 ? Object.keys(campaign.sizeGuide.sizes)[0] : null);
             
             const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
@@ -759,23 +760,23 @@
             };
 
             const MainActions = () => {
-                const actionButtonClass = "font-bold py-3 sm:py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 w-full disabled:opacity-50 disabled:cursor-not-allowed";
+                const baseButtonClass = "font-bold py-3 sm:py-4 rounded-lg shadow-md transition-all flex items-center justify-center space-x-2 w-full disabled:opacity-50 disabled:cursor-not-allowed";
                 switch(campaign.stage) {
-                    case 'DESIGN': return ( <button onClick={onLike} className={`${actionButtonClass} ${isLiked ? 'bg-pink-600 text-white' : 'bg-white text-pink-600 border-2 border-pink-600'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
-                    case 'SAMPLING': return ( <button onClick={onAddToWaitingList} className={`${actionButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
+                    case 'DESIGN': return ( <button onClick={onLike} className={`${baseButtonClass} ${isLiked ? 'bg-pink-600 text-white hover:bg-pink-700' : 'bg-white text-pink-600 border-2 border-pink-600 hover:bg-pink-50'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
+                    case 'SAMPLING': return ( <button onClick={onAddToWaitingList} className={`${baseButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
                     case 'PRE_ORDER': 
                         return (
                             <div className="flex items-stretch gap-3 w-full">
-                                <button onClick={() => setShowPledgeModal(true)} className={`flex-grow ${actionButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>
-                                    Pledge Now for €{campaign.price}
+                                <button onClick={onOpenPledgeModal} className={`flex-grow ${baseButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>
+                                    Select Size & Pledge
                                 </button>
-                                <div className="flex items-center justify-center text-sm font-bold text-gray-800 bg-gray-200/80 px-4 rounded-xl whitespace-nowrap">
+                                <div className="flex items-center justify-center text-sm font-bold text-gray-800 bg-gray-200 px-4 rounded-lg whitespace-nowrap">
                                     R{campaign.productionRound}
                                 </div>
                             </div>
                         );
                     case 'CONFIRMED':
-                        return <button disabled className={`${actionButtonClass} bg-green-600 text-white`}> <CheckCircleIcon className="w-6 h-6" /> <span>Fully Funded!</span> </button>;
+                        return <button disabled className={`${baseButtonClass} bg-green-600 text-white`}> <CheckCircleIcon className="w-6 h-6" /> <span>Fully Funded!</span> </button>;
                     default: return null;
                 }
             }
@@ -947,7 +948,7 @@
                                             <>
                                             <div className="flex space-x-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
                                                 {Object.keys(campaign.sizeGuide.sizes).map(size => (
-                                                    <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                                    <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-700 border-gray-200'}`}>
                                                         {size}
                                                     </button>
                                                 ))}
@@ -976,7 +977,7 @@
                                                     </div>
                                                 </div>
                                                 <p className="text-gray-700 mb-4 text-sm">Learn more about the planned journey of your garment, from raw materials to the final product.</p>
-                                                <button onClick={onShowBlueprint} className="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                                <button onClick={onShowBlueprint} className="w-full bg-gray-800 text-white font-bold py-2 rounded-lg hover:bg-black transition-colors">
                                                     View Full Blueprint
                                                 </button>
                                             </div>
@@ -1034,7 +1035,7 @@
                             </div>
                         </div>
                         {/* Sticky CTA Bar */}
-                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
+                        <div className="flex-shrink-0 p-4 bg-white border-t border-gray-200">
                             <MainActions />
                         </div>
                     </div>
@@ -1059,15 +1060,15 @@
             if (isCombinedFunding) { totalFunded = Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0); combinedProgress = campaign.preOrderDetails.overallMoq > 0 ? (totalFunded / campaign.preOrderDetails.overallMoq) * 100 : 0; }
             return (
                 <div className={`fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                    <div className={`bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
                         <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"> <XIcon className="w-6 h-6" /> </button>
                         <h2 className="font-bold text-2xl mb-2">{campaign.name}</h2>
                         <p className="text-lg text-gray-600 mb-6">€{campaign.price}</p>
                         {isCombinedFunding && ( <div className="mb-4"> <h3 className="font-semibold text-sm mb-2">Overall Funding Progress</h3> <div className="w-full bg-gray-200 rounded-full h-2.5"> <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${combinedProgress}%` }}></div> </div> <div className="flex justify-between items-center text-xs text-gray-600 mt-1"> <span>{totalFunded} / {campaign.preOrderDetails.overallMoq} Funded</span> <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span> </div> </div> )}
                         <div className="mb-4"> <h3 className="font-semibold text-sm mb-3">{isCombinedFunding ? 'Pledges by Size' : 'Funding Progress by Size'}</h3> <div className="space-y-3"> {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => { if (isCombinedFunding) { return ( <div key={size} className="flex justify-between items-center text-sm py-1"> <span className="font-medium text-gray-800">{size}</span> <span className="text-gray-600 font-semibold">{data.funded} pledged</span> </div> ) } const moq = data.moq; const progress = moq ? (data.funded / moq) * 100 : 0; const isFunded = moq && progress >= 100; return ( <div key={size}> <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}> <span className="font-semibold">{size}</span> {moq && <span>{data.funded} / {moq}</span>} </div> {moq && <div className="w-full bg-gray-200 rounded-full h-2"> <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div> </div>} </div> ); })} </div> </div>
-                        <div className="mb-6"> <h3 className="font-semibold text-sm mb-2">Select Size to Pledge For</h3> <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide"> {Object.keys(campaign.preOrderDetails.sizes).map(size => ( <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}> {size} </button> ))} </div> </div>
-                        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-r-lg mb-6"> <p className="text-sm text-blue-800">Your card will only be charged if the funding goal is met.</p> </div>
-                        <button onClick={() => onPledge(campaign, selectedSize)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all"> Confirm Pledge for Size {selectedSize} </button>
+                        <div className="mb-6"> <h3 className="font-semibold text-sm mb-2">Select Size to Pledge For</h3> <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide"> {Object.keys(campaign.preOrderDetails.sizes).map(size => ( <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-700 border-gray-200'}`}> {size} </button> ))} </div> </div>
+                        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-lg mb-6"> <p className="text-sm text-blue-800">Your card will only be charged if the funding goal is met.</p> </div>
+                        <button onClick={() => onPledge(campaign, selectedSize, null)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg shadow-md hover:bg-blue-700 transition-all"> Confirm Pledge for Size {selectedSize} </button>
                     </div>
                 </div>
             );
@@ -1079,7 +1080,7 @@
             const handleClose = () => { setShow(false); setTimeout(onClose, 300); };
             return (
                 <div className={`fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <div className={`w-full h-full max-w-4xl max-h-[80vh] bg-slate-200 rounded-2xl shadow-2xl relative transform transition-all duration-300 ease-in-out overflow-hidden ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                    <div className={`w-full h-full max-w-4xl max-h-[80vh] bg-slate-200 rounded-xl shadow-2xl relative transform transition-all duration-300 ease-in-out overflow-hidden ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
                         <button onClick={handleClose} className="absolute top-4 right-4 text-gray-800 bg-white/50 rounded-full p-2 hover:bg-white z-10"> <XIcon className="w-6 h-6" /> </button>
                         <ThreeDViewer />
                     </div>
@@ -1132,17 +1133,17 @@
             const handleClose = () => { setShow(false); setTimeout(onClose, 300); };
 
             if (!campaign.productionBlueprint) return null;
-            const { productionRunId, manufacturerInfo, supplyChain, sustainability, compliance } = campaign.productionBlueprint;
+            const { productionRunId } = campaign.productionBlueprint;
 
             return (
                 <div className={`fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-2xl relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
-                        <div className="absolute top-0 left-0 right-0 p-6 bg-gray-50 rounded-t-2xl border-b border-gray-200">
+                    <div className={`bg-white rounded-xl shadow-2xl w-full max-w-2xl relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 p-6 bg-gray-50 rounded-t-xl border-b border-gray-200 z-10">
                              <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"> <XIcon className="w-6 h-6" /> </button>
                              <h2 className="text-2xl font-bold text-gray-900">Production Blueprint</h2>
                              <p className="text-sm text-gray-600">Run ID: {productionRunId}</p>
                         </div>
-                        <div className="p-6 pt-28 max-h-[80vh] overflow-y-auto scrollbar-hide">
+                        <div className="p-6 max-h-[70vh] overflow-y-auto scrollbar-hide">
                             <PassportContent blueprint={campaign.productionBlueprint} />
                         </div>
                     </div>
@@ -1159,13 +1160,13 @@
 
             return (
                 <div className={`fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-2xl relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
-                        <div className="absolute top-0 left-0 right-0 p-6 bg-blue-600 text-white rounded-t-2xl">
+                    <div className={`bg-white rounded-xl shadow-2xl w-full max-w-2xl relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 p-6 bg-blue-600 text-white rounded-t-xl z-10">
                              <button onClick={handleClose} className="absolute top-4 right-4 text-blue-100 hover:text-white"> <XIcon className="w-6 h-6" /> </button>
                              <h2 className="text-2xl font-bold">Digital Passport</h2>
                              <p className="text-sm font-mono text-blue-200">{item.digitalPassportId}</p>
                         </div>
-                        <div className="p-6 pt-28 max-h-[80vh] overflow-y-auto scrollbar-hide">
+                        <div className="p-6 max-h-[70vh] overflow-y-auto scrollbar-hide">
                             <PassportContent blueprint={item.productionBlueprint} />
                         </div>
                     </div>
@@ -1239,8 +1240,8 @@
             }
             return (
                 <form onSubmit={handleSubmit} className="mt-4">
-                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-2 border rounded-lg text-sm bg-white" placeholder="Add a comment..."></textarea>
-                    <button type="submit" className="mt-2 px-4 py-2 bg-gray-800 text-white font-semibold rounded-lg text-sm hover:bg-gray-900 transition-colors">Post Comment</button>
+                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Add a comment..."></textarea>
+                    <button type="submit" className="mt-2 px-4 py-2 bg-gray-800 text-white font-semibold rounded-lg text-sm hover:bg-black transition-colors">Post Comment</button>
                 </form>
             );
         };
@@ -1262,7 +1263,7 @@
                     <div className="flex items-center mb-2">
                         {[...Array(5)].map((_, i) => <button type="button" key={i} onClick={() => setRating(i+1)}><StarIcon className={`w-6 h-6 transition-colors ${i < rating ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-400'}`} isFilled={i < rating} /></button>)}
                     </div>
-                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-2 border rounded-lg text-sm bg-white" placeholder="Share your thoughts on the fit and quality..."></textarea>
+                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Share your thoughts on the fit and quality..."></textarea>
                     <button type="submit" className="mt-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg text-sm hover:bg-blue-700 transition-colors">Submit Review</button>
                 </form>
             );
@@ -1278,7 +1279,7 @@
                         <p className="text-sm text-gray-800">{campaign.designer}</p>
                         <h3 className="font-bold text-xl truncate text-gray-900">{campaign.name}</h3>
                         <div className="mt-4">
-                        <div className="w-full bg-gray-200/70 rounded-full h-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
                             <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${likeProgress}%` }}></div>
                         </div>
                         <div className="flex justify-between items-center text-sm text-gray-700 mt-2">
@@ -1296,7 +1297,7 @@
                     <div className="p-4">
                         <p className="text-sm text-gray-800">{campaign.designer}</p>
                         <h3 className="font-bold text-xl truncate text-gray-900">{campaign.name}</h3>
-                        <div className="mt-4 bg-cyan-50/80 text-cyan-800 p-3 rounded-lg text-center">
+                        <div className="mt-4 bg-cyan-50 text-cyan-800 p-3 rounded-lg text-center">
                         <p className="font-semibold">Sample in Progress</p>
                         <p className="text-sm">Pre-orders coming soon</p>
                         </div>
@@ -1311,7 +1312,7 @@
                             const fundProgress = overallMoq > 0 ? (totalFunded / overallMoq) * 100 : 0;
                             return (
                                 <>
-                                    <div className="w-full bg-gray-200/70 rounded-full h-2">
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
                                         <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${fundProgress}%` }}></div>
                                     </div>
                                     <div className="flex justify-between text-sm text-gray-700 mt-2">
@@ -1325,7 +1326,7 @@
                             const totalSizes = Object.keys(sizes).length;
                             return (
                                 <>
-                                    <div className="w-full bg-gray-200/70 rounded-full h-2">
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
                                          <div className="bg-green-600 h-2 rounded-full" style={{ width: `${(fundedSizes / totalSizes) * 100}%` }}></div>
                                     </div>
                                     <div className="flex justify-between text-sm text-gray-700 mt-2">
@@ -1354,7 +1355,7 @@
                         <div className="p-4">
                             <p className="text-sm text-gray-800">{campaign.designer}</p>
                             <h3 className="font-bold text-xl truncate text-gray-900">{campaign.name}</h3>
-                            <div className="mt-4 bg-green-50/80 text-green-800 p-3 rounded-lg text-center">
+                            <div className="mt-4 bg-green-50 text-green-800 p-3 rounded-lg text-center">
                                 <p className="font-semibold">Fully Funded!</p>
                                 <p className="text-sm">Production starting soon</p>
                             </div>
@@ -1366,7 +1367,7 @@
             };
 
             return (
-                <div onClick={() => onSelect(campaign)} className="bg-white/40 backdrop-blur-lg border border-white/50 rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 group">
+                <div onClick={() => onSelect(campaign)} className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">
                 <div className="h-80 relative">
                     <img src={campaign.heroImage} alt={campaign.name} className="w-full h-full object-cover" />
                     <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm text-xs font-bold px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-sm">
@@ -1393,7 +1394,7 @@
         
         // --- SKELETON LOADERS ---
         const CampaignCardSkeleton = () => (
-            <div className="bg-white/40 rounded-xl shadow-lg overflow-hidden animate-pulse">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
                 <div className="h-80 bg-gray-300"></div>
                 <div className="p-4">
                     <div className="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
@@ -1410,7 +1411,7 @@
         const HomeScreenSkeleton = () => (
             <div className="p-4 sm:p-6 lg:p-8">
                 <header className="mb-8 text-center">
-                    <div className="h-12 bg-gray-300 rounded w-1/2 mx-auto animate-pulse"></div>
+                    <div className="h-10 bg-gray-300 rounded w-1/2 mx-auto animate-pulse"></div>
                     <div className="h-6 bg-gray-300 rounded w-1/3 mx-auto mt-4 animate-pulse"></div>
                 </header>
                 <div className="mb-8">

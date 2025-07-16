@@ -794,7 +794,7 @@
             return (
                 <div className="w-full h-full lg:grid lg:grid-cols-5 overflow-hidden">
                     {/* Media Column (Left) */}
-                    <div className="lg:col-span-3 h-full p-4 hidden lg:flex flex-col gap-4 overflow-hidden">
+                    <div className="lg:col-span-3 h-full p-4 hidden lg:flex flex-col gap-4 overflow-hidden bg-gray-50">
                         <div className="flex-1 relative">
                             <button className="w-full h-full rounded-lg overflow-hidden" onClick={() => onShowMedia(currentMediaIndex)}>
                                 {mediaItems[currentMediaIndex].type === 'video' ? (
@@ -830,7 +830,7 @@
                                  {/* Mobile Media */}
                                 <div className="lg:hidden">
                                     <div 
-                                        className={`relative aspect-[4/5] mb-2 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
+                                        className={`relative aspect-[4/5] bg-gray-100 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
                                         onTouchStart={handleTouchStart}
                                         onTouchMove={handleTouchMove}
                                         onTouchEnd={handleTouchEnd}
@@ -852,15 +852,27 @@
                                             </button>
                                         )}
                                     </div>
-                                    <div className="flex justify-center items-center space-x-2">
+                                    <div className="flex justify-center items-center space-x-2 py-2">
                                         {mediaItems.map((_, index) => (
                                             <div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                                         ))}
                                     </div>
                                 </div>
                                 
+                                <div className="sticky top-0 z-20 py-2 bg-white/80 backdrop-blur-md border-b border-gray-200">
+                                    <div className="max-w-md mx-auto px-4">
+                                        <DetailIsland 
+                                            sectionRefs={sectionRefs}
+                                            containerRef={contentRef}
+                                            notification={islandNotification}
+                                            onClose={onClose}
+                                            hasBlueprint={!!campaign.productionBlueprint}
+                                        />
+                                    </div>
+                                </div>
+
                                 {/* Common Details */}
-                                <div className="p-5 lg:p-6 lg:pt-24"> {/* Add padding for sticky island */}
+                                <div className="p-5 lg:p-6">
                                     <div className="flex justify-between items-center">
                                         <p className="text-sm text-gray-800">{campaign.designer}</p>
                                     </div>
@@ -1019,19 +1031,6 @@
                                         )}
                                         <CommentForm campaignId={campaign.id} onSubmit={onCommentSubmit} />
                                     </ContentSection>
-                                </div>
-                            </div>
-                            <div className="absolute top-0 left-0 right-0 p-4 z-20">
-                                <div className="max-w-md mx-auto">
-                                    <DetailIsland 
-                                        campaignName={campaign.name}
-                                        designerName={campaign.designer}
-                                        sectionRefs={sectionRefs}
-                                        containerRef={contentRef}
-                                        notification={islandNotification}
-                                        onClose={onClose}
-                                        hasBlueprint={!!campaign.productionBlueprint}
-                                    />
                                 </div>
                             </div>
                         </div>
@@ -1462,7 +1461,7 @@
             );
         }
 
-        const DetailIsland = ({ campaignName, designerName, sectionRefs, containerRef, notification, onClose, hasBlueprint }) => {
+        const DetailIsland = ({ sectionRefs, containerRef, notification, onClose, hasBlueprint }) => {
             const [activeSection, setActiveSection] = useState('details');
             const islandRef = useRef(null);
 
@@ -1513,13 +1512,9 @@
                         ${notification.message ? 'island-notification-bg-animate' : ''}
                     `}
                 >
-                    {/* Default view: Title and Nav Icons */}
+                    {/* Default view: Nav Icons and Close button */}
                     <div className={`flex items-center justify-between w-full px-2 transition-opacity duration-300 ${notification.message ? 'opacity-0' : 'opacity-100'}`}>
-                        <div className="hidden lg:block mr-4 pl-2">
-                            <p className="text-white font-bold truncate">{campaignName}</p>
-                            <p className="text-gray-400 text-sm truncate">{designerName}</p>
-                        </div>
-                        <div className="flex items-center justify-center lg:justify-end flex-grow gap-x-1">
+                        <div className="flex items-center justify-center flex-grow gap-x-1">
                             {SECTIONS.map(({ id, icon: Icon, label }) => (
                                 <button 
                                     key={id} 

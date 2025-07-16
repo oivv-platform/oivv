@@ -859,7 +859,7 @@
                                     </div>
                                 </div>
                                 
-                                <div className="sticky top-0 z-20 py-2 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4">
+                                <div className="sticky top-0 z-20 p-4 bg-white/80 backdrop-blur-xl border-b border-gray-200">
                                     <DetailIsland 
                                         sectionRefs={sectionRefs}
                                         containerRef={contentRef}
@@ -1033,7 +1033,7 @@
                             </div>
                         </div>
                         {/* Sticky CTA Bar */}
-                        <div className="flex-shrink-0 p-4 bg-white border-t border-gray-200">
+                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-200">
                             <MainActions />
                         </div>
                     </div>
@@ -1505,21 +1505,21 @@
                     ref={islandRef}
                     key={notification.key}
                     className={`
-                        relative flex items-center h-14 w-full
-                        bg-gray-900/75 backdrop-blur-lg rounded-2xl shadow-2xl overflow-hidden
+                        relative flex items-center w-full
+                        bg-white/80 backdrop-blur-xl rounded-xl shadow-lg overflow-hidden p-2
                         ${notification.message ? 'island-notification-bg-animate' : ''}
                     `}
                 >
                     {/* Default view: Nav Icons and Close button */}
-                    <div className={`flex items-center justify-between w-full px-2 transition-opacity duration-300 ${notification.message ? 'opacity-0' : 'opacity-100'}`}>
-                        <div className="flex items-center justify-center flex-grow gap-x-1">
+                    <div className={`flex items-center justify-between w-full transition-opacity duration-300 ${notification.message ? 'opacity-0' : 'opacity-100'}`}>
+                        <div className="flex items-center gap-x-1">
                             {SECTIONS.map(({ id, icon: Icon, label }) => (
                                 <button 
                                     key={id} 
                                     onClick={() => handleNavClick(id)}
                                     className={`
                                         p-2 rounded-full transition-colors duration-200
-                                        ${activeSection === id ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'}
+                                        ${activeSection === id ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-800'}
                                     `}
                                     aria-label={label}
                                 >
@@ -1527,8 +1527,7 @@
                                 </button>
                             ))}
                         </div>
-                        <div className="h-8 w-px bg-gray-600/50 mx-1"></div>
-                        <button onClick={onClose} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-full transition-colors">
+                        <button onClick={onClose} className="p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-800 rounded-full transition-colors">
                            <XIcon className="w-5 h-5" />
                         </button>
                     </div>

@@ -855,6 +855,10 @@
                                     <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-contain" />
                                 )}
                             </button>
+                             {/* Desktop Nav Arrows */}
+                            <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors opacity-0 group-hover:opacity-100"><ChevronLeftIcon className="w-6 h-6" /></button>
+                            <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors opacity-0 group-hover:opacity-100"><ChevronRightIcon className="w-6 h-6" /></button>
+
                             {campaign.has3D && (
                                 <button 
                                     onClick={(e) => { e.stopPropagation(); onShow3D(); }} 
@@ -1153,10 +1157,22 @@
             const [currentIndex, setCurrentIndex] = useState(startIndex);
             const [show, setShow] = useState(false);
 
+            const changeMedia = (direction) => {
+                setCurrentIndex(prev => (prev + direction + mediaItems.length) % mediaItems.length);
+            };
+
             useEffect(() => {
                 const timer = setTimeout(() => setShow(true), 10);
-                return () => clearTimeout(timer);
-            }, []);
+                const handleKeyDown = (e) => {
+                    if (e.key === 'ArrowLeft') changeMedia(-1);
+                    if (e.key === 'ArrowRight') changeMedia(1);
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => {
+                    clearTimeout(timer);
+                    window.removeEventListener('keydown', handleKeyDown);
+                };
+            }, [mediaItems.length]);
 
             const handleClose = () => {
                 setShow(false);
@@ -1164,24 +1180,20 @@
             };
 
             return (
-                <div className={`fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <button onClick={handleClose} className="absolute top-4 right-4 text-white bg-black/30 rounded-full p-2 hover:bg-black/50 z-10">
+                <div className={`fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <button onClick={handleClose} className="absolute top-4 right-4 text-white bg-black/30 rounded-full p-2 hover:bg-black/50 z-20">
                         <XIcon className="w-6 h-6" />
                     </button>
-                    <div className={`w-full h-full max-w-5xl max-h-[80vh] flex items-center justify-center transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                    
+                    <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/30 transition-colors z-20"><ChevronLeftIcon className="w-8 h-8" /></button>
+                    <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/30 transition-colors z-20"><ChevronRightIcon className="w-8 h-8" /></button>
+
+                    <div className={`w-full h-full flex items-center justify-center transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
                         {mediaItems[currentIndex].type === 'video' ? (
                             <video key={mediaItems[currentIndex].url} src={mediaItems[currentIndex].url} controls autoPlay className="max-w-full max-h-full object-contain rounded-lg"></video>
                         ) : (
                             <img src={mediaItems[currentIndex].url} alt="Full screen product view" className="max-w-full max-h-full object-contain rounded-lg" />
                         )}
-                    </div>
-                    <div className={`mt-4 flex space-x-2 overflow-x-auto scrollbar-hide transform transition-all duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={(e) => e.stopPropagation()}>
-                        {mediaItems.map((media, index) => (
-                            <button key={index} onClick={() => setCurrentIndex(index)} className={`w-16 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 relative ${currentIndex === index ? 'border-white' : 'border-transparent'}`}>
-                                <img src={media.thumbnail} alt={media.type} className="w-full h-full object-cover" />
-                                {media.type === 'video' && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><PlayIcon className="w-6 h-6 text-white" /></div>}
-                            </button>
-                        ))}
                     </div>
                 </div>
             );

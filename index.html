@@ -207,8 +207,12 @@
                 }, 1500);
             }, []);
 
-            const isModalOpen = showPledgeModal || show3DModal || showMediaModal.visible || !!showCampaignModal || showBlueprintModal || showPassportModal.visible;
-            const isNestedModalOpen = (!!showCampaignModal) && (showPledgeModal || show3DModal || showMediaModal.visible || showBlueprintModal || showPassportModal.visible);
+            // Determines if any modal is open on the screen.
+            const isAnyModalOpen = showPledgeModal || show3DModal || showMediaModal.visible || !!showCampaignModal || showBlueprintModal || showPassportModal.visible;
+            
+            // Determines if a nested modal is open on top of the campaign detail view.
+            const isCampaignDetailBlurred = showPledgeModal || show3DModal || showMediaModal.visible || showBlueprintModal;
+
 
             useEffect(() => {
                 const updatedCampaigns = campaigns.map(c => {
@@ -368,7 +372,8 @@
 
             return (
                 <div className="w-full min-h-screen">
-                    <div className={isModalOpen && !isNestedModalOpen ? 'blur-background' : ''}>
+                    {/* This div wraps the main content and applies blur when any modal is open */}
+                    <div className={isAnyModalOpen ? 'blur-background' : ''}>
                         <TopNavBar onNavigate={navigateTo} currentScreen={currentScreen} dashboardView={dashboardView} />
                         <div className="max-w-7xl mx-auto pt-24 pb-12">
                             <main>
@@ -392,6 +397,7 @@
                             onShowBlueprint={() => setShowBlueprintModal(true)}
                             onAddToWaitingList={handleAddToWaitingList}
                             isOnWaitingList={waitingListItems.some(item => item.id === showCampaignModal.id)}
+                            isBlurred={isCampaignDetailBlurred} // Pass the blur state
                         />
                     }
                     {showPledgeModal && <PledgeModal campaign={showCampaignModal} onClose={() => setShowPledgeModal(false)} onPledge={handlePledge} />}
@@ -657,7 +663,7 @@
         };
 
         // --- MODALS ---
-        function CampaignDetailModal({ campaign, onOpenPledgeModal, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList }) {
+        function CampaignDetailModal({ campaign, onOpenPledgeModal, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList, isBlurred }) {
             const [show, setShow] = useState(false);
             const [islandNotification, setIslandNotification] = useState({ key: 0, message: '' });
 
@@ -686,7 +692,14 @@
                 >
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true"></div>
                     <div 
-                        className={`relative w-full h-full max-w-7xl max-h-full sm:max-h-[90vh] bg-white/80 backdrop-blur-xl shadow-2xl transform transition-all duration-300 ease-in-out flex flex-col sm:rounded-2xl sm:overflow-hidden ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+                        className={`
+                            relative w-full h-full max-w-7xl max-h-full sm:max-h-[90vh] 
+                            bg-white/80 backdrop-blur-xl shadow-2xl 
+                            transform transition-all duration-300 ease-in-out 
+                            flex flex-col sm:rounded-2xl sm:overflow-hidden 
+                            ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}
+                            ${isBlurred ? 'blur-background' : ''}
+                        `}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <CampaignDetailContent 

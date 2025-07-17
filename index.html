@@ -392,7 +392,6 @@
                             onShowBlueprint={() => setShowBlueprintModal(true)}
                             onAddToWaitingList={handleAddToWaitingList}
                             isOnWaitingList={waitingListItems.some(item => item.id === showCampaignModal.id)}
-                            isNestedModalOpen={isNestedModalOpen}
                         />
                     }
                     {showPledgeModal && <PledgeModal campaign={showCampaignModal} onClose={() => setShowPledgeModal(false)} onPledge={handlePledge} />}
@@ -658,7 +657,7 @@
         };
 
         // --- MODALS ---
-        function CampaignDetailModal({ campaign, onOpenPledgeModal, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList, isNestedModalOpen }) {
+        function CampaignDetailModal({ campaign, onOpenPledgeModal, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList }) {
             const [show, setShow] = useState(false);
             const [islandNotification, setIslandNotification] = useState({ key: 0, message: '' });
 
@@ -690,24 +689,22 @@
                         className={`relative w-full h-full max-w-7xl max-h-full sm:max-h-[90vh] bg-white/80 backdrop-blur-xl shadow-2xl transform transition-all duration-300 ease-in-out flex flex-col sm:rounded-2xl sm:overflow-hidden ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className={isNestedModalOpen ? 'blur-background' : ''}>
-                            <CampaignDetailContent 
-                                campaign={campaign} 
-                                onOpenPledgeModal={onOpenPledgeModal}
-                                onLike={() => onLike(campaign.id, showIslandNotification)} 
-                                isLiked={isLiked} 
-                                hasPurchased={hasPurchased} 
-                                onCommentSubmit={(id, text) => onCommentSubmit(id, text, showIslandNotification)} 
-                                onReviewSubmit={(id, review) => onReviewSubmit(id, review, showIslandNotification)} 
-                                onShow3D={onShow3D} 
-                                onShowMedia={onShowMedia} 
-                                onShowBlueprint={onShowBlueprint}
-                                onAddToWaitingList={() => onAddToWaitingList(campaign.id, showIslandNotification)} 
-                                isOnWaitingList={isOnWaitingList}
-                                islandNotification={islandNotification}
-                                onClose={handleClose}
-                            />
-                        </div>
+                        <CampaignDetailContent 
+                            campaign={campaign} 
+                            onOpenPledgeModal={onOpenPledgeModal}
+                            onLike={() => onLike(campaign.id, showIslandNotification)} 
+                            isLiked={isLiked} 
+                            hasPurchased={hasPurchased} 
+                            onCommentSubmit={(id, text) => onCommentSubmit(id, text, showIslandNotification)} 
+                            onReviewSubmit={(id, review) => onReviewSubmit(id, review, showIslandNotification)} 
+                            onShow3D={onShow3D} 
+                            onShowMedia={onShowMedia} 
+                            onShowBlueprint={onShowBlueprint}
+                            onAddToWaitingList={() => onAddToWaitingList(campaign.id, showIslandNotification)} 
+                            isOnWaitingList={isOnWaitingList}
+                            islandNotification={islandNotification}
+                            onClose={handleClose}
+                        />
                     </div>
                 </div>
             );

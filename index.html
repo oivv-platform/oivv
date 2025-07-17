@@ -847,7 +847,7 @@
                 <div className="w-full h-full lg:grid lg:grid-cols-5 overflow-hidden">
                     {/* Media Column (Left) */}
                     <div className="lg:col-span-3 h-full p-4 hidden lg:flex flex-col gap-4 overflow-hidden bg-gray-50">
-                        <div className="flex-1 relative rounded-lg bg-gray-100">
+                        <div className="flex-1 relative rounded-lg bg-gray-100 min-h-0">
                             <button className="w-full h-full" onClick={() => onShowMedia(currentMediaIndex)}>
                                 {mediaItems[currentMediaIndex].type === 'video' ? (
                                     <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-contain"></video>
@@ -891,37 +891,35 @@
                             <div ref={contentRef} className="absolute inset-0 overflow-y-auto scrollbar-hide">
                                  {/* Mobile View */}
                                 <div className="lg:hidden">
-                                    <div className="flex flex-col min-h-[calc(100vh-200px)] sm:min-h-[calc(90vh-200px)]">
-                                        <div className="p-5">
-                                            <p className="text-sm text-gray-800">{campaign.designer}</p>
-                                            <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
-                                        </div>
-                                        <div 
-                                            className={`flex-grow relative bg-gray-100 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
-                                            onTouchStart={handleTouchStart}
-                                            onTouchMove={handleTouchMove}
-                                            onTouchEnd={handleTouchEnd}
-                                        >
-                                            <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
-                                            {mediaItems[currentMediaIndex].type === 'video' ? (
-                                                <div className="w-full h-full relative">
-                                                    <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} playsInline loop muted autoPlay className="w-full h-full object-cover bg-black"></video>
-                                                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none"><PlayIcon className="w-16 h-16 text-white/70" /></div>
-                                                </div>
-                                            ) : (
-                                                <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover" />
-                                            )}
-                                            </button>
-                                            {/* Mobile Nav Arrows */}
-                                            <button onClick={() => changeMedia(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronLeftIcon className="w-6 h-6" /></button>
-                                            <button onClick={() => changeMedia(1)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronRightIcon className="w-6 h-6" /></button>
-                                            {campaign.has3D && (
-                                                <button onClick={(e) => { e.stopPropagation(); onShow3D(); }} className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"><CubeIcon className="w-5 h-5" /><span>3D</span></button>
-                                            )}
-                                        </div>
-                                        <div className="flex justify-center items-center space-x-2 py-3">
-                                            {mediaItems.map((_, index) => (<div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>))}
-                                        </div>
+                                    <div className="p-5">
+                                        <p className="text-sm text-gray-800">{campaign.designer}</p>
+                                        <h2 className="text-3xl font-bold text-gray-900">{campaign.name}</h2>
+                                    </div>
+                                    <div 
+                                        className={`relative bg-gray-100 transition-opacity duration-150 aspect-[4/5] ${isFading ? 'opacity-0' : 'opacity-100'}`}
+                                        onTouchStart={handleTouchStart}
+                                        onTouchMove={handleTouchMove}
+                                        onTouchEnd={handleTouchEnd}
+                                    >
+                                        <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
+                                        {mediaItems[currentMediaIndex].type === 'video' ? (
+                                            <div className="w-full h-full relative">
+                                                <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} playsInline loop muted autoPlay className="w-full h-full object-contain bg-black"></video>
+                                                <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none"><PlayIcon className="w-16 h-16 text-white/70" /></div>
+                                            </div>
+                                        ) : (
+                                            <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-contain" />
+                                        )}
+                                        </button>
+                                        {/* Mobile Nav Arrows */}
+                                        <button onClick={() => changeMedia(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronLeftIcon className="w-6 h-6" /></button>
+                                        <button onClick={() => changeMedia(1)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronRightIcon className="w-6 h-6" /></button>
+                                        {campaign.has3D && (
+                                            <button onClick={(e) => { e.stopPropagation(); onShow3D(); }} className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"><CubeIcon className="w-5 h-5" /><span>3D</span></button>
+                                        )}
+                                    </div>
+                                    <div className="flex justify-center items-center space-x-2 py-3">
+                                        {mediaItems.map((_, index) => (<div key={index} className={`w-2 h-2 rounded-full ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300'}`}></div>))}
                                     </div>
                                 </div>
                                 

@@ -846,7 +846,7 @@
             return (
                 <div className="w-full h-full lg:grid lg:grid-cols-5 overflow-hidden">
                     {/* Media Column (Left) */}
-                    <div className="lg:col-span-3 h-full p-4 hidden lg:flex flex-col gap-4 overflow-hidden bg-gray-50">
+                    <div className="lg:col-span-3 h-full p-4 hidden lg:flex flex-col gap-4 overflow-hidden bg-gray-50 group">
                         <div className="flex-1 relative rounded-lg bg-gray-100 min-h-0">
                             <button className="w-full h-full" onClick={() => onShowMedia(currentMediaIndex)}>
                                 {mediaItems[currentMediaIndex].type === 'video' ? (
@@ -1156,16 +1156,66 @@
             const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
             const [currentIndex, setCurrentIndex] = useState(startIndex);
             const [show, setShow] = useState(false);
+            const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
+            const isDragging = useRef(false);
+            const lastPosition = useRef({ x: 0, y: 0 });
+            const imageRef = useRef(null);
 
             const changeMedia = (direction) => {
+                setTransform({ scale: 1, x: 0, y: 0 });
                 setCurrentIndex(prev => (prev + direction + mediaItems.length) % mediaItems.length);
             };
+
+            const handleWheel = (e) => {
+                e.preventDefault();
+                const scaleAmount = 0.1;
+                const newScale = transform.scale - e.deltaY * 0.001 * transform.scale;
+                const clampedScale = Math.min(Math.max(newScale, 0.5), 5);
+                
+                if (imageRef.current) {
+                    const rect = imageRef.current.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    const newX = transform.x + (x / transform.scale - x / clampedScale) * clampedScale;
+                    const newY = transform.y + (y / transform.scale - y / clampedScale) * clampedScale;
+
+                    setTransform({ scale: clampedScale, x: newX, y: newY });
+                }
+            };
+            
+            const handleMouseDown = (e) => {
+                if (transform.scale > 1) {
+                    isDragging.current = true;
+                    lastPosition.current = { x: e.clientX, y: e.clientY };
+                    e.target.style.cursor = 'grabbing';
+                }
+            };
+
+            const handleMouseUp = (e) => {
+                isDragging.current = false;
+                e.target.style.cursor = 'grab';
+            };
+
+            const handleMouseMove = (e) => {
+                if (isDragging.current) {
+                    const dx = e.clientX - lastPosition.current.x;
+                    const dy = e.clientY - lastPosition.current.y;
+                    lastPosition.current = { x: e.clientX, y: e.clientY };
+                    setTransform(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
+                }
+            };
+            
+            const handleDoubleClick = () => {
+                 setTransform({ scale: 1, x: 0, y: 0 });
+            }
 
             useEffect(() => {
                 const timer = setTimeout(() => setShow(true), 10);
                 const handleKeyDown = (e) => {
                     if (e.key === 'ArrowLeft') changeMedia(-1);
                     if (e.key === 'ArrowRight') changeMedia(1);
+                    if (e.key === 'Escape') handleClose();
                 };
                 window.addEventListener('keydown', handleKeyDown);
                 return () => {
@@ -1188,11 +1238,22 @@
                     <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/30 transition-colors z-20"><ChevronLeftIcon className="w-8 h-8" /></button>
                     <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/30 transition-colors z-20"><ChevronRightIcon className="w-8 h-8" /></button>
 
-                    <div className={`w-full h-full flex items-center justify-center transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                    <div className={`w-full h-full flex items-center justify-center transform transition-all duration-300 ease-in-out overflow-hidden ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onWheel={handleWheel} onClick={(e) => e.stopPropagation()}>
                         {mediaItems[currentIndex].type === 'video' ? (
                             <video key={mediaItems[currentIndex].url} src={mediaItems[currentIndex].url} controls autoPlay className="max-w-full max-h-full object-contain rounded-lg"></video>
                         ) : (
-                            <img src={mediaItems[currentIndex].url} alt="Full screen product view" className="max-w-full max-h-full object-contain rounded-lg" />
+                            <img 
+                                ref={imageRef}
+                                src={mediaItems[currentIndex].url} 
+                                alt="Full screen product view" 
+                                className={`max-w-full max-h-full object-contain rounded-lg transition-transform duration-200 ${transform.scale > 1 ? 'cursor-grab' : ''}`}
+                                style={{ transform: `scale(${transform.scale}) translate(${transform.x}px, ${transform.y}px)` }}
+                                onMouseDown={handleMouseDown}
+                                onMouseUp={handleMouseUp}
+                                onMouseMove={handleMouseMove}
+                                onMouseLeave={handleMouseUp} // End drag if mouse leaves the image
+                                onDoubleClick={handleDoubleClick}
+                            />
                         )}
                     </div>
                 </div>

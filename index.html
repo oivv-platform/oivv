@@ -1324,13 +1324,13 @@
                             style={{ touchAction: 'none' }}
                         >
                             {mediaItems[currentIndex].type === 'video' ? (
-                                <video key={mediaItems[currentIndex].url} src={mediaItems[currentIndex].url} controls autoPlay className="max-w-full max-h-full object-contain rounded-lg"></video>
+                                <video key={mediaItems[currentIndex].url} src={mediaItems[currentIndex].url} controls autoPlay className="max-w-full max-h-full object-contain"></video>
                             ) : (
                                 <img 
                                     ref={imageRef}
                                     src={mediaItems[currentIndex].url} 
                                     alt="Full screen product view" 
-                                    className={`max-w-full max-h-full object-contain rounded-lg transition-transform duration-200 ${transform.scale > 1 ? 'cursor-grab' : ''}`}
+                                    className={`max-w-full max-h-full object-contain transition-transform duration-200 ${transform.scale > 1 ? 'cursor-grab' : ''}`}
                                     style={{ transform: `scale(${transform.scale}) translate(${transform.x}px, ${transform.y}px)` }}
                                     onDoubleClick={handleDoubleClick}
                                 />

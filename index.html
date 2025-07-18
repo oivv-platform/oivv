@@ -1680,7 +1680,7 @@
             );
         }
 
-        const DetailIsland = ({ sectionRefs, containerRef, notification, onClose, hasBlueprint }) => {
+        const DetailIsland = ({ sectionRefs, containerRef, notification, onClose, hasBlueprint, onNavClick }) => {
             const [activeSection, setActiveSection] = useState('details');
             const islandRef = useRef(null);
 
@@ -1721,6 +1721,7 @@
             }, [sectionRefs, containerRef]);
 
             const handleNavClick = (id) => {
+                onNavClick(); // Triggers the slide-up animation
                 sectionRefs[id].current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             };
 

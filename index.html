@@ -791,6 +791,8 @@
             const touchStartY = useRef(0);
             const touchEndY = useRef(0);
             const panelRef = useRef(null);
+            const footerRef = useRef(null);
+            const [footerHeight, setFooterHeight] = useState(0);
             
             const contentRef = useRef(null);
             const sectionRefs = {
@@ -801,6 +803,19 @@
                 blueprint: useRef(null),
                 community: useRef(null),
             };
+
+            useEffect(() => {
+                if (footerRef.current) {
+                    // Use a ResizeObserver to handle cases where the footer height might change (e.g., status display)
+                    const observer = new ResizeObserver(entries => {
+                        for (let entry of entries) {
+                            setFooterHeight(entry.target.offsetHeight);
+                        }
+                    });
+                    observer.observe(footerRef.current);
+                    return () => observer.disconnect();
+                }
+            }, []);
 
             const changeMedia = (direction) => {
                 const newIndex = (currentMediaIndex + direction + mediaItems.length) % mediaItems.length;
@@ -1048,27 +1063,27 @@
 
                         {/* Sliding Details Panel */}
                         <div 
-                            className={`absolute left-0 right-0 bottom-0 bg-white shadow-2xl rounded-t-2xl flex flex-col transition-transform duration-500 ease-in-out z-20`}
+                            className={`absolute left-0 right-0 bottom-0 bg-white shadow-2xl flex flex-col transition-transform duration-500 ease-in-out z-20`}
                             style={{ 
-                                transform: isPanelOpen ? 'translateY(0)' : 'translateY(calc(100% - 150px))', 
+                                transform: isPanelOpen ? 'translateY(0)' : `translateY(calc(100% - ${footerHeight}px))`, 
                                 height: 'calc(100% - 80px)' // Height minus header
                             }}
                             onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
                         >
-                            <div className="flex-shrink-0 text-center py-3 cursor-grab" onClick={() => setIsPanelOpen(!isPanelOpen)}>
-                                <div className="w-10 h-1.5 bg-gray-300 rounded-full mx-auto"></div>
-                            </div>
-                            <div ref={panelRef} className="flex-grow overflow-y-auto scrollbar-hide p-5 pt-0 space-y-6">
+                            <div ref={panelRef} className="flex-grow overflow-y-auto scrollbar-hide p-5 pt-2 space-y-6">
                                 <AllContentSections />
                             </div>
                         </div>
 
                          {/* Footer */}
-                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-200 z-30">
-                            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showStatusInFooter ? 'max-h-96 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
+                        <div ref={footerRef} className="relative flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-200 z-30">
+                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-full flex justify-center pt-1 pb-3 cursor-pointer" onClick={() => setIsPanelOpen(!isPanelOpen)}>
+                                <div className="w-10 h-1.5 bg-gray-400 rounded-full"></div>
+                            </div>
+                            <div className={`overflow-hidden transition-all duration-300 ease-in-out pt-2 ${showStatusInFooter ? 'max-h-96 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
                                 <FooterStatusDisplay campaign={campaign} />
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 pt-2">
                                 <MainActions />
                                 {['DESIGN', 'PRE_ORDER', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) && (
                                     <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-3 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`} aria-label="Toggle campaign status">

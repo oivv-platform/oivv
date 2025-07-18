@@ -1173,28 +1173,11 @@
             const isDragging = useRef(false);
             const lastPosition = useRef({ x: 0, y: 0 });
             const imageRef = useRef(null);
+            const containerRef = useRef(null); // Ref for the container to attach wheel event
 
             const changeMedia = (direction) => {
                 setTransform({ scale: 1, x: 0, y: 0 });
                 setCurrentIndex(prev => (prev + direction + mediaItems.length) % mediaItems.length);
-            };
-
-            const handleWheel = (e) => {
-                e.preventDefault();
-                const scaleAmount = 0.1;
-                const newScale = transform.scale - e.deltaY * 0.001 * transform.scale;
-                const clampedScale = Math.min(Math.max(newScale, 0.5), 5);
-                
-                if (imageRef.current) {
-                    const rect = imageRef.current.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-
-                    const newX = transform.x + (x / transform.scale - x / clampedScale) * clampedScale;
-                    const newY = transform.y + (y / transform.scale - y / clampedScale) * clampedScale;
-
-                    setTransform({ scale: clampedScale, x: newX, y: newY });
-                }
             };
             
             const handleMouseDown = (e) => {
@@ -1233,11 +1216,46 @@
                     if (e.key === 'Escape') handleClose();
                 };
                 window.addEventListener('keydown', handleKeyDown);
+
+                // Manually add wheel event listener with passive: false
+                const container = containerRef.current;
+                const handleWheel = (e) => {
+                    if (mediaItems[currentIndex].type !== 'image') return;
+                    e.preventDefault(); // This is the crucial part
+                    
+                    const scaleAmount = 0.1;
+                    const newScale = e.deltaY > 0 ? transform.scale / 1.1 : transform.scale * 1.1;
+                    const clampedScale = Math.min(Math.max(newScale, 1), 5);
+                    
+                    if (imageRef.current) {
+                        const rect = imageRef.current.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+
+                        const newX = transform.x + (x / transform.scale - x / clampedScale) * clampedScale;
+                        const newY = transform.y + (y / transform.scale - y / clampedScale) * clampedScale;
+                        
+                        // If scale is 1, reset position.
+                        if (clampedScale === 1) {
+                            setTransform({ scale: 1, x: 0, y: 0 });
+                        } else {
+                            setTransform({ scale: clampedScale, x: newX, y: newY });
+                        }
+                    }
+                };
+
+                if (container) {
+                    container.addEventListener('wheel', handleWheel, { passive: false });
+                }
+
                 return () => {
                     clearTimeout(timer);
                     window.removeEventListener('keydown', handleKeyDown);
+                    if (container) {
+                        container.removeEventListener('wheel', handleWheel);
+                    }
                 };
-            }, [mediaItems.length]);
+            }, [currentIndex, transform, mediaItems]); // Re-attach listener if dependencies change
 
             const handleClose = () => {
                 setShow(false);
@@ -1251,8 +1269,8 @@
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div
+                            ref={containerRef}
                             className="absolute inset-0 flex items-center justify-center overflow-hidden"
-                            onWheel={mediaItems[currentIndex].type === 'image' ? handleWheel : null}
                         >
                             {mediaItems[currentIndex].type === 'video' ? (
                                 <video key={mediaItems[currentIndex].url} src={mediaItems[currentIndex].url} controls autoPlay className="max-w-full max-h-full object-contain rounded-lg"></video>

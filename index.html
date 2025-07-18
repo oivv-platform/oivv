@@ -1024,9 +1024,9 @@
                         <div className="flex-grow relative bg-gray-100" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                              <button className="w-full h-full" onClick={() => onShowMedia(currentMediaIndex)}>
                                 {mediaItems[currentMediaIndex].type === 'video' ? (
-                                    <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-contain"></video>
+                                    <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-cover object-bottom"></video>
                                 ) : (
-                                    <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-contain" />
+                                    <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover object-bottom" />
                                 )}
                             </button>
                             

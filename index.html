@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MePont | Community-Powered Fashion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -786,7 +786,6 @@
             
             const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
             const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-            const [isFading, setIsFading] = useState(false);
             
             const touchStartY = useRef(0);
             const touchEndY = useRef(0);
@@ -806,7 +805,6 @@
 
             useEffect(() => {
                 if (footerRef.current) {
-                    // Use a ResizeObserver to handle cases where the footer height might change (e.g., status display)
                     const observer = new ResizeObserver(entries => {
                         for (let entry of entries) {
                             setFooterHeight(entry.target.offsetHeight);
@@ -815,17 +813,11 @@
                     observer.observe(footerRef.current);
                     return () => observer.disconnect();
                 }
-            }, []);
+            }, [showStatusInFooter]); // Re-observe if status display changes footer height
 
             const changeMedia = (direction) => {
                 const newIndex = (currentMediaIndex + direction + mediaItems.length) % mediaItems.length;
-                if (newIndex !== currentMediaIndex) {
-                    setIsFading(true);
-                    setTimeout(() => {
-                        setCurrentMediaIndex(newIndex);
-                        setIsFading(false);
-                    }, 150);
-                }
+                setCurrentMediaIndex(newIndex);
             };
             
             const handleTouchStart = (e) => {
@@ -837,6 +829,7 @@
             };
             
             const handleTouchEnd = () => {
+                if (touchStartY.current === 0) return;
                 const swipeDistance = touchStartY.current - touchEndY.current;
                 if (swipeDistance > 50) { // Swipe up
                     setIsPanelOpen(true);
@@ -844,6 +837,7 @@
                 if (swipeDistance < -50 && panelRef.current?.scrollTop === 0) { // Swipe down from top of panel
                     setIsPanelOpen(false);
                 }
+                touchStartY.current = 0;
             };
 
             const handlePanelNav = (id) => {
@@ -1022,9 +1016,9 @@
             return (
                 <>
                     {/* --- NEW MOBILE/TABLET LAYOUT --- */}
-                    <div className="lg:hidden w-full h-full flex flex-col bg-white overflow-hidden">
-                        {/* Header */}
-                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl z-30">
+                    <div className="lg:hidden w-full h-full flex flex-col bg-gray-100 overflow-hidden relative">
+                        {/* Header (z-index 30) */}
+                        <div className="flex-shrink-0 p-4 z-30">
                             <DetailIsland 
                                 sectionRefs={sectionRefs}
                                 containerRef={panelRef}
@@ -1035,8 +1029,8 @@
                             />
                         </div>
 
-                        {/* Gallery Area */}
-                        <div className="flex-grow relative bg-gray-100" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+                        {/* Gallery Area (z-index 10) */}
+                        <div className="flex-grow relative z-10" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                              <button className="w-full h-full" onClick={() => onShowMedia(currentMediaIndex)}>
                                 {mediaItems[currentMediaIndex].type === 'video' ? (
                                     <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-cover object-bottom"></video>
@@ -1045,13 +1039,11 @@
                                 )}
                             </button>
                             
-                            {/* Product Name Overlay */}
-                            <div className="absolute top-0 left-0 right-0 p-4 pt-0 bg-gradient-to-b from-black/30 to-transparent pointer-events-none">
+                            <div className="absolute top-0 left-0 right-0 p-4 pt-2 bg-gradient-to-b from-black/30 to-transparent pointer-events-none">
                                 <p className="text-sm text-white/90 drop-shadow-md">{campaign.designer}</p>
                                 <h2 className="text-xl font-bold text-white drop-shadow-md">{campaign.name}</h2>
                             </div>
 
-                             {/* Gallery Nav Arrows */}
                             <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronLeftIcon className="w-6 h-6" /></button>
                             <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronRightIcon className="w-6 h-6" /></button>
                             {campaign.has3D && (
@@ -1061,38 +1053,45 @@
                             )}
                         </div>
 
-                        {/* Sliding Details Panel */}
-                        <div 
-                            className={`absolute left-0 right-0 bottom-0 bg-white shadow-2xl flex flex-col transition-transform duration-500 ease-in-out z-20`}
-                            style={{ 
-                                transform: isPanelOpen ? 'translateY(0)' : `translateY(calc(100% - ${footerHeight}px))`, 
-                                height: 'calc(100% - 80px)' // Height minus header
-                            }}
-                            onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
-                        >
-                            <div ref={panelRef} className="flex-grow overflow-y-auto scrollbar-hide p-5 pt-2 space-y-6">
-                                <AllContentSections />
+                        {/* Footer (z-index 40) - ALWAYS VISIBLE */}
+                        <div ref={footerRef} className="flex-shrink-0 bg-white/80 backdrop-blur-xl border-t z-40 pb-[env(safe-area-inset-bottom)]">
+                            <div className="w-full text-center pt-3 pb-1 cursor-grab" onClick={() => setIsPanelOpen(!isPanelOpen)}>
+                                <div className="w-10 h-1.5 bg-gray-400 rounded-full mx-auto"></div>
+                            </div>
+                            
+                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${showStatusInFooter ? 'max-h-96' : 'max-h-0'}`}>
+                                <div className="px-4 pb-4">
+                                    <FooterStatusDisplay campaign={campaign} />
+                                </div>
+                            </div>
+
+                            <div className="p-4 pt-0">
+                                <div className="flex items-center gap-3">
+                                    <MainActions />
+                                    {['DESIGN', 'PRE_ORDER', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) && (
+                                        <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-3 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`} aria-label="Toggle campaign status">
+                                            <BarChartIcon className="w-6 h-6" />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                         {/* Footer */}
-                        <div ref={footerRef} className="relative flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-200 z-30">
-                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-full flex justify-center pt-1 pb-3 cursor-pointer" onClick={() => setIsPanelOpen(!isPanelOpen)}>
-                                <div className="w-10 h-1.5 bg-gray-400 rounded-full"></div>
-                            </div>
-                            <div className={`overflow-hidden transition-all duration-300 ease-in-out pt-2 ${showStatusInFooter ? 'max-h-96 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
-                                <FooterStatusDisplay campaign={campaign} />
-                            </div>
-                            <div className="flex items-center gap-3 pt-2">
-                                <MainActions />
-                                {['DESIGN', 'PRE_ORDER', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) && (
-                                    <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-3 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`} aria-label="Toggle campaign status">
-                                        <BarChartIcon className="w-6 h-6" />
-                                    </button>
-                                )}
+                        {/* Sliding Details Panel (z-index 50) */}
+                        <div 
+                            className={`absolute top-0 left-0 w-full h-full bg-white transition-transform duration-500 ease-in-out z-50 flex flex-col ${isPanelOpen ? 'translate-y-0' : 'translate-y-full'}`}
+                            onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+                        >
+                            <div className="flex-shrink-0 h-[88px]"></div> 
+                            
+                            <div ref={panelRef} className="flex-grow overflow-y-auto scrollbar-hide">
+                                <div className="p-5 space-y-6" style={{ paddingBottom: `${footerHeight + 20}px` }}>
+                                    <AllContentSections />
+                                </div>
                             </div>
                         </div>
                     </div>
+
 
                     {/* --- EXISTING DESKTOP LAYOUT --- */}
                     <div className="hidden lg:grid lg:grid-cols-5 w-full h-full overflow-hidden">

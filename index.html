@@ -2,547 +2,1839 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reconstructed Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MePont | Community-Powered Fashion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* General Body and Resets */
         body {
-            margin: 0;
-            background-color: #141414;
-            font-family: "Inter", sans-serif;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none;
         }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        /* Main container for the mobile screen */
-        .mobile-screen {
-            width: 430px;
-            max-width: 100%;
-            height: 899px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            background-color: #141414;
-        }
-
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            width: 430px;
-            max-width: 100%;
-            z-index: 10;
-            padding: 10px;
-            background-color: rgba(48, 48, 48, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: transparent;
-            border-radius: 20px;
-            height: 41px;
-            padding: 10px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgb(212, 212, 212);
-            border-radius: 10px;
-            padding: 4px 8px;
-            box-shadow: inset 0px 10px 14px 0px rgba(0, 0, 0, 0.25);
-        }
-
-        .logo-text {
-            font-size: 14px;
-            font-weight: 700;
-            color: rgb(31, 31, 31);
-            text-shadow: 0px 2px 3px rgba(0,0,0,0.25);
-            line-height: 1em;
-        }
-
-        .search-icon {
-            cursor: pointer;
-            color: rgb(194, 194, 194);
-        }
-        
-        /* Scrollable Content Area */
-        .scroll-container {
-            padding-top: 61px; /* Height of the fixed header */
-            padding-bottom: 140px; /* Height of the fixed footer */
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        /* Hide scrollbar */
-        .scroll-container::-webkit-scrollbar {
+        .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
-        .scroll-container {
+        .scrollbar-hide {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        
-        .content-wrapper {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
+        .cursor-grab {
+            cursor: grab;
+        }
+        .cursor-grabbing {
+            cursor: grabbing;
+        }
+        .blur-background {
+            filter: blur(4px);
+            transition: filter 0.3s ease-in-out;
         }
 
-        /* Product Card */
-        .product-card {
-            width: 100%;
-            border-radius: 20px;
-            border: 1px solid rgb(255, 255, 255);
-            overflow: hidden;
-            position: relative;
+        /* Keyframes for the island notification */
+        @keyframes island-notify-bg {
+            0%, 100% { background-color: rgba(17, 24, 39, 0.75); } /* bg-gray-900/75 */
+            10%, 90% { background-color: rgba(5, 150, 105, 0.85); } /* bg-emerald-600 with more opacity */
         }
 
-        .card-user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        @keyframes island-notify-text {
+            0% { transform: translateX(100%); opacity: 0; }
+            10%, 90% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(-100%); opacity: 0; }
         }
 
-        .user-avatar {
-            width: 41px;
-            height: 40px;
-            border-radius: 10px;
-            border: 1px solid white;
-            object-fit: cover;
+        .island-notification-bg-animate {
+            animation: island-notify-bg 3s ease-in-out forwards;
         }
 
-        .user-details {
-            flex-grow: 1;
-            padding: 5px;
-            background-color: rgba(255, 255, 255, 0.6);
-            border: 1px solid white;
-            border-radius: 10px;
-            box-shadow: inset 0px 10px 10px -2px rgba(0, 0, 0, 0.15);
+        .island-notification-text-animate {
+            animation: island-notify-text 3s ease-in-out forwards;
         }
         
-        .user-details-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-name {
-            font-weight: 700;
-            font-size: 14px;
-            color: black;
-        }
-        
-        .rating {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .rating-stars svg {
-            width: 73px;
-            height: 13px;
-        }
-
-        .rating-text {
-            font-size: 12px;
-            font-weight: 700;
-            color: rgb(0, 47, 255);
-        }
-
-        .product-name {
-            font-size: 14px;
-            color: black;
-        }
-
-        /* Image Carousel */
-        .carousel-container {
-            position: relative;
-            height: 585px;
-        }
-        
-        .carousel-track-container {
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-        }
-
-        .carousel-track {
-            display: flex;
-            height: 100%;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .carousel-slide {
-            flex: 0 0 100%;
-            height: 100%;
-        }
-
-        .carousel-slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .carousel-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.2);
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 5;
-        }
-        
-        .carousel-button--left {
-            left: 20px;
-        }
-        
-        .carousel-button--right {
-            right: 20px;
-        }
-        
-        .carousel-button.hidden {
-            display: none;
-        }
-
-        .try-on-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 5px 15px;
-            border-radius: 20px;
-            border: 1px solid white;
-            background-color: rgba(15, 15, 15, 0.8);
-            box-shadow: inset 0px 10px 9px -1.5px rgba(0, 0, 0, 0.18);
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            z-index: 5;
-        }
-        
-        /* Submit Button */
-        .submit-button {
-            position: absolute;
-            top: 222px;
-            left: 73px;
-            width: 240px;
-            height: 40px;
-            background-color: rgb(51, 51, 51);
-            border: none;
-            border-radius: 20px;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        /* Footer Timeline */
-        .footer-timeline {
-            position: fixed;
-            bottom: 0;
-            width: 430px;
-            max-width: 100%;
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 5px 10px 15px;
-        }
-
-        .timeline-steps {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-around;
-        }
-
-        .timeline-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            flex: 1;
-            position: relative;
-        }
-        
-        .timeline-icon-container {
-            width: 45px;
-            height: 45px;
-            border-radius: 20px;
-            border: 1px solid white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: white;
-            backdrop-filter: blur(100px);
-            -webkit-backdrop-filter: blur(100px);
-            box-shadow: inset 5px 5px 5.65px 0px rgba(0, 0, 0, 0.25);
-        }
-
-        .timeline-icon-container.active {
-            background-color: rgb(21, 255, 0);
-        }
-
-        .timeline-icon-container .icon-image {
-             width: 80%;
-             height: 80%;
-             object-fit: fill;
-             mix-blend-mode: multiply;
-        }
-        
-        .timeline-icon-container .icon-image.sample {
-            object-fit: contain;
-        }
-
-        .timeline-step p {
-            font-size: 8px;
-            margin: 0;
-            color: white;
-        }
-        
-        .progress-bar-container {
-            width: 100%;
-            height: 8px;
-            margin-top: 4px;
-            background-color: white;
-            box-shadow: inset 0px 10px 10px 0px rgba(0, 0, 0, 0.25);
-        }
-
-        .progress-bar-fill {
-            width: 41%;
-            height: 100%;
-            background-color: rgb(21, 255, 0);
-        }
-        
-        /* Line connectors */
-        .timeline-step:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            top: 22px; /* Vertically center with the icons */
-            right: -25px; /* Position between steps, adjust as needed */
-            width: 50px; /* Width of the connecting line, adjust as needed */
-            height: 1px;
-            background-color: white;
-            z-index: -1;
-        }
-
-
     </style>
 </head>
-<body>
+<body class="bg-gray-100">
+    <div id="root"></div>
 
-    <div class="mobile-screen">
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <p class="logo-text">MEPONT</p>
-                </div>
-                <div class="search-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="24" height="24" fill="currentColor">
-                        <path d="M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.54a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z"></path>
-                    </svg>
-                </div>
-            </div>
-        </header>
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
 
-        <div class="scroll-container">
-            <div class="content-wrapper">
-                <div class="product-card">
-                    <div class="card-user-info">
-                        <img src="https://framerusercontent.com/images/Zm49LxusjMIeCgUKcQFXpf3RrC8.jpg" alt="User Avatar" class="user-avatar">
-                        <div class="user-details">
-                            <div class="user-details-top">
-                                <p class="user-name">Barbara Milano</p>
-                                <div class="rating">
-                                    <div class="rating-stars">
-                                        <svg viewBox="0 0 73 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M 7.006 0.621 L 8.918 4.491 L 13.194 5.112 L 10.1 8.125 L 10.83 12.379 L 7.006 10.371 L 3.182 12.379 L 3.912 8.125 L 0.818 5.112 L 5.094 4.491 Z" fill="rgb(255, 179, 0)"></path>
-                                            <path d="M 21.753 0.621 L 23.665 4.491 L 27.941 5.112 L 24.847 8.125 L 25.577 12.379 L 21.753 10.371 L 17.929 12.379 L 18.659 8.125 L 15.565 5.112 L 19.841 4.491 Z" fill="rgb(255, 179, 0)"></path>
-                                            <path d="M 36.5 0.621 L 38.412 4.491 L 42.688 5.112 L 39.594 8.125 L 40.324 12.379 L 36.5 10.371 L 32.676 12.379 L 33.406 8.125 L 30.312 5.112 L 34.588 4.491 Z" fill="rgb(255, 179, 0)"></path>
-                                            <path d="M 51.247 0.621 L 53.159 4.491 L 57.435 5.112 L 54.341 8.125 L 55.071 12.379 L 51.247 10.371 L 47.423 12.379 L 48.153 8.125 L 45.059 5.112 L 49.335 4.491 Z" fill="rgb(255, 179, 0)"></path>
-                                            <path d="M 65.994 0.621 L 67.906 4.491 L 72.182 5.112 L 69.088 8.125 L 69.818 12.379 L 65.994 10.371 L 62.17 12.379 L 62.9 8.125 L 59.806 5.112 L 64.082 4.491 Z" fill="#CCC"></path>
-                                        </svg>
-                                    </div>
-                                    <p class="rating-text">4/5</p>
-                                </div>
-                            </div>
-                            <p class="product-name">Oversized T-Shirt</p>
-                        </div>
-                    </div>
-                    
-                    <div class="carousel-container">
-                        <div class="carousel-track-container">
-                             <div class="carousel-track">
-                                <div class="carousel-slide"><img src="https://framerusercontent.com/images/vviqBkLekss7sZJ3qyOhp43bcdY.jpg" alt="Product Image 1"></div>
-                                <div class="carousel-slide"><img src="https://framerusercontent.com/images/etxo8NpKgPEHOAqkRWLfxKYmIMc.jpg" alt="Product Image 2"></div>
-                                <div class="carousel-slide"><img src="https://framerusercontent.com/images/QJE5OqR2PKnCyINT1jvDh7WOUI.jpg" alt="Product Image 3"></div>
-                                <div class="carousel-slide"><img src="https://framerusercontent.com/images/daBbMkE33Bpha1XH1iKb6CcmA.jpg" alt="Product Image 4"></div>
-                            </div>
-                        </div>
+        // --- MOCK DATA (ENHANCED) ---
+        const MOCK_CAMPAIGNS = [
+            {
+                id: 1,
+                name: 'The Milano Linen Blazer',
+                designer: 'Studio Rossi',
+                price: 85,
+                stage: 'PRE_ORDER',
+                productionRound: 2,
+                category: 'Blazers',
+                dateAdded: '2024-06-20T10:00:00Z',
+                heroImage: 'https://images.unsplash.com/photo-1594938384914-29a4491a9599?q=80&w=800',
+                images: [ 'https://images.unsplash.com/photo-1594938384914-29a4491a9599?q=80&w=800', 'https://images.unsplash.com/photo-1617137968427-4dd4bf633758?q=80&w=800', 'https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=800' ],
+                video: {thumbnail: 'https://placehold.co/800x1000/64748b/ffffff?text=Video', url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4'},
+                details: 'Crafted from 100% organic Italian linen, this blazer offers a relaxed yet structured fit. Perfect for summer evenings and smart-casual events. Features natural horn buttons and a silk-blend lining.',
+                preOrderDetails: { fundingType: 'INDEPENDENT', daysLeft: 12, sizes: { 'S': { moq: 50, funded: 50 }, 'M': { moq: 100, funded: 98 }, 'L': { moq: 100, funded: 35 }, 'XL': { moq: 50, funded: 2 } } },
+                priceBreakdown: { materials: 35, manufacturing: 31, designer: 10, platform: 8.5 },
+                sizeGuide: { fitDetails: 'Relaxed, unstructured fit. Designed to be worn comfortably over a shirt. Consider sizing down for a slimmer fit.', sizes: { 'S': { 'Chest': '38"', 'Sleeve': '25"', 'Length': '28"' }, 'M': { 'Chest': '40"', 'Sleeve': '25.5"', 'Length': '28.5"' }, 'L': { 'Chest': '42"', 'Sleeve': '26"', 'Length': '29"' }, 'XL': { 'Chest': '44"', 'Sleeve': '26.5"', 'Length': '29.5"' }, } },
+                garmentCare: { composition: '100% Organic Linen, 100% Cupro Lining', instructions: ['Dry clean only', 'Iron on low heat', 'Do not tumble dry'] },
+                comments: [{user: 'Julia S.', comment: 'So excited for Round 2!'}],
+                reviews: [ { user: 'Alex R.', rating: 5, comment: 'Received this from the first round. The quality is absolutely insane for the price. The linen is soft, not scratchy at all.'}, { user: 'Beatrice L.', rating: 4, comment: 'Beautiful blazer, though it runs a little large. I would recommend sizing down if you are between sizes.'}, ],
+                has3D: true,
+                manufacturer: { name: 'Artisan Tailors Lda', country: 'Portugal' },
+                productionBlueprint: { productionRunId: 'MEP-RUN-2025-0001', manufacturerInfo: { name: 'Artisan Tailors Lda', address: 'Rua das Flores 123, 4050-262 Porto, Portugal', contact: 'production@artisans.pt' }, supplyChain: [ { component: 'Main Fabric', material: '100% Organic Linen', supplier: 'Solbiati S.r.l.', origin: 'Emilia-Romagna, Italy' }, { component: 'Lining', material: '50% Cupro, 50% Viscose', supplier: 'Manifattura Pezzetti', origin: 'Como, Italy' }, { component: 'Buttons', material: 'Natural Horn', supplier: 'Bottonificio Padano', origin: 'Parma, Italy' }, { component: 'Sewing Thread', material: '100% Recycled Polyester', supplier: 'Coats Group plc', origin: 'United Kingdom' } ], sustainability: { recycledContent: '10% (sewing thread)', durability: 'High resistance to pilling. Tested for 50+ wash cycles.', repairability: { score: '8/10', details: 'Spare buttons included. Fabric patches available upon request. Standard seam construction allows for easy alterations.' }, endOfLife: { instructions: 'Fabric is biodegradable and compostable. Please remove buttons before disposal. Consider donating or returning via our take-back program.', recyclable: true } }, compliance: { svhc: 'None', certifications: ['European Flax® Certified', 'OEKO-TEX Standard 100 (Lining)'] } }
+            },
+            {
+                id: 7,
+                name: 'The Nomad Travel Shirt',
+                designer: 'Wayfarer Co.',
+                price: 65,
+                stage: 'SAMPLING',
+                productionRound: 1,
+                category: 'Tops',
+                dateAdded: '2024-07-01T10:00:00Z',
+                heroImage: 'https://images.unsplash.com/photo-1603252109360-778ba9913158?q=80&w=800',
+                images: ['https://images.unsplash.com/photo-1603252109360-778ba9913158?q=80&w=800', 'https://images.unsplash.com/photo-1564859228273-204232441043?q=80&w=800', 'https://images.unsplash.com/photo-1589902860377-128a3e284873?q=80&w=800'],
+                video: {thumbnail: 'https://placehold.co/800x1000/9ca3af/ffffff?text=Video', url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4'},
+                details: 'The only shirt you need. Made from a technical merino wool blend that is wrinkle-resistant, anti-odor, and temperature regulating.',
+                designerUpdates: [ { date: '3 days ago', title: 'First Sample Arrived!', text: 'The first physical sample is here and it feels incredible. The merino blend is super soft. We are now testing the fit and making minor adjustments to the collar.' }, { date: '1 week ago', title: 'Fabric Confirmed', text: 'We have officially confirmed the 87/13 Merino/Nylon blend from Nippon Wool Co. The quality is exceptional and perfect for our requirements.' } ],
+                preOrderDetails: { fundingType: 'COMBINED', daysLeft: 18, overallMoq: 200, sizes: { 'S': { funded: 30 }, 'M': { funded: 65 }, 'L': { funded: 40 }, 'XL': { funded: 15 } } },
+                priceBreakdown: { materials: 25, manufacturing: 22, designer: 10, platform: 6.5 },
+                sizeGuide: { fitDetails: 'Modern athletic fit. Not too slim, not too loose.', sizes: { 'S': { 'Chest': '38"', 'Length': '28"' }, 'M': { 'Chest': '40"', 'Length': '29"' }, 'L': { 'Chest': '42"', 'Length': '30"' }, 'XL': { 'Chest': '44"', 'Length': '30.5"' }, } },
+                garmentCare: { composition: '87% Merino Wool, 13% Nylon', instructions: ['Machine wash cold, gentle cycle', 'Lay flat to dry', 'Do not bleach'] },
+                comments: [],
+                reviews: [],
+                has3D: false,
+                manufacturer: { name: 'TechFabrics Vietnam', country: 'Vietnam' },
+                productionBlueprint: { productionRunId: 'MEP-RUN-2025-0007', manufacturerInfo: { name: 'TechFabrics Vietnam Co., Ltd.', address: 'Lot 4, Tan Thuan EPZ, Ho Chi Minh City, Vietnam', contact: 'compliance@techfab.vn' }, supplyChain: [ { component: 'Main Fabric', material: '87% Merino Wool, 13% Nylon', supplier: 'Nippon Wool Co.', origin: 'Japan (Milling)' }, { component: 'Wool Fiber', material: '100% Merino Wool', supplier: 'Australian Wool Network', origin: 'Australia' } ], sustainability: { recycledContent: 'None', durability: 'Excellent wrinkle and odor resistance.', repairability: { score: '6/10', details: 'Standard repairs possible by any tailor.' }, endOfLife: { instructions: 'Fabric is recyclable where textile recycling facilities exist.', recyclable: true } }, compliance: { svhc: 'None', certifications: ['Responsible Wool Standard (RWS)'] } }
+            },
+            {
+                id: 3,
+                name: 'The Urban Explorer Trouser',
+                designer: 'Concrete Collective',
+                price: 75,
+                stage: 'DESIGN',
+                category: 'Trousers',
+                dateAdded: '2024-07-10T10:00:00Z',
+                heroImage: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800',
+                images: ['https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800'],
+                details: 'A modern, technical trouser designed for life on the move. Constructed from a durable, water-repellent stretch canvas, it features a gusseted crotch for freedom of movement and a secure zip pocket for your essentials.',
+                likes: 184,
+                targetLikes: 250,
+                priceBreakdown: { materials: 30, manufacturing: 25, designer: 12, platform: 8 },
+                sizeGuide: { fitDetails: 'Slim-tapered fit. Articulated knees for ease of movement.', sizes: { 'S': {}, 'M': {}, 'L': {}, 'XL': {} } },
+                garmentCare: { composition: '98% Cotton, 2% Elastane with DWR finish', instructions: ['Machine wash cold', 'Tumble dry low', 'Do not use fabric softener'] },
+                comments: [],
+                reviews: [],
+                has3D: false,
+                manufacturer: { name: 'To be determined', country: 'TBD' },
+                productionBlueprint: null
+            },
+            {
+                id: 4,
+                name: 'The Essential Pima Tee',
+                designer: 'Plain Goods',
+                price: 35,
+                stage: 'CONFIRMED',
+                productionRound: 1,
+                category: 'Tops',
+                dateAdded: '2024-06-15T10:00:00Z',
+                heroImage: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800',
+                images: ['https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800'],
+                details: 'The perfect t-shirt does exist. Made from 100% Peruvian Pima cotton, known for its exceptional softness and durability. A classic crewneck silhouette with a modern, tailored fit.',
+                preOrderDetails: { fundingType: 'COMBINED', daysLeft: 0, overallMoq: 300, sizes: { 'S': { funded: 80 }, 'M': { funded: 150 }, 'L': { funded: 100 }, 'XL': { funded: 50 } } },
+                priceBreakdown: { materials: 12, manufacturing: 10, designer: 5, platform: 3.5 },
+                sizeGuide: { fitDetails: 'Tailored fit. Size up for a more relaxed feel.', sizes: { 'S': { 'Chest': '38"', 'Length': '28"' }, 'M': { 'Chest': '40"', 'Length': '29"' }, 'L': { 'Chest': '42"', 'Length': '30"' }, 'XL': { 'Chest': '44"', 'Length': '30.5"' }, } },
+                garmentCare: { composition: '100% Pima Cotton', instructions: ['Machine wash cold with like colors', 'Tumble dry low', 'Warm iron if needed'] },
+                comments: [],
+                reviews: [],
+                has3D: false,
+                manufacturer: { name: 'Cotton Experts S.A.C.', country: 'Peru' },
+                productionBlueprint: { productionRunId: 'MEP-RUN-2025-0004', manufacturerInfo: { name: 'Cotton Experts S.A.C.', address: 'Av. Industrial 150, Ate, Lima, Peru', contact: 'contact@cottonexperts.pe' }, supplyChain: [ { component: 'Main Fabric', material: '100% Pima Cotton', supplier: 'IncaCotton', origin: 'Piura, Peru' } ], sustainability: { recycledContent: 'None', durability: 'High', repairability: { score: '7/10', details: 'Standard repairs possible.' }, endOfLife: { instructions: 'Fabric is biodegradable.', recyclable: true } }, compliance: { svhc: 'None', certifications: ['Peruvian Pima Cotton Certified'] } }
+            },
+        ];
 
-                        <button class="carousel-button carousel-button--left">
-                            <img src="https://framerusercontent.com/images/6tTbkXggWgQCAJ4DO2QEdXXmgM.svg" alt="Previous">
-                        </button>
-                        <button class="carousel-button carousel-button--right">
-                            <img src="https://framerusercontent.com/images/11KSGbIZoRSg4pjdnUoif6MKHI.svg" alt="Next">
-                        </button>
-                        
-                        <div class="try-on-button">Try On Now</div>
-                    </div>
-                </div>
+        // --- UI ICONS ---
+        const InfoIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>;
+        const ShirtIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>;
+        const TagIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2z"></path><path d="M7 7h.01"></path></svg>;
+        const RulerIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L3 8.4a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0L15.3 9"></path><path d="m14.5 12.5 2-2"></path><path d="m11.5 9.5 2-2"></path><path d="m8.5 6.5 2-2"></path><path d="m17.5 15.5 2-2"></path></svg>;
+        const UsersIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
+        const PlayIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path d="M8 5v14l11-7z"></path></svg>;
+        const CubeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>;
+        const HomeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>;
+        const UserIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
+        const XIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
+        const HeartIcon = ({ className, isFilled }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={isFilled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>;
+        const ListIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>;
+        const ArrowRightIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
+        const ChevronLeftIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="15 18 9 12 15 6"></polyline></svg>;
+        const ChevronRightIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 18 15 12 9 6"></polyline></svg>;
+        const StarIcon = ({ className, isFilled }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={isFilled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
+        const EUFlagIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40" width="24" height="16"><path fill="#003399" d="M0 0h60v40H0z"/><g transform="translate(30,20) scale(1.3)"><g id="s"><g id="c"><path id="t" d="M0,-12 V0 H6 Z" transform="rotate(18 0 -12)" fill="#FFCC00"/><use href="#t" transform="scale(-1,1)"/></g><use href="#c" transform="rotate(72)"/><use href="#c" transform="rotate(144)"/><use href="#c" transform="rotate(216)"/><use href="#c" transform="rotate(288)"/></g></g></svg>;
+        const CheckCircleIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
+        const ShieldCheckIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>;
+        const BarChartIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>;
 
-                <div class="product-card">
-                    <div class="card-user-info">
-                        <img src="https://framerusercontent.com/images/Zm49LxusjMIeCgUKcQFXpf3RrC8.jpg" alt="User Avatar" class="user-avatar">
-                        <div class="user-details">
-                            <div class="user-details-top">
-                                <p class="user-name">Barbara Milano</p>
-                                <div class="rating">
-                                    <div class="rating-stars">
-                                        <svg viewBox="0 0 73 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M 7.006 0.621 L 8.918 4.491 L 13.194 5.112 L 10.1 8.125 L 10.83 12.379 L 7.006 10.371 L 3.182 12.379 L 3.912 8.125 L 0.818 5.112 L 5.094 4.491 Z" fill="rgb(255, 179, 0)"></path>
-                                            <path d="M 21.753 0.621 L 23.665 4.491 L 27.941 5.112 L 24.847 8.125 L 25.577 12.379 L 21.753 10.371 L 17.929 12.379 L 18.659 8.125 L 15.565 5.112 L 19.841 4.491 Z" fill="rgb(255, 179, 0)"></path>
-                                            <path d="M 36.5 0.621 L 38.412 4.491 L 42.688 5.112 L 39.594 8.125 L 40.324 12.379 L 36.5 10.371 L 32.676 12.379 L 33.406 8.125 L 30.312 5.112 L 34.588 4.491 Z" fill="rgb(255, 179, 0)"></path>
-                                            <path d="M 51.247 0.621 L 53.159 4.491 L 57.435 5.112 L 54.341 8.125 L 55.071 12.379 L 51.247 10.371 L 47.423 12.379 L 48.153 8.125 L 45.059 5.112 L 49.335 4.491 Z" fill="rgb(255, 179, 0)"></path>
-                                            <path d="M 65.994 0.621 L 67.906 4.491 L 72.182 5.112 L 69.088 8.125 L 69.818 12.379 L 65.994 10.371 L 62.17 12.379 L 62.9 8.125 L 59.806 5.112 L 64.082 4.491 Z" fill="#CCC"></path>
-                                        </svg>
-                                    </div>
-                                    <p class="rating-text">4/5</p>
-                                </div>
-                            </div>
-                            <p class="product-name">Oversized T-Shirt</p>
-                        </div>
-                    </div>
-                    <div class="carousel-container">
-                        <img src="https://framerusercontent.com/images/0hO1nzhXLUGe3bPlpOBHdD0Sw5U.jpg" alt="Product Background" style="width: 100%; height: 100%; object-fit: cover;">
-                        <div class="try-on-button">Try On Now</div>
-                    </div>
-                </div>
+        // --- MAIN APP COMPONENT ---
+        function App() {
+            const [isLoading, setIsLoading] = useState(true);
+            const [currentScreen, setCurrentScreen] = useState('Home');
+            const [campaigns, setCampaigns] = useState([]);
+            const [pledgedItems, setPledgedItems] = useState([]);
+            const [waitingListItems, setWaitingListItems] = useState([]);
+            const [likedItems, setLikedItems] = useState([]);
+            
+            // Modal States
+            const [showPledgeModal, setShowPledgeModal] = useState(false);
+            const [show3DModal, setShow3DModal] = useState(false);
+            const [showMediaModal, setShowMediaModal] = useState({ visible: false, startIndex: 0 });
+            const [showCampaignModal, setShowCampaignModal] = useState(null);
+            const [showBlueprintModal, setShowBlueprintModal] = useState(false);
+            const [showPassportModal, setShowPassportModal] = useState({ visible: false, item: null });
 
-            </div>
-        </div>
+            const [dashboardView, setDashboardView] = useState('My MePont');
 
-        <button class="submit-button">Submit</button>
+            useEffect(() => {
+                setTimeout(() => {
+                    setCampaigns(MOCK_CAMPAIGNS);
+                    setLikedItems(MOCK_CAMPAIGNS.filter(c => c.id === 3));
+                    setIsLoading(false);
+                }, 1500);
+            }, []);
 
-        <footer class="footer-timeline">
-            <div class="timeline-steps">
-                <div class="timeline-step">
-                    <div class="timeline-icon-container active">
-                        <img class="icon-image" src="https://framerusercontent.com/images/ioSIXRHJvCbKUq5yWw8ew3j2yic.png" alt="Design Icon">
-                    </div>
-                    <p>Design</p>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill"></div>
-                    </div>
-                </div>
-                <div class="timeline-step">
-                    <div class="timeline-icon-container">
-                        <img class="icon-image sample" src="https://framerusercontent.com/images/jezRwkF9hnTe4Act7apGkPveXI.png" alt="Sample Icon">
-                    </div>
-                    <p>Sample</p>
-                     <div class="progress-bar-container"></div>
-                </div>
-                <div class="timeline-step">
-                    <div class="timeline-icon-container">
-                        <img class="icon-image" src="https://framerusercontent.com/images/ioSIXRHJvCbKUq5yWw8ew3j2yic.png" alt="Order Icon">
-                    </div>
-                    <p>Order</p>
-                    <div class="progress-bar-container"></div>
-                </div>
-                <div class="timeline-step">
-                    <div class="timeline-icon-container">
-                        <img class="icon-image" src="https://framerusercontent.com/images/ioSIXRHJvCbKUq5yWw8ew3j2yic.png" alt="Production Icon">
-                    </div>
-                    <p>Production</p>
-                    <div class="progress-bar-container"></div>
-                </div>
-                <div class="timeline-step">
-                    <div class="timeline-icon-container">
-                        <img class="icon-image" src="https://framerusercontent.com/images/ioSIXRHJvCbKUq5yWw8ew3j2yic.png" alt="Delivery Icon">
-                    </div>
-                    <p>Delivery</p>
-                    <div class="progress-bar-container"></div>
-                </div>
-            </div>
-        </footer>
-    </div>
+            // Determines if any modal is open on the screen.
+            const isAnyModalOpen = showPledgeModal || show3DModal || showMediaModal.visible || !!showCampaignModal || showBlueprintModal || showPassportModal.visible;
+            
+            // Determines if a nested modal is open on top of the campaign detail view.
+            const isCampaignDetailBlurred = showPledgeModal || show3DModal || showMediaModal.visible || showBlueprintModal;
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const carousels = document.querySelectorAll('.product-card .carousel-container');
 
-            carousels.forEach(carousel => {
-                // Check if the carousel has a track, otherwise it's a static image card.
-                const track = carousel.querySelector('.carousel-track');
-                if (!track) return;
+            useEffect(() => {
+                const updatedCampaigns = campaigns.map(c => {
+                    if (c.stage === 'DESIGN' && c.likes >= c.targetLikes) {
+                        return { ...c, stage: 'SAMPLING' };
+                    }
+                    return c;
+                });
+                if (JSON.stringify(updatedCampaigns) !== JSON.stringify(campaigns)) {
+                    setCampaigns(updatedCampaigns);
+                }
+            }, [campaigns]);
 
-                const slides = Array.from(track.children);
-                const nextButton = carousel.querySelector('.carousel-button--right');
-                const prevButton = carousel.querySelector('.carousel-button--left');
-                const slideWidth = slides[0].getBoundingClientRect().width;
+            const productionSteps = ['Confirmed', 'Fabric Sourced', 'In Production', 'Quality Check', 'Shipped'];
 
-                let currentIndex = 0;
+            // Simulate production progress and passport graduation
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setPledgedItems(prevItems =>
+                        prevItems.map(item => {
+                            const currentStepIndex = productionSteps.indexOf(item.productionStatus);
+                            if (item.productionStatus !== 'Shipped' && Math.random() < 0.2) {
+                                const nextStepIndex = currentStepIndex + 1;
+                                const newStatus = productionSteps[nextStepIndex];
+                                const newPassportId = newStatus === 'Shipped' ? `MEP-ITEM-${item.id}-${item.provisionalId.slice(-4)}` : item.digitalPassportId;
+                                return { ...item, productionStatus: newStatus, digitalPassportId: newPassportId };
+                            }
+                            return item;
+                        })
+                    );
+                }, 5000);
 
-                // Function to move to a specific slide
-                const moveToSlide = (targetIndex) => {
-                    track.style.transform = 'translateX(-' + slideWidth * targetIndex + 'px)';
-                    currentIndex = targetIndex;
-                    updateButtons();
-                };
+                return () => clearInterval(interval);
+            }, []);
 
-                // Update button visibility
-                const updateButtons = () => {
-                    prevButton.classList.toggle('hidden', currentIndex === 0);
-                    nextButton.classList.toggle('hidden', currentIndex === slides.length - 1);
-                };
+            const hasPurchased = (campaignId) => pledgedItems.some(item => item.id === campaignId);
 
-                // Event Listeners
-                nextButton.addEventListener('click', () => {
-                    if (currentIndex < slides.length - 1) {
-                        moveToSlide(currentIndex + 1);
+            const navigateTo = (screen, view = 'My MePont') => {
+                setShowCampaignModal(null);
+                setCurrentScreen(screen);
+                if (screen === 'Dashboard') {
+                    setDashboardView(view);
+                }
+            }
+
+            const viewCampaignDetail = (campaign) => {
+                setShowCampaignModal(campaign);
+            };
+
+            const handleLike = (campaignId, showNotification) => {
+                const campaign = campaigns.find(c => c.id === campaignId);
+                let isNowLiked = false;
+                setLikedItems(prev => {
+                    const isLiked = prev.some(item => item.id === campaignId);
+                    if (isLiked) {
+                        isNowLiked = false;
+                        return prev.filter(item => item.id !== campaignId);
+                    } else {
+                        isNowLiked = true;
+                        return [...prev, campaign];
                     }
                 });
+                setCampaigns(prev => prev.map(c => {
+                    if (c.id === campaignId && c.stage === 'DESIGN') {
+                        return {...c, likes: isNowLiked ? c.likes + 1 : c.likes - 1};
+                    }
+                    return c;
+                }));
+                if(showNotification) showNotification(isNowLiked ? `Added to Liked Items` : `Removed from Liked`);
+            };
 
-                prevButton.addEventListener('click', () => {
-                    if (currentIndex > 0) {
-                        moveToSlide(currentIndex - 1);
+            const handleAddToWaitingList = (campaignId, showNotification) => {
+                const campaign = campaigns.find(c => c.id === campaignId);
+                let isNowOnList = false;
+                setWaitingListItems(prev => {
+                    const isOnList = prev.some(item => item.id === campaignId);
+                    if (isOnList) {
+                        isNowOnList = false;
+                        return prev.filter(item => item.id !== campaignId);
+                    } else {
+                        isNowOnList = true;
+                        return [...prev, campaign];
                     }
                 });
+                if(showNotification) showNotification(isNowOnList ? 'Added to Waiting List' : 'Removed from List');
+            };
+
+            const handlePledge = (campaign, size, showNotification) => {
+                const provisionalId = `PLEDGE-${campaign.id}-${size.charAt(0)}-${Date.now()}`;
+                const newPledge = { 
+                    ...campaign, 
+                    size, 
+                    provisionalId,
+                    digitalPassportId: null,
+                    productionStatus: 'Confirmed' 
+                };
                 
-                // Initialize
-                updateButtons();
-            });
-        });
-    </script>
+                setPledgedItems(prev => [...prev, newPledge]);
 
+                setCampaigns(prevCampaigns =>
+                    prevCampaigns.map(c => {
+                        if (c.id === campaign.id && c.stage === 'PRE_ORDER') {
+                            const updatedSizes = { ...c.preOrderDetails.sizes };
+                            if(updatedSizes[size]) {
+                                updatedSizes[size].funded += 1;
+                            }
+                            const totalFunded = Object.values(updatedSizes).reduce((acc, s) => acc + s.funded, 0);
+                            const newStage = c.preOrderDetails.fundingType === 'COMBINED' && totalFunded >= c.preOrderDetails.overallMoq ? 'CONFIRMED' : c.stage;
+                            return { ...c, stage: newStage, preOrderDetails: { ...c.preOrderDetails, sizes: updatedSizes }};
+                        }
+                        return c;
+                    })
+                );
+                setShowPledgeModal(false);
+                if(showNotification) showNotification(`Pledge for Size ${size} Confirmed!`);
+            };
+
+            const addComment = (campaignId, commentText, showNotification) => {
+                const newComment = { user: 'You', comment: commentText };
+                setCampaigns(prev => prev.map(c =>
+                    c.id === campaignId ? {...c, comments: [...c.comments, newComment]} : c
+                ));
+                if(showNotification) showNotification('Comment Posted!');
+            };
+
+            const addReview = (campaignId, review, showNotification) => {
+                const newReview = { user: 'You', ...review };
+                setCampaigns(prev => prev.map(c =>
+                    c.id === campaignId ? {...c, reviews: [...c.reviews, newReview]} : c
+                ));
+                if(showNotification) showNotification('Review Submitted!');
+            };
+
+            const renderScreen = () => {
+                if (isLoading) {
+                    return <HomeScreenSkeleton />;
+                }
+                switch (currentScreen) {
+                    case 'Home':
+                        return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={(id) => handleLike(id, null)} likedItems={likedItems} />;
+                    case 'Dashboard':
+                        return <DashboardScreen
+                                    pledgedItems={pledgedItems}
+                                    waitingListItems={waitingListItems}
+                                    likedItems={likedItems}
+                                    productionSteps={productionSteps}
+                                    activeView={dashboardView}
+                                    onNavigate={navigateTo}
+                                    onCampaignSelect={viewCampaignDetail}
+                                    onLike={(id) => handleLike(id, null)}
+                                    onViewPassport={(item) => setShowPassportModal({ visible: true, item })}
+                                />;
+                    default:
+                        return <HomeScreen campaigns={campaigns} onCampaignSelect={viewCampaignDetail} onLike={(id) => handleLike(id, null)} likedItems={likedItems} />;
+                }
+            };
+
+            return (
+                <div className="w-full min-h-screen">
+                    {/* This div wraps the main content and applies blur when any modal is open */}
+                    <div className={isAnyModalOpen ? 'blur-background' : ''}>
+                        <TopNavBar onNavigate={navigateTo} currentScreen={currentScreen} dashboardView={dashboardView} />
+                        <div className="max-w-7xl mx-auto pt-24 pb-12">
+                            <main>
+                                {renderScreen()}
+                            </main>
+                        </div>
+                    </div>
+
+                    {showCampaignModal &&
+                        <CampaignDetailModal
+                            campaign={showCampaignModal}
+                            onOpenPledgeModal={() => setShowPledgeModal(true)}
+                            onBack={() => setShowCampaignModal(null)}
+                            onLike={handleLike}
+                            isLiked={likedItems.some(item => item.id === showCampaignModal.id)}
+                            hasPurchased={hasPurchased(showCampaignModal.id)}
+                            onCommentSubmit={addComment}
+                            onReviewSubmit={addReview}
+                            onShow3D={() => setShow3DModal(true)}
+                            onShowMedia={(startIndex) => setShowMediaModal({ visible: true, startIndex: startIndex })}
+                            onShowBlueprint={() => setShowBlueprintModal(true)}
+                            onAddToWaitingList={handleAddToWaitingList}
+                            isOnWaitingList={waitingListItems.some(item => item.id === showCampaignModal.id)}
+                            isBlurred={isCampaignDetailBlurred} // Pass the blur state
+                        />
+                    }
+                    {showPledgeModal && <PledgeModal campaign={showCampaignModal} onClose={() => setShowPledgeModal(false)} onPledge={handlePledge} />}
+                    {show3DModal && <ThreeDModal onClose={() => setShow3DModal(false)} />}
+                    {showMediaModal.visible && <MediaViewerModal campaign={showCampaignModal} startIndex={showMediaModal.startIndex} onClose={() => setShowMediaModal({ visible: false, startIndex: 0 })} />}
+                    {showBlueprintModal && <ProductionBlueprintModal campaign={showCampaignModal} onClose={() => setShowBlueprintModal(false)} />}
+                    {showPassportModal.visible && <DigitalPassportModal item={showPassportModal.item} onClose={() => setShowPassportModal({ visible: false, item: null })} />}
+                </div>
+            );
+        }
+
+        // --- 3D VIEWER COMPONENT ---
+        function ThreeDViewer() {
+            const mountRef = useRef(null);
+            useEffect(() => {
+                const currentMount = mountRef.current;
+                if (!currentMount) return;
+
+                const scene = new THREE.Scene();
+                scene.background = new THREE.Color(0xf1f5f9);
+                const camera = new THREE.PerspectiveCamera(50, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+                currentMount.appendChild(renderer.domElement);
+
+                const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+                const material = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.5, metalness: 0.2 });
+                const torusKnot = new THREE.Mesh(geometry, material);
+                scene.add(torusKnot);
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                scene.add(ambientLight);
+                const pointLight = new THREE.PointLight(0xffffff, 0.8);
+                pointLight.position.set(25, 50, 25);
+                scene.add(pointLight);
+
+                camera.position.z = 30;
+                
+                let isDragging = false;
+                let previousPointerPosition = { x: 0, y: 0 };
+
+                const onPointerDown = (e) => {
+                    isDragging = true;
+                    currentMount.classList.add('cursor-grabbing');
+                    previousPointerPosition = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
+                };
+
+                const onPointerUp = () => {
+                    isDragging = false;
+                    currentMount.classList.remove('cursor-grabbing');
+                };
+
+                const onPointerMove = (e) => {
+                    if (!isDragging) return;
+                    const clientX = e.clientX || e.touches[0].clientX;
+                    const clientY = e.clientY || e.touches[0].clientY;
+                    const deltaMove = {
+                        x: clientX - previousPointerPosition.x,
+                        y: clientY - previousPointerPosition.y
+                    };
+                    const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
+                        new THREE.Euler((deltaMove.y * Math.PI) / 180, (deltaMove.x * Math.PI) / 180, 0, 'XYZ')
+                    );
+                    torusKnot.quaternion.multiplyQuaternions(deltaRotationQuaternion, torusKnot.quaternion);
+                    previousPointerPosition = { x: clientX, y: clientY };
+                };
+                
+                const onWheel = (e) => {
+                    camera.position.z += e.deltaY * 0.05;
+                    camera.position.z = Math.max(15, Math.min(camera.position.z, 50));
+                };
+
+                currentMount.addEventListener('mousedown', onPointerDown);
+                window.addEventListener('mouseup', onPointerUp);
+                window.addEventListener('mousemove', onPointerMove);
+                currentMount.addEventListener('touchstart', onPointerDown, { passive: true });
+                window.addEventListener('touchend', onPointerUp);
+                window.addEventListener('touchmove', onPointerMove, { passive: true });
+                currentMount.addEventListener('wheel', onWheel, { passive: false });
+
+                const animate = function () { requestAnimationFrame(animate); renderer.render(scene, camera); };
+                animate();
+                
+                const handleResize = () => {
+                    if (currentMount) {
+                        camera.aspect = currentMount.clientWidth / currentMount.clientHeight;
+                        camera.updateProjectionMatrix();
+                        renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+                    }
+                }
+                window.addEventListener('resize', handleResize);
+
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    window.removeEventListener('mouseup', onPointerUp);
+                    window.removeEventListener('mousemove', onPointerMove);
+                    window.removeEventListener('touchend', onPointerUp);
+                    window.removeEventListener('touchmove', onPointerMove);
+                    if(currentMount && renderer.domElement) {
+                       currentMount.removeChild(renderer.domElement);
+                    }
+                };
+            }, []);
+            return <div ref={mountRef} className="w-full h-full cursor-grab"></div>;
+        }
+
+        // --- SCREENS ---
+        function HomeScreen({ campaigns, onCampaignSelect, onLike, likedItems }) {
+            const [selectedCategory, setSelectedCategory] = useState('All');
+            const [sortBy, setSortBy] = useState('Newest');
+
+            const categories = ['All', 'Outerwear', 'Blazers', 'Trousers', 'Tops', 'Denim', 'Dresses', 'Accessories'];
+            
+            const sortedAndFilteredCampaigns = useMemo(() => {
+                let filtered = campaigns.filter(campaign => selectedCategory === 'All' || campaign.category === selectedCategory);
+                
+                switch(sortBy) {
+                    case 'Newest':
+                        return filtered.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+                    case 'Ending Soon':
+                        return filtered.sort((a, b) => (a.preOrderDetails?.daysLeft || Infinity) - (b.preOrderDetails?.daysLeft || Infinity));
+                    case 'Price: Low to High':
+                        return filtered.sort((a, b) => a.price - b.price);
+                    case 'Price: High to Low':
+                        return filtered.sort((a, b) => b.price - a.price);
+                    default:
+                        return filtered;
+                }
+            }, [campaigns, selectedCategory, sortBy]);
+
+            return (
+                <div className="p-4 sm:p-6 lg:p-8">
+                    <header className="mb-8 text-center">
+                        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">MePont</h1>
+                        <p className="mt-2 text-lg text-gray-600">Community-powered fashion. Sell then make.</p>
+                    </header>
+                    <div className="mb-4">
+                        <div className="flex justify-center flex-wrap gap-2">
+                        {categories.map(category => (
+                            <button key={category} onClick={() => setSelectedCategory(category)} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors whitespace-nowrap ${selectedCategory === category ? 'bg-gray-800 text-white' : 'bg-white text-gray-700 shadow-sm hover:bg-gray-50'}`}>
+                            {category}
+                            </button>
+                        ))}
+                        </div>
+                    </div>
+                    <div className="mb-8 flex justify-center">
+                        <div className="flex items-center gap-2 bg-white p-1 rounded-full shadow-sm">
+                            <span className="text-sm font-semibold text-gray-600 pl-2">Sort by:</span>
+                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-transparent font-semibold text-blue-600 rounded-full py-1 pr-8 border-none focus:ring-0 text-sm">
+                                <option>Newest</option>
+                                <option>Ending Soon</option>
+                                <option>Price: Low to High</option>
+                                <option>Price: High to Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {sortedAndFilteredCampaigns.map(campaign => ( <CampaignCard key={campaign.id} campaign={campaign} onSelect={onCampaignSelect} onLike={onLike} isLiked={likedItems.some(item => item.id === campaign.id)} /> ))}
+                    </div>
+                </div>
+            );
+        };
+
+        function DashboardScreen({ pledgedItems, waitingListItems, likedItems, productionSteps, activeView, onNavigate, onCampaignSelect, onLike, onViewPassport }) {
+            const renderContent = () => {
+                switch(activeView) {
+                    case 'My MePont':
+                        return <PledgedItemsView items={pledgedItems} productionSteps={productionSteps} onViewPassport={onViewPassport} />;
+                    case 'Waiting List':
+                        return <ItemGridView items={waitingListItems} onCampaignSelect={onCampaignSelect} onLike={onLike} likedItems={likedItems} emptyMessage="Your waiting list is empty." />;
+                    case 'Liked':
+                        return <ItemGridView items={likedItems} onCampaignSelect={onCampaignSelect} onLike={onLike} likedItems={likedItems} emptyMessage="You haven't liked any items yet." />;
+                    default:
+                        return <PledgedItemsView items={pledgedItems} productionSteps={productionSteps} onViewPassport={onViewPassport} />;
+                }
+            }
+
+            return (
+                <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+                    <header className="mb-8">
+                        <h1 className="text-3xl font-bold tracking-tight text-gray-900">{activeView.replace('My MePont', 'My Pledges')}</h1>
+                    </header>
+                    <div className="mb-6 border-b border-gray-200">
+                        <div className="flex space-x-2 sm:space-x-4">
+                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'My MePont' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-800'}`}>My Pledges</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'Waiting List' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-800'}`}>Waiting List</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`py-2 px-1 sm:px-2 font-semibold text-sm sm:text-base ${activeView === 'Liked' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-800'}`}>Liked</button>
+                        </div>
+                    </div>
+                    {renderContent()}
+                </div>
+            );
+        }
+
+        const PledgedItemsView = ({ items, productionSteps, onViewPassport }) => {
+            if (items.length === 0) {
+                return <div className="text-center py-20 bg-white rounded-xl shadow-md"><p className="text-gray-500">You haven't pledged for any items yet.</p></div>;
+            }
+            return (
+                <div className="space-y-6">
+                    {items.map((item) => (
+                        <div key={item.provisionalId} className="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                            <div className="flex flex-col sm:flex-row items-start sm:space-x-6">
+                                <img src={item.heroImage} alt={item.name} className="w-24 h-32 object-cover rounded-lg flex-shrink-0 mb-4 sm:mb-0" />
+                                <div className="flex-grow">
+                                    <p className="font-bold text-lg text-gray-900">{item.name}</p>
+                                    <p className="text-sm text-gray-600">Size: {item.size}</p>
+                                    <p className="text-sm text-gray-600 mb-4">Price: €{item.price}</p>
+                                    
+                                    <div className="bg-gray-100 p-3 rounded-lg text-sm">
+                                        <p className="font-semibold text-gray-800 mb-1">Pledge ID</p>
+                                        {item.digitalPassportId ? (
+                                            <button onClick={() => onViewPassport(item)} className="font-mono text-xs text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-colors w-full text-left flex items-center justify-between">
+                                                <span>View Passport</span>
+                                                <ArrowRightIcon className="w-3 h-3" />
+                                            </button>
+                                        ) : (
+                                            <p className="font-mono text-xs text-gray-500 bg-gray-200 px-3 py-1.5 rounded-lg">{item.provisionalId}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-6">
+                                <h4 className="font-semibold mb-4 text-sm text-gray-800">Production Status</h4>
+                                <div className="relative flex items-center justify-between w-full">
+                                    <div className="absolute left-0 top-1/2 w-full h-0.5 bg-gray-200 transform -translate-y-1/2"></div>
+                                    <div 
+                                        className="absolute left-0 top-1/2 h-0.5 bg-blue-600 transform -translate-y-1/2 transition-all duration-500" 
+                                        style={{width: `${(productionSteps.indexOf(item.productionStatus) / (productionSteps.length - 1)) * 100}%`}}>
+                                    </div>
+                                    {productionSteps.map((step) => {
+                                        const currentStepIndex = productionSteps.indexOf(item.productionStatus);
+                                        const stepIndex = productionSteps.indexOf(step);
+                                        const isCompleted = stepIndex <= currentStepIndex;
+                                        return (
+                                            <div key={step} className="relative z-10 flex flex-col items-center">
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors duration-300 ${isCompleted ? 'bg-blue-600' : 'bg-gray-200 border-2 border-white'}`}>
+                                                    {isCompleted && <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                                                </div>
+                                                <p className={`text-xs text-center mt-2 w-20 transition-colors duration-300 ${isCompleted ? 'font-semibold text-blue-600' : 'text-gray-500'}`}>{step}</p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const ItemGridView = ({ items, onCampaignSelect, onLike, likedItems, emptyMessage }) => {
+             if (items.length === 0) {
+                return <div className="text-center py-20 bg-white rounded-xl shadow-md"><p className="text-gray-500">{emptyMessage}</p></div>;
+            }
+            return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {items.map(item => (
+                        <CampaignCard key={item.id} campaign={item} onSelect={onCampaignSelect} onLike={onLike} isLiked={likedItems.some(li => li.id === item.id)} />
+                    ))}
+                </div>
+            );
+        };
+
+        // --- MODALS ---
+        function CampaignDetailModal({ campaign, onOpenPledgeModal, onBack, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList, isBlurred }) {
+            const [show, setShow] = useState(false);
+            const [islandNotification, setIslandNotification] = useState({ key: 0, message: '' });
+
+            const showIslandNotification = (message) => {
+                setIslandNotification({ key: Date.now(), message });
+            };
+            
+            useEffect(() => {
+                const timer = setTimeout(() => setShow(true), 10);
+                document.body.style.overflow = 'hidden';
+                return () => {
+                    clearTimeout(timer);
+                    document.body.style.overflow = 'auto';
+                };
+            }, []);
+
+            const handleClose = () => {
+                setShow(false);
+                setTimeout(onBack, 300);
+            };
+            
+            return (
+                <div 
+                    className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} 
+                    onClick={handleClose}
+                >
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true"></div>
+                    <div 
+                        className={`
+                            relative w-full h-full max-w-7xl max-h-full sm:max-h-[90vh] 
+                            bg-white/80 backdrop-blur-xl shadow-2xl 
+                            transform transition-all duration-300 ease-in-out 
+                            flex flex-col sm:rounded-2xl sm:overflow-hidden 
+                            ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}
+                            ${isBlurred ? 'blur-background' : ''}
+                        `}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <CampaignDetailContent 
+                            campaign={campaign} 
+                            onOpenPledgeModal={onOpenPledgeModal}
+                            onLike={() => onLike(campaign.id, showIslandNotification)} 
+                            isLiked={isLiked} 
+                            hasPurchased={hasPurchased} 
+                            onCommentSubmit={(id, text) => onCommentSubmit(id, text, showIslandNotification)} 
+                            onReviewSubmit={(id, review) => onReviewSubmit(id, review, showIslandNotification)} 
+                            onShow3D={onShow3D} 
+                            onShowMedia={onShowMedia} 
+                            onShowBlueprint={onShowBlueprint}
+                            onAddToWaitingList={() => onAddToWaitingList(campaign.id, showIslandNotification)} 
+                            isOnWaitingList={isOnWaitingList}
+                            islandNotification={islandNotification}
+                            onClose={handleClose}
+                        />
+                    </div>
+                </div>
+            );
+        };
+        
+        const FooterStatusDisplay = ({ campaign }) => {
+            switch(campaign.stage) {
+                case 'DESIGN':
+                    return (
+                        <>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${(campaign.likes / campaign.targetLikes) * 100}%` }}></div>
+                            </div>
+                            <div className="flex justify-between items-center text-sm text-gray-600 mt-2">
+                                <span>{campaign.likes} / {campaign.targetLikes} likes to sample</span>
+                            </div>
+                        </>
+                    );
+                case 'PRE_ORDER':
+                    return campaign.preOrderDetails.fundingType === 'COMBINED' ? (
+                        <>
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0) / campaign.preOrderDetails.overallMoq) * 100}%` }}></div>
+                            </div>
+                            <div className="flex justify-between items-center text-sm text-gray-600 mt-2">
+                                <span>{Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0)} / {campaign.preOrderDetails.overallMoq} Funded</span>
+                                <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center text-sm text-gray-600">
+                                <h4 className="font-semibold text-gray-800">Fund each size independently:</h4>
+                                <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span>
+                            </div>
+                            {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => {
+                                const progress = (data.funded / data.moq) * 100;
+                                const isFunded = progress >= 100;
+                                return (
+                                    <div key={size}>
+                                        <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}>
+                                            <span className="font-semibold">{size}</span>
+                                            <span>{data.funded} / {data.moq}</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    );
+                case 'SAMPLING':
+                    return <div className="bg-cyan-50 text-cyan-800 p-3 rounded-lg text-center"><p className="font-semibold">Sample in Progress</p><p className="text-sm">Pre-orders will open soon.</p></div>;
+                case 'CONFIRMED':
+                    return <div className="bg-green-50 text-green-800 p-3 rounded-lg text-center flex items-center justify-center gap-2"><CheckCircleIcon className="w-5 h-5" /><p className="font-semibold">Fully Funded!</p></div>;
+                default:
+                    return null;
+            }
+        };
+
+        function CampaignDetailContent({ campaign, onOpenPledgeModal, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList, islandNotification, onClose }) {
+            const [selectedSize, setSelectedSize] = useState(campaign.sizeGuide.sizes && Object.keys(campaign.sizeGuide.sizes).length > 0 ? Object.keys(campaign.sizeGuide.sizes)[0] : null);
+            const [showStatusInFooter, setShowStatusInFooter] = useState(false);
+            const [isPanelOpen, setIsPanelOpen] = useState(false);
+            
+            const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
+            const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+            
+            const touchStartY = useRef(0);
+            const touchEndY = useRef(0);
+            const panelRef = useRef(null);
+            const footerRef = useRef(null);
+            const [footerHeight, setFooterHeight] = useState(0);
+            
+            const contentRef = useRef(null);
+            const sectionRefs = {
+                details: useRef(null),
+                care: useRef(null),
+                price: useRef(null),
+                size: useRef(null),
+                blueprint: useRef(null),
+                community: useRef(null),
+            };
+
+            useEffect(() => {
+                if (footerRef.current) {
+                    const observer = new ResizeObserver(entries => {
+                        for (let entry of entries) {
+                            setFooterHeight(entry.target.offsetHeight);
+                        }
+                    });
+                    observer.observe(footerRef.current);
+                    return () => observer.disconnect();
+                }
+            }, [showStatusInFooter]); // Re-observe if status display changes footer height
+
+            const changeMedia = (direction) => {
+                const newIndex = (currentMediaIndex + direction + mediaItems.length) % mediaItems.length;
+                setCurrentMediaIndex(newIndex);
+            };
+            
+            const handleTouchStart = (e) => {
+                // Only initiate swipe if the touch is on the gallery container, not its children buttons
+                if (e.target.tagName !== 'BUTTON') {
+                    touchStartY.current = e.targetTouches[0].clientY;
+                }
+            };
+            
+            const handleTouchMove = (e) => {
+                if (touchStartY.current !== 0) {
+                    touchEndY.current = e.targetTouches[0].clientY;
+                }
+            };
+            
+            const handleTouchEnd = () => {
+                if (touchStartY.current === 0) return;
+                const swipeDistance = touchStartY.current - touchEndY.current;
+                if (swipeDistance > 50) { // Swipe up
+                    setIsPanelOpen(true);
+                }
+                if (swipeDistance < -50 && panelRef.current?.scrollTop === 0) { // Swipe down from top of panel
+                    setIsPanelOpen(false);
+                }
+                touchStartY.current = 0;
+            };
+
+            const handlePanelNav = (id) => {
+                setIsPanelOpen(true);
+                setTimeout(() => {
+                    sectionRefs[id].current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300); // Wait for panel animation
+            };
+
+            const MainActions = () => {
+                const baseButtonClass = "font-bold py-3 sm:py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 w-full disabled:opacity-50 disabled:cursor-not-allowed";
+                switch(campaign.stage) {
+                    case 'DESIGN': return ( <button onClick={onLike} className={`${baseButtonClass} ${isLiked ? 'bg-pink-600 text-white hover:bg-pink-700' : 'bg-white text-pink-600 border-2 border-pink-600 hover:bg-pink-50'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
+                    case 'SAMPLING': return ( <button onClick={onAddToWaitingList} className={`${baseButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
+                    case 'PRE_ORDER': 
+                        return (
+                            <div className="flex items-stretch gap-3 w-full">
+                                <button onClick={onOpenPledgeModal} className={`flex-grow ${baseButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>
+                                    Select Size & Pledge
+                                </button>
+                            </div>
+                        );
+                    case 'CONFIRMED':
+                        return <button disabled className={`${baseButtonClass} bg-green-600 text-white`}> <CheckCircleIcon className="w-6 h-6" /> <span>Fully Funded!</span> </button>;
+                    default: return null;
+                }
+            }
+
+            const AllContentSections = () => (
+                <>
+                    <ContentSection id="details" title="Details" ref={sectionRefs.details}>
+                        <p className="text-gray-700 mb-6">{campaign.details}</p>
+                        {campaign.manufacturer?.country !== 'TBD' && ["Portugal", "Spain", "Italy", "France"].includes(campaign.manufacturer.country) && (
+                            <div className="mb-6 border border-blue-200 p-4 rounded-lg flex items-center gap-4">
+                                <EUFlagIcon />
+                                <div>
+                                    <h4 className="font-semibold text-blue-900">Proudly Made in the EU</h4>
+                                    <p className="text-sm text-blue-800">This product is manufactured in {campaign.manufacturer.country}, supporting local craftsmanship and ensuring high labor standards.</p>
+                                </div>
+                            </div>
+                        )}
+                        {campaign.designerUpdates && campaign.designerUpdates.length > 0 && (
+                            <div className="mb-6">
+                                <h3 className="font-semibold text-md mb-3 text-gray-800">Designer's Updates</h3>
+                                <div className="space-y-4">
+                                    {campaign.designerUpdates.map((update, index) => (
+                                        <div key={index} className="relative pl-6 border-l-2 border-gray-200">
+                                            <div className="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-gray-300 rounded-full"></div>
+                                            <p className="text-xs text-gray-500">{update.date}</p>
+                                            <p className="font-semibold text-gray-800">{update.title}</p>
+                                            <p className="text-sm text-gray-600">{update.text}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </ContentSection>
+                    <ContentSection id="care" title="Care & Composition" ref={sectionRefs.care}>
+                        <div className="space-y-2 text-sm">
+                            <h5 className="font-bold mb-2 text-gray-800">Composition</h5>
+                            <p className="text-gray-700">{campaign.garmentCare.composition}</p>
+                        </div>
+                        <div className="mt-4 space-y-2 text-sm">
+                            <h5 className="font-bold mb-2 text-gray-800">Care Instructions</h5>
+                            <ul className="list-disc list-inside text-gray-700">
+                                {campaign.garmentCare.instructions.map((instruction, index) => <li key={index}>{instruction}</li>)}
+                            </ul>
+                        </div>
+                    </ContentSection>
+                    <ContentSection id="price" title="Price Breakdown" ref={sectionRefs.price}>
+                        <p className="text-gray-700 mb-4 text-sm">We believe in radical transparency. Here's the true cost of making this garment.</p>
+                        <div className="space-y-3 mb-6">
+                            {Object.entries(campaign.priceBreakdown).map(([key, value]) => {
+                                const percentage = (value / campaign.price) * 100;
+                                return (
+                                    <div key={key}>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="capitalize text-gray-600">{key}</span>
+                                            <span className="font-semibold text-gray-900">€{value.toFixed(2)}</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="bg-blue-500 h-2 rounded-full" style={{width: `${percentage}%`}}></div>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                        <div className="border-t border-gray-200 pt-4">
+                            <div className="flex justify-between text-sm mb-2">
+                                <span className="text-gray-600">True Cost</span>
+                                <span className="font-semibold text-gray-900">€{Object.values(campaign.priceBreakdown).reduce((sum, val) => sum + val, 0).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-md font-bold text-gray-900">
+                                <span>Our Price</span>
+                                <span>€{campaign.price.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div className="mt-6 text-sm text-blue-800">
+                            <p><strong>Note:</strong> Final cost, including shipping & duties, will be calculated at checkout.</p>
+                        </div>
+                    </ContentSection>
+                    <ContentSection id="size" title="Size & Fit" ref={sectionRefs.size}>
+                        <p className="text-gray-700 mb-4">{campaign.sizeGuide.fitDetails}</p>
+                        {selectedSize ? (
+                            <>
+                            <div className="flex space-x-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                                {Object.keys(campaign.sizeGuide.sizes).map(size => (
+                                    <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="space-y-2 text-sm">
+                                <h5 className="font-bold mb-2 text-gray-800">Measurements for Size {selectedSize}</h5>
+                                {Object.entries(campaign.sizeGuide.sizes[selectedSize]).map(([key, value]) => (
+                                    <div key={key} className="flex justify-between">
+                                        <span className="text-gray-600">{key}</span>
+                                        <span className="font-semibold text-gray-900">{value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            </>
+                        ) : <p className="text-gray-500 text-sm">Size guide coming soon.</p>}
+                    </ContentSection>
+                    {campaign.productionBlueprint && (
+                        <ContentSection id="blueprint" title="Production Blueprint" ref={sectionRefs.blueprint}>
+                            <div className="flex items-center gap-3 mb-3">
+                                <ShieldCheckIcon className="w-8 h-8 text-blue-600" />
+                                <div>
+                                    <h4 className="font-bold text-md text-gray-800">Verified Traceability</h4>
+                                </div>
+                            </div>
+                            <p className="text-gray-700 mb-4 text-sm">This item has a verified production plan. View the full blueprint for details on the manufacturer, supply chain, and sustainability.</p>
+                            <button onClick={onShowBlueprint} className="w-full bg-gray-800 text-white font-bold py-2 rounded-lg hover:bg-black transition-colors">
+                                View Full Blueprint
+                            </button>
+                        </ContentSection>
+                    )}
+                    <ContentSection id="community" title="Community" ref={sectionRefs.community}>
+                        <h4 className="font-bold text-md mb-3 text-gray-800">Reviews</h4>
+                        {campaign.reviews.length > 0 ? (
+                            <div className="space-y-4">
+                                {campaign.reviews.map((review, index) => (
+                                    <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                                        <div className="flex items-center mb-1">
+                                            {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-yellow-500" isFilled={i < review.rating} />)}
+                                            <span className="ml-2 font-bold text-gray-800">{review.user}</span>
+                                        </div>
+                                        <p className="text-gray-700">{review.comment}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-500 text-sm py-2">No reviews yet.</p>
+                        )}
+                        {hasPurchased && <ReviewForm campaignId={campaign.id} onSubmit={onReviewSubmit} />}
+                        
+                        <h4 className="font-bold text-md mt-6 mb-3 text-gray-800">Comments</h4>
+                        {campaign.comments.length > 0 ? (
+                            <div className="space-y-4">
+                                {campaign.comments.map((comment, index) => (
+                                    <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                                        <p className="font-bold text-sm text-gray-800">{comment.user}</p>
+                                        <p className="text-gray-700">{comment.comment}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-500 text-sm py-2">No comments yet. Be the first!</p>
+                        )}
+                        <CommentForm campaignId={campaign.id} onSubmit={onCommentSubmit} />
+                    </ContentSection>
+                </>
+            );
+
+            return (
+                <>
+                    {/* --- NEW MOBILE/TABLET LAYOUT --- */}
+                    <div className="lg:hidden w-full h-full bg-white overflow-hidden relative">
+                        {/* Gallery Area (z-10) */}
+                        <div 
+                            className="absolute inset-0 z-10"
+                            onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+                        >
+                             <button className="w-full h-full" onClick={(e) => { e.stopPropagation(); onShowMedia(currentMediaIndex); }}>
+                                {mediaItems[currentMediaIndex].type === 'video' ? (
+                                    <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-cover object-bottom"></video>
+                                ) : (
+                                    <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover object-bottom" />
+                                )}
+                            </button>
+                            
+                            <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronLeftIcon className="w-6 h-6" /></button>
+                            <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronRightIcon className="w-6 h-6" /></button>
+                            {campaign.has3D && (
+                                <button onClick={(e) => { e.stopPropagation(); onShow3D(); }} className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors">
+                                    <CubeIcon className="w-5 h-5" /><span>3D</span>
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Header (z-40) */}
+                        <div className="absolute top-0 left-0 right-0 p-4 z-40 pointer-events-none" style={{paddingTop: 'calc(env(safe-area-inset-top, 0) + 1rem)'}}>
+                             <div className="pointer-events-auto">
+                                <DetailIsland 
+                                    sectionRefs={sectionRefs}
+                                    containerRef={panelRef}
+                                    notification={islandNotification}
+                                    onClose={onClose}
+                                    hasBlueprint={!!campaign.productionBlueprint}
+                                    onNavClick={handlePanelNav}
+                                />
+                             </div>
+                        </div>
+                        
+                        {/* Name Overlay (z-20) - Visible when panel is closed */}
+                        <div className={`absolute left-0 right-0 p-4 pointer-events-none z-20 transition-opacity duration-300 ${isPanelOpen ? 'opacity-0' : 'opacity-100'}`} style={{top: 'calc(env(safe-area-inset-top, 0) + 88px)'}}>
+                            <p className="text-sm text-white/90 drop-shadow-md">{campaign.designer}</p>
+                            <h2 className="text-xl font-bold text-white drop-shadow-md">{campaign.name}</h2>
+                        </div>
+
+                        {/* Sliding Details Panel (z-30) */}
+                        <div 
+                            className={`absolute top-0 left-0 w-full h-full bg-white transition-transform duration-500 ease-in-out z-30 flex flex-col ${isPanelOpen ? 'translate-y-0' : 'translate-y-full'}`}
+                            onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+                        >
+                             <div className="flex-shrink-0" style={{ height: 'calc(env(safe-area-inset-top, 0) + 88px)' }}></div> {/* Spacer for header */}
+                            
+                             {/* Sticky Panel Header */}
+                            <div className="flex-shrink-0 p-4 pt-2 border-b bg-white/80 backdrop-blur-xl">
+                                <p className="text-sm text-gray-800">{campaign.designer}</p>
+                                <h2 className="text-xl font-bold text-gray-900">{campaign.name}</h2>
+                            </div>
+
+                            <div ref={panelRef} className="flex-grow overflow-y-auto scrollbar-hide">
+                                <div className="p-5 space-y-6" style={{ paddingBottom: `${footerHeight + 20}px` }}>
+                                    <AllContentSections />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer (z-40) */}
+                        <div ref={footerRef} className="absolute bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t pb-[env(safe-area-inset-bottom)]">
+                            <div className="w-full text-center pt-3 pb-1 cursor-grab" onClick={() => setIsPanelOpen(!isPanelOpen)}>
+                                <div className="w-10 h-1.5 bg-gray-400 rounded-full mx-auto"></div>
+                            </div>
+                            
+                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${showStatusInFooter ? 'max-h-96' : 'max-h-0'}`}>
+                                <div className="px-4 pb-4">
+                                    <FooterStatusDisplay campaign={campaign} />
+                                </div>
+                            </div>
+
+                            <div className="p-4 pt-0">
+                                <div className="flex items-center gap-3">
+                                    <MainActions />
+                                    {['DESIGN', 'PRE_ORDER', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) && (
+                                        <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-3 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`} aria-label="Toggle campaign status">
+                                            <BarChartIcon className="w-6 h-6" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    {/* --- EXISTING DESKTOP LAYOUT --- */}
+                    <div className="hidden lg:grid lg:grid-cols-5 w-full h-full overflow-hidden">
+                        {/* Media Column (Left) */}
+                        <div className="lg:col-span-3 h-full p-4 flex flex-col gap-4 overflow-hidden bg-gray-50 group">
+                            <div className="flex-1 relative rounded-lg bg-gray-100 min-h-0">
+                                <button className="w-full h-full" onClick={() => onShowMedia(currentMediaIndex)}>
+                                    {mediaItems[currentMediaIndex].type === 'video' ? (
+                                        <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-contain"></video>
+                                    ) : (
+                                        <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-contain" />
+                                    )}
+                                </button>
+                                <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors opacity-0 group-hover:opacity-100"><ChevronLeftIcon className="w-6 h-6" /></button>
+                                <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors opacity-0 group-hover:opacity-100"><ChevronRightIcon className="w-6 h-6" /></button>
+                                {campaign.has3D && (
+                                    <button onClick={(e) => { e.stopPropagation(); onShow3D(); }} className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors">
+                                        <CubeIcon className="w-5 h-5" /><span>3D</span>
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex-shrink-0 flex justify-center items-center space-x-2 py-2">
+                                {mediaItems.map((_, index) => (
+                                    <button key={index} onClick={() => setCurrentMediaIndex(index)} className="p-1">
+                                        <div className={`w-2 h-2 rounded-full transition-colors ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300 hover:bg-gray-400'}`}></div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Details Column (Right) */}
+                        <div className="lg:col-span-2 h-full flex flex-col bg-white">
+                            <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-b border-gray-200 z-30">
+                                <DetailIsland 
+                                    sectionRefs={sectionRefs}
+                                    containerRef={contentRef}
+                                    notification={islandNotification}
+                                    onClose={onClose}
+                                    hasBlueprint={!!campaign.productionBlueprint}
+                                    onNavClick={(id) => sectionRefs[id].current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                                />
+                            </div>
+                            
+                            <div className="flex-1 relative min-h-0">
+                                <div ref={contentRef} className="absolute inset-0 overflow-y-auto scrollbar-hide">
+                                    <div className="p-5 lg:p-6">
+                                        <p className="text-sm text-gray-800">{campaign.designer}</p>
+                                        <h2 className="text-xl font-bold text-gray-900">{campaign.name}</h2>
+                                    </div>
+                                    <div className="px-5 lg:px-6 pb-24 space-y-6">
+                                        <AllContentSections />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Sticky CTA Bar */}
+                            <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-200 z-30">
+                                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showStatusInFooter ? 'max-h-96 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
+                                    <FooterStatusDisplay campaign={campaign} />
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <MainActions />
+                                    {['DESIGN', 'PRE_ORDER', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) && (
+                                        <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-3 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`} aria-label="Toggle campaign status">
+                                            <BarChartIcon className="w-6 h-6" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        };
+
+        const ContentSection = React.forwardRef(({ id, title, children }, ref) => (
+            <div id={id} ref={ref} className="scroll-mt-20 bg-gray-50/70 p-5 rounded-2xl border border-gray-200/60 shadow-sm">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">{title}</h3>
+                {children}
+            </div>
+        ));
+
+        function PledgeModal({ campaign, onClose, onPledge }) {
+            const [show, setShow] = useState(false);
+            const [selectedSize, setSelectedSize] = useState(Object.keys(campaign.preOrderDetails.sizes)[0]);
+            const isCombinedFunding = campaign.preOrderDetails.fundingType === 'COMBINED';
+            useEffect(() => { const timer = setTimeout(() => setShow(true), 10); return () => clearTimeout(timer); }, []);
+            const handleClose = () => { setShow(false); setTimeout(onClose, 300); };
+            let combinedProgress = 0; let totalFunded = 0;
+            if (isCombinedFunding) { totalFunded = Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0); combinedProgress = campaign.preOrderDetails.overallMoq > 0 ? (totalFunded / campaign.preOrderDetails.overallMoq) * 100 : 0; }
+            return (
+                <div className={`fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <div className={`bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"> <XIcon className="w-6 h-6" /> </button>
+                        <h2 className="font-bold text-2xl mb-2">{campaign.name}</h2>
+                        <p className="text-lg text-gray-600 mb-6">€{campaign.price}</p>
+                        {isCombinedFunding && ( <div className="mb-4"> <h3 className="font-semibold text-sm mb-2">Overall Funding Progress</h3> <div className="w-full bg-gray-200 rounded-full h-2.5"> <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${combinedProgress}%` }}></div> </div> <div className="flex justify-between items-center text-xs text-gray-600 mt-1"> <span>{totalFunded} / {campaign.preOrderDetails.overallMoq} Funded</span> <span className="font-semibold">{campaign.preOrderDetails.daysLeft} days left</span> </div> </div> )}
+                        <div className="mb-4"> <h3 className="font-semibold text-sm mb-3">{isCombinedFunding ? 'Pledges by Size' : 'Funding Progress by Size'}</h3> <div className="space-y-3"> {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => { if (isCombinedFunding) { return ( <div key={size} className="flex justify-between items-center text-sm py-1"> <span className="font-medium text-gray-800">{size}</span> <span className="text-gray-600 font-semibold">{data.funded} pledged</span> </div> ) } const moq = data.moq; const progress = moq ? (data.funded / moq) * 100 : 0; const isFunded = moq && progress >= 100; return ( <div key={size}> <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}> <span className="font-semibold">{size}</span> {moq && <span>{data.funded} / {moq}</span>} </div> {moq && <div className="w-full bg-gray-200 rounded-full h-2"> <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div> </div>} </div> ); })} </div> </div>
+                        <div className="mb-6"> <h3 className="font-semibold text-sm mb-2">Select Size to Pledge For</h3> <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide"> {Object.keys(campaign.preOrderDetails.sizes).map(size => ( <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-700 border-gray-200'}`}> {size} </button> ))} </div> </div>
+                        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-lg mb-6"> <p className="text-sm text-blue-800">Your card will only be charged if the funding goal is met.</p> </div>
+                        <button onClick={() => onPledge(campaign, selectedSize, showIslandNotification)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all"> Confirm Pledge for Size {selectedSize} </button>
+                    </div>
+                </div>
+            );
+        };
+
+        function ThreeDModal({ onClose }) {
+            const [show, setShow] = useState(false);
+            useEffect(() => { const timer = setTimeout(() => setShow(true), 10); return () => clearTimeout(timer); }, []);
+            const handleClose = () => { setShow(false); setTimeout(onClose, 300); };
+            return (
+                <div className={`fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <div className={`w-full h-full max-w-4xl max-h-[80vh] bg-slate-200 rounded-xl shadow-2xl relative transform transition-all duration-300 ease-in-out overflow-hidden ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-800 bg-white/50 rounded-full p-2 hover:bg-white z-10"> <XIcon className="w-6 h-6" /> </button>
+                        <ThreeDViewer />
+                    </div>
+                </div>
+            );
+        }
+
+        function MediaViewerModal({ campaign, startIndex, onClose }) {
+            const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
+            const [currentIndex, setCurrentIndex] = useState(startIndex);
+            const [show, setShow] = useState(false);
+            const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
+            
+            const isDragging = useRef(false);
+            const lastPosition = useRef({ x: 0, y: 0 });
+            const initialPinchDistance = useRef(0);
+
+            const imageRef = useRef(null);
+            const containerRef = useRef(null);
+
+            const changeMedia = (direction) => {
+                setTransform({ scale: 1, x: 0, y: 0 });
+                setCurrentIndex(prev => (prev + direction + mediaItems.length) % mediaItems.length);
+            };
+
+            const handleDoubleClick = () => {
+                 setTransform({ scale: 1, x: 0, y: 0 });
+            }
+
+            useEffect(() => {
+                const timer = setTimeout(() => setShow(true), 10);
+                const handleKeyDown = (e) => {
+                    if (e.key === 'ArrowLeft') changeMedia(-1);
+                    if (e.key === 'ArrowRight') changeMedia(1);
+                    if (e.key === 'Escape') handleClose();
+                };
+                window.addEventListener('keydown', handleKeyDown);
+
+                const container = containerRef.current;
+                if (!container) return;
+
+                const handleMouseDown = (e) => {
+                    if (transform.scale > 1) {
+                        isDragging.current = true;
+                        e.currentTarget.style.cursor = 'grabbing';
+                        lastPosition.current = { x: e.clientX, y: e.clientY };
+                    }
+                };
+                const handleMouseUp = (e) => {
+                    isDragging.current = false;
+                    if (e.currentTarget) e.currentTarget.style.cursor = 'grab';
+                };
+                const handleMouseMove = (e) => {
+                    if (isDragging.current) {
+                        const dx = e.clientX - lastPosition.current.x;
+                        const dy = e.clientY - lastPosition.current.y;
+                        lastPosition.current = { x: e.clientX, y: e.clientY };
+                        setTransform(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
+                    }
+                };
+                const handleWheel = (e) => {
+                    if (mediaItems[currentIndex].type !== 'image') return;
+                    e.preventDefault();
+                    const newScale = e.deltaY > 0 ? transform.scale / 1.1 : transform.scale * 1.1;
+                    const clampedScale = Math.min(Math.max(newScale, 1), 5);
+                    if (clampedScale === 1) {
+                        setTransform({ scale: 1, x: 0, y: 0 });
+                    } else {
+                        setTransform(prev => ({ ...prev, scale: clampedScale }));
+                    }
+                };
+                
+                const getDistance = (touches) => {
+                    return Math.sqrt(Math.pow(touches[0].clientX - touches[1].clientX, 2) + Math.pow(touches[0].clientY - touches[1].clientY, 2));
+                };
+
+                const handleTouchStart = (e) => {
+                    if (e.touches.length === 2) {
+                        e.preventDefault();
+                        initialPinchDistance.current = getDistance(e.touches);
+                    } else if (e.touches.length === 1 && transform.scale > 1) {
+                        e.preventDefault();
+                        isDragging.current = true;
+                        lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                    }
+                };
+
+                const handleTouchMove = (e) => {
+                    if (e.touches.length === 2) {
+                        e.preventDefault();
+                        const newDist = getDistance(e.touches);
+                        const scaleChange = newDist / initialPinchDistance.current;
+                        setTransform(prev => {
+                            const newScale = prev.scale * scaleChange;
+                            const clampedScale = Math.min(Math.max(newScale, 1), 5);
+                            return {...prev, scale: clampedScale};
+                        });
+                         initialPinchDistance.current = newDist;
+                    } else if (e.touches.length === 1 && isDragging.current) {
+                        e.preventDefault();
+                        const dx = e.touches[0].clientX - lastPosition.current.x;
+                        const dy = e.touches[0].clientY - lastPosition.current.y;
+                        lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                        setTransform(prev => {
+                            const img = imageRef.current;
+                            if (!img) return prev;
+                            
+                            const maxPanX = (img.clientWidth * prev.scale - container.clientWidth) / 2;
+                            const maxPanY = (img.clientHeight * prev.scale - container.clientHeight) / 2;
+
+                            const newX = Math.max(-maxPanX, Math.min(maxPanX, prev.x + dx));
+                            const newY = Math.max(-maxPanY, Math.min(maxPanY, prev.y + dy));
+
+                            return { ...prev, x: newX, y: newY };
+                        });
+                    }
+                };
+
+                const handleTouchEnd = (e) => {
+                    isDragging.current = false;
+                    initialPinchDistance.current = 0;
+                     if (transform.scale <= 1) {
+                        setTransform({ scale: 1, x: 0, y: 0 });
+                    }
+                };
+
+                container.addEventListener('mousedown', handleMouseDown);
+                container.addEventListener('mouseup', handleMouseUp);
+                container.addEventListener('mousemove', handleMouseMove);
+                container.addEventListener('mouseleave', handleMouseUp);
+                container.addEventListener('wheel', handleWheel, { passive: false });
+                container.addEventListener('touchstart', handleTouchStart, { passive: false });
+                container.addEventListener('touchmove', handleTouchMove, { passive: false });
+                container.addEventListener('touchend', handleTouchEnd);
+
+
+                return () => {
+                    window.removeEventListener('keydown', handleKeyDown);
+                    container.removeEventListener('mousedown', handleMouseDown);
+                    container.removeEventListener('mouseup', handleMouseUp);
+                    container.removeEventListener('mousemove', handleMouseMove);
+                    container.removeEventListener('mouseleave', handleMouseUp);
+                    container.removeEventListener('wheel', handleWheel);
+                    container.removeEventListener('touchstart', handleTouchStart);
+                    container.removeEventListener('touchmove', handleTouchMove);
+                    container.removeEventListener('touchend', handleTouchEnd);
+                };
+            }, [currentIndex, transform, mediaItems]);
+
+            const handleClose = () => {
+                setShow(false);
+                setTimeout(onClose, 300);
+            };
+
+            return (
+                <div className={`fixed inset-0 bg-black/80 z-[60] flex items-center justify-center transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <div 
+                        className={`w-full h-full transform transition-all duration-300 ease-in-out relative ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} 
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div
+                            ref={containerRef}
+                            className="absolute inset-0 flex items-center justify-center overflow-hidden"
+                            style={{ touchAction: 'none' }}
+                        >
+                            {mediaItems[currentIndex].type === 'video' ? (
+                                <video key={mediaItems[currentIndex].url} src={mediaItems[currentIndex].url} controls autoPlay className="max-w-full max-h-full object-contain"></video>
+                            ) : (
+                                <img 
+                                    ref={imageRef}
+                                    src={mediaItems[currentIndex].url} 
+                                    alt="Full screen product view" 
+                                    className={`max-w-full max-h-full object-contain transition-transform duration-200 ${transform.scale > 1 ? 'cursor-grab' : ''}`}
+                                    style={{ transform: `scale(${transform.scale}) translate(${transform.x}px, ${transform.y}px)` }}
+                                    onDoubleClick={handleDoubleClick}
+                                />
+                            )}
+                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/30 transition-colors z-20"><ChevronLeftIcon className="w-8 h-8" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/30 transition-colors z-20"><ChevronRightIcon className="w-8 h-8" /></button>
+                    </div>
+                    <button onClick={handleClose} className="absolute top-4 right-4 text-white bg-black/30 rounded-full p-2 hover:bg-black/50 z-[70]">
+                        <XIcon className="w-6 h-6" />
+                    </button>
+                </div>
+            );
+        }
+
+        function ProductionBlueprintModal({ campaign, onClose }) {
+            const [show, setShow] = useState(false);
+            useEffect(() => { const timer = setTimeout(() => setShow(true), 10); return () => clearTimeout(timer); }, []);
+            const handleClose = () => { setShow(false); setTimeout(onClose, 300); };
+
+            if (!campaign.productionBlueprint) return null;
+            const { productionRunId } = campaign.productionBlueprint;
+
+            return (
+                <div className={`fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <div className={`bg-white rounded-xl shadow-2xl w-full max-w-2xl relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 p-6 bg-gray-50 rounded-t-xl border-b border-gray-200 z-10">
+                             <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"> <XIcon className="w-6 h-6" /> </button>
+                             <h2 className="text-2xl font-bold text-gray-900">Production Blueprint</h2>
+                             <p className="text-sm text-gray-600">Run ID: {productionRunId}</p>
+                        </div>
+                        <div className="p-6 max-h-[70vh] overflow-y-auto scrollbar-hide">
+                            <PassportContent blueprint={campaign.productionBlueprint} />
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function DigitalPassportModal({ item, onClose }) {
+            const [show, setShow] = useState(false);
+            useEffect(() => { const timer = setTimeout(() => setShow(true), 10); return () => clearTimeout(timer); }, []);
+            const handleClose = () => { setShow(false); setTimeout(onClose, 300); };
+
+            if (!item || !item.productionBlueprint) return null;
+
+            return (
+                <div className={`fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <div className={`bg-white rounded-xl shadow-2xl w-full max-w-2xl relative transform transition-all duration-300 ease-in-out ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 p-6 bg-blue-600 text-white rounded-t-xl z-10">
+                             <button onClick={handleClose} className="absolute top-4 right-4 text-blue-100 hover:text-white"> <XIcon className="w-6 h-6" /> </button>
+                             <h2 className="text-2xl font-bold">Digital Passport</h2>
+                             <p className="text-sm font-mono text-blue-200">{item.digitalPassportId}</p>
+                        </div>
+                        <div className="p-6 max-h-[70vh] overflow-y-auto scrollbar-hide">
+                            <PassportContent blueprint={item.productionBlueprint} />
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        const PassportContent = ({ blueprint }) => {
+            const { manufacturerInfo, supplyChain, sustainability, compliance } = blueprint;
+            return (
+                <div className="space-y-6">
+                    <div>
+                        <h3 className="font-bold text-lg mb-2 text-gray-800">Manufacturer</h3>
+                        <div className="bg-gray-100/80 p-4 rounded-lg text-sm">
+                            <p><strong>Name:</strong> {manufacturerInfo.name}</p>
+                            <p><strong>Address:</strong> {manufacturerInfo.address}</p>
+                            <p><strong>Contact:</strong> <a href={`mailto:${manufacturerInfo.contact}`} className="text-blue-600 hover:underline">{manufacturerInfo.contact}</a></p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg mb-2 text-gray-800">Supply Chain</h3>
+                        <div className="space-y-3">
+                            {supplyChain.map((item, index) => (
+                                <div key={index} className="bg-gray-100/80 p-4 rounded-lg text-sm">
+                                    <p><strong>Component:</strong> {item.component}</p>
+                                    <p><strong>Material:</strong> {item.material}</p>
+                                    <p><strong>Supplier:</strong> {item.supplier}</p>
+                                    <p><strong>Origin:</strong> {item.origin}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg mb-2 text-gray-800">Sustainability</h3>
+                        <div className="bg-gray-100/80 p-4 rounded-lg text-sm space-y-2">
+                            <p><strong>Recycled Content:</strong> {sustainability.recycledContent}</p>
+                            <p><strong>Durability:</strong> {sustainability.durability}</p>
+                            <div>
+                                <p><strong>Repairability:</strong> {sustainability.repairability.score}</p>
+                                <p className="text-xs text-gray-600">{sustainability.repairability.details}</p>
+                            </div>
+                                <div>
+                                <p><strong>End of Life:</strong> {sustainability.endOfLife.recyclable ? 'Recyclable' : 'Non-recyclable'}</p>
+                                <p className="text-xs text-gray-600">{sustainability.endOfLife.instructions}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg mb-2 text-gray-800">Compliance & Certifications</h3>
+                            <div className="bg-gray-100/80 p-4 rounded-lg text-sm">
+                            <p><strong>SVHC Status:</strong> {compliance.svhc}</p>
+                            <p><strong>Certifications:</strong></p>
+                            <ul className="list-disc list-inside ml-4">
+                                {compliance.certifications.map(cert => <li key={cert}>{cert}</li>)}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- REUSABLE UI COMPONENTS ---
+        function CommentForm({ campaignId, onSubmit }) {
+            const [comment, setComment] = useState('');
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if(comment.trim()) {
+                    onSubmit(campaignId, comment);
+                    setComment('');
+                }
+            }
+            return (
+                <form onSubmit={handleSubmit} className="mt-4">
+                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Add a comment..."></textarea>
+                    <button type="submit" className="mt-2 px-4 py-2 bg-gray-800 text-white font-semibold rounded-lg text-sm hover:bg-black transition-colors">Post Comment</button>
+                </form>
+            );
+        };
+
+        function ReviewForm({ campaignId, onSubmit }) {
+            const [rating, setRating] = useState(5);
+            const [comment, setComment] = useState('');
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if(comment.trim()) {
+                    onSubmit(campaignId, { rating, comment });
+                    setComment('');
+                    setRating(5);
+                }
+            }
+            return (
+                <form onSubmit={handleSubmit} className="mt-6 pt-4 border-t border-gray-200">
+                    <h5 className="font-bold mb-2">Write a Review</h5>
+                    <div className="flex items-center mb-2">
+                        {[...Array(5)].map((_, i) => <button type="button" key={i} onClick={() => setRating(i+1)}><StarIcon className={`w-6 h-6 transition-colors ${i < rating ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-400'}`} isFilled={i < rating} /></button>)}
+                    </div>
+                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Share your thoughts on the fit and quality..."></textarea>
+                    <button type="submit" className="mt-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg text-sm hover:bg-blue-700 transition-colors">Submit Review</button>
+                </form>
+            );
+        };
+
+        function CampaignCard({ campaign, onSelect, onLike, isLiked }) {
+            const renderCardContent = () => {
+                switch (campaign.stage) {
+                case 'DESIGN':
+                    const likeProgress = (campaign.likes / campaign.targetLikes) * 100;
+                    return (
+                    <div className="p-4">
+                        <p className="text-sm text-gray-800">{campaign.designer}</p>
+                        <h3 className="font-bold text-lg truncate text-gray-900">{campaign.name}</h3>
+                        <div className="mt-4">
+                        <div className="w-full bg-gray-200/70 rounded-full h-2">
+                            <div className="bg-pink-500 h-2 rounded-full" style={{ width: `${likeProgress}%` }}></div>
+                        </div>
+                        <div className="flex justify-between items-center text-sm text-gray-700 mt-2">
+                            <span>{campaign.likes} / {campaign.targetLikes} likes</span>
+                            <button onClick={(e) => { e.stopPropagation(); onLike(campaign.id); }} className={`flex items-center space-x-1 font-semibold transition-colors ${isLiked ? 'text-pink-600' : 'text-gray-500'}`}>
+                            <HeartIcon className="w-4 h-4" isFilled={isLiked} />
+                            <span>{isLiked ? 'Liked' : 'Like'}</span>
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                    );
+                case 'SAMPLING':
+                    return (
+                    <div className="p-4">
+                        <p className="text-sm text-gray-800">{campaign.designer}</p>
+                        <h3 className="font-bold text-lg truncate text-gray-900">{campaign.name}</h3>
+                        <div className="mt-4 bg-cyan-50/80 text-cyan-800 p-3 rounded-lg text-center">
+                        <p className="font-semibold">Sample in Progress</p>
+                        <p className="text-sm">Pre-orders coming soon</p>
+                        </div>
+                    </div>
+                    );
+                case 'PRE_ORDER':
+                    const { fundingType, sizes, overallMoq, daysLeft } = campaign.preOrderDetails;
+                    
+                    const CardStatus = () => {
+                        if (fundingType === 'COMBINED') {
+                            const totalFunded = Object.values(sizes).reduce((acc, size) => acc + size.funded, 0);
+                            const fundProgress = overallMoq > 0 ? (totalFunded / overallMoq) * 100 : 0;
+                            return (
+                                <>
+                                    <div className="w-full bg-gray-200/70 rounded-full h-2">
+                                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${fundProgress}%` }}></div>
+                                    </div>
+                                    <div className="flex justify-between text-sm text-gray-700 mt-2">
+                                        <span>{Math.floor(fundProgress)}% Funded</span>
+                                        <span>{daysLeft} days left</span>
+                                    </div>
+                                </>
+                            );
+                        } else {
+                            const fundedSizes = Object.values(sizes).filter(s => s.funded >= s.moq).length;
+                            const totalSizes = Object.keys(sizes).length;
+                            return (
+                                <>
+                                    <div className="w-full bg-gray-200/70 rounded-full h-2">
+                                         <div className="bg-green-600 h-2 rounded-full" style={{ width: `${(fundedSizes / totalSizes) * 100}%` }}></div>
+                                    </div>
+                                    <div className="flex justify-between text-sm text-gray-700 mt-2">
+                                        <span className="font-medium">{fundedSizes} of {totalSizes} sizes funded</span>
+                                        <span>{daysLeft} days left</span>
+                                    </div>
+                                </>
+                            );
+                        }
+                    };
+
+                    return (
+                        <div className="p-4">
+                            <div className="flex justify-between items-start">
+                                <p className="text-sm text-gray-800">{campaign.designer}</p>
+                                <span className="font-bold text-lg text-gray-900">€{campaign.price}</span>
+                            </div>
+                            <h3 className="font-bold text-lg truncate -mt-1 text-gray-900">{campaign.name}</h3>
+                            <div className="mt-4">
+                                <CardStatus />
+                            </div>
+                        </div>
+                    );
+                case 'CONFIRMED':
+                     return (
+                        <div className="p-4">
+                            <p className="text-sm text-gray-800">{campaign.designer}</p>
+                            <h3 className="font-bold text-lg truncate text-gray-900">{campaign.name}</h3>
+                            <div className="mt-4 bg-green-50/80 text-green-800 p-3 rounded-lg text-center">
+                                <p className="font-semibold">Fully Funded!</p>
+                                <p className="text-sm">Production starting soon</p>
+                            </div>
+                        </div>
+                    );
+                default:
+                    return null;
+                }
+            };
+
+            return (
+                <div onClick={() => onSelect(campaign)} className="bg-white/40 backdrop-blur-lg border border-white/50 rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">
+                <div className="h-[28rem] sm:h-80 relative">
+                    <img src={campaign.heroImage} alt={campaign.name} className="w-full h-full object-cover" />
+                    <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm text-xs font-bold px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-sm">
+                    <span className={
+                        campaign.stage === 'DESIGN' ? 'text-pink-600' :
+                        campaign.stage === 'SAMPLING' ? 'text-cyan-600' :
+                        campaign.stage === 'CONFIRMED' ? 'text-green-600' :
+                        'text-blue-600'
+                    }>{campaign.stage.replace('_', ' ')}</span>
+                    
+                    {campaign.stage === 'DESIGN' && ( <> <ArrowRightIcon className="w-4 h-4 text-gray-400" /> <span className="text-gray-500">SAMPLING</span> </> )}
+                    {campaign.stage === 'SAMPLING' && ( <> <ArrowRightIcon className="w-4 h-4 text-gray-400" /> <span className="text-gray-500">PRE-ORDER</span> </> )}
+                    </div>
+                    {campaign.stage === 'PRE_ORDER' && (
+                        <div className="absolute bottom-3 left-3 bg-white/80 backdrop-blur-sm text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                            Round {campaign.productionRound}
+                        </div>
+                    )}
+                </div>
+                {renderCardContent()}
+                </div>
+            );
+        };
+        
+        // --- SKELETON LOADERS ---
+        const CampaignCardSkeleton = () => (
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
+                <div className="h-80 bg-gray-300"></div>
+                <div className="p-4">
+                    <div className="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                    <div className="h-6 bg-gray-300 rounded w-3/4 mb-4"></div>
+                    <div className="h-2 bg-gray-300 rounded w-full mb-2"></div>
+                    <div className="flex justify-between">
+                        <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                        <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const HomeScreenSkeleton = () => (
+            <div className="p-4 sm:p-6 lg:p-8">
+                <header className="mb-8 text-center">
+                    <div className="h-10 bg-gray-300 rounded w-1/2 mx-auto animate-pulse"></div>
+                    <div className="h-6 bg-gray-300 rounded w-1/3 mx-auto mt-4 animate-pulse"></div>
+                </header>
+                <div className="mb-8">
+                    <div className="flex justify-center flex-wrap gap-2">
+                        {[...Array(5)].map((_, i) => <div key={i} className="h-10 bg-gray-300 rounded-full w-24 animate-pulse"></div>)}
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {[...Array(8)].map((_, i) => <CampaignCardSkeleton key={i} />)}
+                </div>
+            </div>
+        );
+        
+        // --- NAVIGATION ---
+        function TopNavBar({ onNavigate, currentScreen, dashboardView }) {
+            return (
+                <header className="fixed top-0 left-0 right-0 z-40 p-2 sm:p-4">
+                    <div className="max-w-7xl mx-auto flex justify-center">
+                        {/* Desktop Nav */}
+                        <nav className="hidden sm:flex items-center gap-2 bg-gray-900/75 backdrop-blur-lg text-white rounded-full p-2 shadow-lg">
+                            <button onClick={() => onNavigate('Home')} className="text-lg font-bold px-4 py-1">MePont</button>
+                            <div className="h-6 w-px bg-gray-600"></div>
+                            <button onClick={() => onNavigate('Home')} className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${currentScreen === 'Home' ? 'bg-gray-700' : 'hover:bg-gray-800'}`}>Drops</button>
+                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${currentScreen === 'Dashboard' && dashboardView === 'My MePont' ? 'bg-gray-700' : 'hover:bg-gray-800'}`}>My Pledges</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${currentScreen === 'Dashboard' && dashboardView === 'Waiting List' ? 'bg-gray-700' : 'hover:bg-gray-800'}`}>Waiting List</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${currentScreen === 'Dashboard' && dashboardView === 'Liked' ? 'bg-gray-700' : 'hover:bg-gray-800'}`}>Liked</button>
+                        </nav>
+
+                        {/* Mobile Nav */}
+                        <nav className="sm:hidden flex justify-between items-center w-full max-w-sm bg-gray-900/75 backdrop-blur-lg text-white rounded-full p-2 shadow-lg">
+                            <button onClick={() => onNavigate('Home')} className={`p-2 rounded-full ${currentScreen === 'Home' ? 'bg-gray-700' : ''}`}>
+                                <HomeIcon className="w-6 h-6" />
+                            </button>
+                            <button onClick={() => onNavigate('Dashboard', 'Waiting List')} className={`p-2 rounded-full ${currentScreen === 'Dashboard' && dashboardView === 'Waiting List' ? 'bg-gray-700' : ''}`}>
+                                <ListIcon className="w-6 h-6" />
+                            </button>
+                            <button onClick={() => onNavigate('Home')} className="text-xl font-bold">MePont</button>
+                            <button onClick={() => onNavigate('Dashboard', 'Liked')} className={`p-2 rounded-full ${currentScreen === 'Dashboard' && dashboardView === 'Liked' ? 'bg-gray-700' : ''}`}>
+                                <HeartIcon className="w-6 h-6" />
+                            </button>
+                            <button onClick={() => onNavigate('Dashboard', 'My MePont')} className={`p-2 rounded-full ${currentScreen === 'Dashboard' && dashboardView === 'My MePont' ? 'bg-gray-700' : ''}`}>
+                                <UserIcon className="w-6 h-6" />
+                            </button>
+                        </nav>
+                    </div>
+                </header>
+            );
+        }
+
+        const DetailIsland = ({ sectionRefs, containerRef, notification, onClose, hasBlueprint, onNavClick }) => {
+            const [activeSection, setActiveSection] = useState('details');
+            const islandRef = useRef(null);
+
+            const SECTIONS = [
+                { id: 'details', icon: InfoIcon, label: 'Details' },
+                { id: 'care', icon: ShirtIcon, label: 'Care' },
+                { id: 'price', icon: TagIcon, label: 'Price' },
+                { id: 'size', icon: RulerIcon, label: 'Size' },
+                ...(hasBlueprint ? [{ id: 'blueprint', icon: ShieldCheckIcon, label: 'Blueprint' }] : []),
+                { id: 'community', icon: UsersIcon, label: 'Community' },
+            ];
+
+            useEffect(() => {
+                const scrollContainer = containerRef.current;
+                if (!scrollContainer) return;
+
+                const observer = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                setActiveSection(entry.target.id);
+                            }
+                        });
+                    },
+                    { root: scrollContainer, rootMargin: "-40% 0px -60% 0px", threshold: 0 }
+                );
+
+                const refs = sectionRefs;
+                Object.values(refs).forEach(ref => {
+                    if (ref.current) observer.observe(ref.current);
+                });
+
+                return () => {
+                    Object.values(refs).forEach(ref => {
+                        if (ref.current) observer.unobserve(ref.current);
+                    });
+                };
+            }, [sectionRefs, containerRef]);
+
+            const handleNavClick = (id) => {
+                onNavClick(id);
+            };
+
+            return (
+                <div 
+                    ref={islandRef}
+                    key={notification.key}
+                    className={`
+                        relative flex items-center w-full
+                        bg-white/80 backdrop-blur-xl rounded-xl shadow-lg overflow-hidden p-2
+                        ${notification.message ? 'island-notification-bg-animate' : ''}
+                    `}
+                >
+                    {/* Default view: Nav Icons and Close button */}
+                    <div className={`flex items-center justify-between w-full transition-opacity duration-300 ${notification.message ? 'opacity-0' : 'opacity-100'}`}>
+                        <div className="flex items-center gap-x-1">
+                            {SECTIONS.map(({ id, icon: Icon, label }) => (
+                                <button 
+                                    key={id} 
+                                    onClick={() => handleNavClick(id)}
+                                    className={`
+                                        p-2 rounded-full transition-colors duration-200
+                                        ${activeSection === id ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-800'}
+                                    `}
+                                    aria-label={label}
+                                >
+                                    <Icon className="w-5 h-5" />
+                                </button>
+                            ))}
+                        </div>
+                        <button onClick={onClose} className="p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-800 rounded-full transition-colors">
+                           <XIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    {/* Notification view */}
+                    {notification.message && (
+                        <div className="absolute inset-0 flex items-center justify-center px-4">
+                            <p className="text-white font-semibold whitespace-nowrap island-notification-text-animate">
+                                {notification.message}
+                            </p>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- RENDER APP ---
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>

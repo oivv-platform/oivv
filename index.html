@@ -1170,40 +1170,20 @@
             const [currentIndex, setCurrentIndex] = useState(startIndex);
             const [show, setShow] = useState(false);
             const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
+            
+            // Refs for gesture state
             const isDragging = useRef(false);
             const lastPosition = useRef({ x: 0, y: 0 });
+            const initialPinchDistance = useRef(0);
+
             const imageRef = useRef(null);
-            const containerRef = useRef(null); // Ref for the container to attach wheel event
+            const containerRef = useRef(null);
 
             const changeMedia = (direction) => {
                 setTransform({ scale: 1, x: 0, y: 0 });
                 setCurrentIndex(prev => (prev + direction + mediaItems.length) % mediaItems.length);
             };
-            
-            const handleMouseDown = (e) => {
-                if (transform.scale > 1) {
-                    isDragging.current = true;
-                    e.currentTarget.style.cursor = 'grabbing';
-                    lastPosition.current = { x: e.clientX, y: e.clientY };
-                }
-            };
 
-            const handleMouseUp = (e) => {
-                isDragging.current = false;
-                 if (e.currentTarget) {
-                    e.currentTarget.style.cursor = 'grab';
-                }
-            };
-
-            const handleMouseMove = (e) => {
-                if (isDragging.current) {
-                    const dx = e.clientX - lastPosition.current.x;
-                    const dy = e.clientY - lastPosition.current.y;
-                    lastPosition.current = { x: e.clientX, y: e.clientY };
-                    setTransform(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
-                }
-            };
-            
             const handleDoubleClick = () => {
                  setTransform({ scale: 1, x: 0, y: 0 });
             }
@@ -1217,45 +1197,107 @@
                 };
                 window.addEventListener('keydown', handleKeyDown);
 
-                // Manually add wheel event listener with passive: false
                 const container = containerRef.current;
+                if (!container) return;
+
+                // --- MOUSE EVENTS ---
+                const handleMouseDown = (e) => {
+                    if (transform.scale > 1) {
+                        isDragging.current = true;
+                        e.currentTarget.style.cursor = 'grabbing';
+                        lastPosition.current = { x: e.clientX, y: e.clientY };
+                    }
+                };
+                const handleMouseUp = (e) => {
+                    isDragging.current = false;
+                    if (e.currentTarget) e.currentTarget.style.cursor = 'grab';
+                };
+                const handleMouseMove = (e) => {
+                    if (isDragging.current) {
+                        const dx = e.clientX - lastPosition.current.x;
+                        const dy = e.clientY - lastPosition.current.y;
+                        lastPosition.current = { x: e.clientX, y: e.clientY };
+                        setTransform(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
+                    }
+                };
                 const handleWheel = (e) => {
                     if (mediaItems[currentIndex].type !== 'image') return;
-                    e.preventDefault(); // This is the crucial part
-                    
-                    const scaleAmount = 0.1;
+                    e.preventDefault();
                     const newScale = e.deltaY > 0 ? transform.scale / 1.1 : transform.scale * 1.1;
                     const clampedScale = Math.min(Math.max(newScale, 1), 5);
-                    
-                    if (imageRef.current) {
-                        const rect = imageRef.current.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
+                    if (clampedScale === 1) {
+                        setTransform({ scale: 1, x: 0, y: 0 });
+                    } else {
+                        setTransform(prev => ({ ...prev, scale: clampedScale }));
+                    }
+                };
+                
+                // --- TOUCH EVENTS ---
+                const getDistance = (touches) => {
+                    return Math.sqrt(Math.pow(touches[0].clientX - touches[1].clientX, 2) + Math.pow(touches[0].clientY - touches[1].clientY, 2));
+                };
 
-                        const newX = transform.x + (x / transform.scale - x / clampedScale) * clampedScale;
-                        const newY = transform.y + (y / transform.scale - y / clampedScale) * clampedScale;
-                        
-                        // If scale is 1, reset position.
-                        if (clampedScale === 1) {
-                            setTransform({ scale: 1, x: 0, y: 0 });
-                        } else {
-                            setTransform({ scale: clampedScale, x: newX, y: newY });
-                        }
+                const handleTouchStart = (e) => {
+                    if (e.touches.length === 2) { // Pinch
+                        e.preventDefault();
+                        initialPinchDistance.current = getDistance(e.touches);
+                    } else if (e.touches.length === 1 && transform.scale > 1) { // Pan
+                        e.preventDefault();
+                        isDragging.current = true;
+                        lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
                     }
                 };
 
-                if (container) {
-                    container.addEventListener('wheel', handleWheel, { passive: false });
-                }
+                const handleTouchMove = (e) => {
+                    if (e.touches.length === 2) { // Pinch
+                        e.preventDefault();
+                        const newDist = getDistance(e.touches);
+                        const scaleChange = newDist / initialPinchDistance.current;
+                        setTransform(prev => {
+                            const newScale = prev.scale * scaleChange;
+                            const clampedScale = Math.min(Math.max(newScale, 1), 5);
+                            return {...prev, scale: clampedScale};
+                        });
+                    } else if (e.touches.length === 1 && isDragging.current) { // Pan
+                        e.preventDefault();
+                        const dx = e.touches[0].clientX - lastPosition.current.x;
+                        const dy = e.touches[0].clientY - lastPosition.current.y;
+                        lastPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                        setTransform(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
+                    }
+                };
+
+                const handleTouchEnd = (e) => {
+                    isDragging.current = false;
+                    initialPinchDistance.current = 0;
+                     if (transform.scale <= 1) {
+                        setTransform({ scale: 1, x: 0, y: 0 });
+                    }
+                };
+
+                // Attach all event listeners
+                container.addEventListener('mousedown', handleMouseDown);
+                container.addEventListener('mouseup', handleMouseUp);
+                container.addEventListener('mousemove', handleMouseMove);
+                container.addEventListener('mouseleave', handleMouseUp);
+                container.addEventListener('wheel', handleWheel, { passive: false });
+                container.addEventListener('touchstart', handleTouchStart, { passive: false });
+                container.addEventListener('touchmove', handleTouchMove, { passive: false });
+                container.addEventListener('touchend', handleTouchEnd);
+
 
                 return () => {
-                    clearTimeout(timer);
                     window.removeEventListener('keydown', handleKeyDown);
-                    if (container) {
-                        container.removeEventListener('wheel', handleWheel);
-                    }
+                    container.removeEventListener('mousedown', handleMouseDown);
+                    container.removeEventListener('mouseup', handleMouseUp);
+                    container.removeEventListener('mousemove', handleMouseMove);
+                    container.removeEventListener('mouseleave', handleMouseUp);
+                    container.removeEventListener('wheel', handleWheel);
+                    container.removeEventListener('touchstart', handleTouchStart);
+                    container.removeEventListener('touchmove', handleTouchMove);
+                    container.removeEventListener('touchend', handleTouchEnd);
                 };
-            }, [currentIndex, transform, mediaItems]); // Re-attach listener if dependencies change
+            }, [currentIndex, transform, mediaItems]);
 
             const handleClose = () => {
                 setShow(false);
@@ -1271,6 +1313,7 @@
                         <div
                             ref={containerRef}
                             className="absolute inset-0 flex items-center justify-center overflow-hidden"
+                            style={{ touchAction: 'none' }} // Important for preventing default browser gestures
                         >
                             {mediaItems[currentIndex].type === 'video' ? (
                                 <video key={mediaItems[currentIndex].url} src={mediaItems[currentIndex].url} controls autoPlay className="max-w-full max-h-full object-contain rounded-lg"></video>
@@ -1281,10 +1324,6 @@
                                     alt="Full screen product view" 
                                     className={`max-w-full max-h-full object-contain rounded-lg transition-transform duration-200 ${transform.scale > 1 ? 'cursor-grab' : ''}`}
                                     style={{ transform: `scale(${transform.scale}) translate(${transform.x}px, ${transform.y}px)` }}
-                                    onMouseDown={handleMouseDown}
-                                    onMouseUp={handleMouseUp}
-                                    onMouseMove={handleMouseMove}
-                                    onMouseLeave={handleMouseUp}
                                     onDoubleClick={handleDoubleClick}
                                 />
                             )}

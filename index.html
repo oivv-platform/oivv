@@ -1200,7 +1200,6 @@
             const handleMouseDown = (e) => {
                 if (transform.scale > 1) {
                     isDragging.current = true;
-                    // Use the target for the cursor style to avoid changing the whole container's cursor
                     e.currentTarget.style.cursor = 'grabbing';
                     lastPosition.current = { x: e.clientX, y: e.clientY };
                 }
@@ -1208,7 +1207,9 @@
 
             const handleMouseUp = (e) => {
                 isDragging.current = false;
-                e.currentTarget.style.cursor = 'grab';
+                 if (e.currentTarget) {
+                    e.currentTarget.style.cursor = 'grab';
+                }
             };
 
             const handleMouseMove = (e) => {
@@ -1245,20 +1246,13 @@
 
             return (
                 <div className={`fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${show ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    {/* Main modal container for entry animation and click handling */}
                     <div 
                         className={`w-full h-full transform transition-all duration-300 ease-in-out relative ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} 
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* The content area for zoom/pan. It clips overflow. */}
                         <div
                             className="absolute inset-0 flex items-center justify-center overflow-hidden"
-                            onWheel={handleWheel}
-                            onMouseDown={handleMouseDown}
-                            onMouseUp={handleMouseUp}
-                            onMouseMove={handleMouseMove}
-                            onMouseLeave={handleMouseUp}
-                            onDoubleClick={handleDoubleClick}
+                            onWheel={mediaItems[currentIndex].type === 'image' ? handleWheel : null}
                         >
                             {mediaItems[currentIndex].type === 'video' ? (
                                 <video key={mediaItems[currentIndex].url} src={mediaItems[currentIndex].url} controls autoPlay className="max-w-full max-h-full object-contain rounded-lg"></video>
@@ -1269,16 +1263,17 @@
                                     alt="Full screen product view" 
                                     className={`max-w-full max-h-full object-contain rounded-lg transition-transform duration-200 ${transform.scale > 1 ? 'cursor-grab' : ''}`}
                                     style={{ transform: `scale(${transform.scale}) translate(${transform.x}px, ${transform.y}px)` }}
+                                    onMouseDown={handleMouseDown}
+                                    onMouseUp={handleMouseUp}
+                                    onMouseMove={handleMouseMove}
+                                    onMouseLeave={handleMouseUp}
+                                    onDoubleClick={handleDoubleClick}
                                 />
                             )}
                         </div>
-
-                        {/* UI Controls are siblings to the content area, so they are not affected by its overflow or transform */}
                         <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/30 transition-colors z-20"><ChevronLeftIcon className="w-8 h-8" /></button>
                         <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/30 transition-colors z-20"><ChevronRightIcon className="w-8 h-8" /></button>
                     </div>
-                    
-                    {/* Close button is outside the scaling container to ensure it's always on top and clickable */}
                     <button onClick={handleClose} className="absolute top-4 right-4 text-white bg-black/30 rounded-full p-2 hover:bg-black/50 z-[70]">
                         <XIcon className="w-6 h-6" />
                     </button>

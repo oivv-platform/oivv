@@ -694,7 +694,7 @@
                     <div 
                         className={`
                             relative w-full h-full max-w-7xl max-h-full sm:max-h-[90vh] 
-                            bg-white lg:bg-white/80 lg:backdrop-blur-xl shadow-2xl 
+                            bg-white/80 backdrop-blur-xl shadow-2xl 
                             transform transition-all duration-300 ease-in-out 
                             flex flex-col sm:rounded-2xl sm:overflow-hidden 
                             ${show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}
@@ -779,102 +779,28 @@
             }
         };
 
-        const CampaignDetailDesktop = (props) => {
-            const { campaign, onOpenPledgeModal, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList, islandNotification, onClose } = props;
+        function CampaignDetailContent({ campaign, onOpenPledgeModal, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList, islandNotification, onClose }) {
             const [selectedSize, setSelectedSize] = useState(campaign.sizeGuide.sizes && Object.keys(campaign.sizeGuide.sizes).length > 0 ? Object.keys(campaign.sizeGuide.sizes)[0] : null);
             const [showStatusInFooter, setShowStatusInFooter] = useState(false);
-            const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
-            const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-            const contentRef = useRef(null);
-            const sectionRefs = { details: useRef(null), care: useRef(null), price: useRef(null), size: useRef(null), blueprint: useRef(null), community: useRef(null) };
-
-            const changeMedia = (direction) => {
-                setCurrentMediaIndex(prev => (prev + direction + mediaItems.length) % mediaItems.length);
-            };
+            const [isPanelOpen, setIsPanelOpen] = useState(false);
             
-            const MainActions = () => {
-                const baseButtonClass = "font-bold py-3 sm:py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 w-full disabled:opacity-50 disabled:cursor-not-allowed";
-                switch(campaign.stage) {
-                    case 'DESIGN': return ( <button onClick={onLike} className={`${baseButtonClass} ${isLiked ? 'bg-pink-600 text-white hover:bg-pink-700' : 'bg-white text-pink-600 border-2 border-pink-600 hover:bg-pink-50'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
-                    case 'SAMPLING': return ( <button onClick={onAddToWaitingList} className={`${baseButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
-                    case 'PRE_ORDER': return ( <button onClick={onOpenPledgeModal} className={`flex-grow ${baseButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>Select Size & Pledge</button> );
-                    case 'CONFIRMED': return <button disabled className={`${baseButtonClass} bg-green-600 text-white`}> <CheckCircleIcon className="w-6 h-6" /> <span>Fully Funded!</span> </button>;
-                    default: return null;
-                }
-            };
-
-            return (
-                <div className="grid grid-cols-5 w-full h-full">
-                    {/* Media Column (Left) */}
-                    <div className="col-span-3 h-full p-4 flex flex-col gap-4 overflow-hidden bg-gray-50 group">
-                        <div className="flex-1 relative rounded-lg bg-gray-100 min-h-0">
-                            <button className="w-full h-full" onClick={() => onShowMedia(currentMediaIndex)}>
-                                {mediaItems[currentMediaIndex].type === 'video' ? (
-                                    <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-contain"></video>
-                                ) : (
-                                    <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-contain" />
-                                )}
-                            </button>
-                            <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors opacity-0 group-hover:opacity-100"><ChevronLeftIcon className="w-6 h-6" /></button>
-                            <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors opacity-0 group-hover:opacity-100"><ChevronRightIcon className="w-6 h-6" /></button>
-                            {campaign.has3D && (
-                                <button onClick={(e) => { e.stopPropagation(); onShow3D(); }} className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors">
-                                    <CubeIcon className="w-5 h-5" /><span>3D</span>
-                                </button>
-                            )}
-                        </div>
-                        <div className="flex-shrink-0 flex justify-center items-center space-x-2 py-2">
-                            {mediaItems.map((_, index) => (
-                                <button key={index} onClick={() => setCurrentMediaIndex(index)} className="p-1">
-                                    <div className={`w-2 h-2 rounded-full transition-colors ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300 hover:bg-gray-400'}`}></div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Details Column (Right) */}
-                    <div className="col-span-2 h-full flex flex-col bg-white">
-                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-b border-gray-200 z-30">
-                            <DetailIsland sectionRefs={sectionRefs} containerRef={contentRef} notification={islandNotification} onClose={onClose} hasBlueprint={!!campaign.productionBlueprint} />
-                        </div>
-                        <div ref={contentRef} className="flex-1 relative min-h-0 overflow-y-auto scrollbar-hide">
-                            <div className="p-5 lg:p-6">
-                                <p className="text-sm text-gray-800">{campaign.designer}</p>
-                                <h2 className="text-xl font-bold text-gray-900">{campaign.name}</h2>
-                            </div>
-                            <div className="px-5 lg:px-6 pb-24 space-y-6">
-                                <ContentSection id="details" title="Details" ref={sectionRefs.details} campaign={campaign}/>
-                                <ContentSection id="care" title="Care & Composition" ref={sectionRefs.care} campaign={campaign}/>
-                                <ContentSection id="price" title="Price Breakdown" ref={sectionRefs.price} campaign={campaign}/>
-                                <ContentSection id="size" title="Size & Fit" ref={sectionRefs.size} campaign={campaign} selectedSize={selectedSize} setSelectedSize={setSelectedSize}/>
-                                {campaign.productionBlueprint && <ContentSection id="blueprint" title="Production Blueprint" ref={sectionRefs.blueprint} campaign={campaign} onShowBlueprint={onShowBlueprint}/>}
-                                <ContentSection id="community" title="Community" ref={sectionRefs.community} campaign={campaign} hasPurchased={hasPurchased} onReviewSubmit={onReviewSubmit} onCommentSubmit={onCommentSubmit}/>
-                            </div>
-                        </div>
-                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-200 z-30">
-                            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showStatusInFooter ? 'max-h-96 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}><FooterStatusDisplay campaign={campaign} /></div>
-                            <div className="flex items-center gap-3">
-                                <MainActions />
-                                {['DESIGN', 'PRE_ORDER', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) && (<button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-3 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`} aria-label="Toggle campaign status"><BarChartIcon className="w-6 h-6" /></button>)}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )
-        }
-        
-        const CampaignDetailMobile = (props) => {
-            const { campaign, onOpenPledgeModal, onLike, isLiked, hasPurchased, onCommentSubmit, onReviewSubmit, onShow3D, onShowMedia, onShowBlueprint, onAddToWaitingList, isOnWaitingList, islandNotification, onClose } = props;
-            const [selectedSize, setSelectedSize] = useState(campaign.sizeGuide.sizes && Object.keys(campaign.sizeGuide.sizes).length > 0 ? Object.keys(campaign.sizeGuide.sizes)[0] : null);
-            const [showStatusInFooter, setShowStatusInFooter] = useState(false);
             const mediaItems = [ ...[...new Set([campaign.heroImage, ...campaign.images])].map(img => ({ type: 'image', url: img, thumbnail: img })), ...(campaign.video ? [{ type: 'video', url: campaign.video.url, thumbnail: campaign.video.thumbnail }] : []) ];
             const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
             const [isFading, setIsFading] = useState(false);
-            const touchStartX = useRef(0);
-            const touchEndX = useRef(0);
-            const hasSwiped = useRef(false);
+            
+            const touchStartY = useRef(0);
+            const touchEndY = useRef(0);
+            const panelRef = useRef(null);
+            
             const contentRef = useRef(null);
-            const sectionRefs = { details: useRef(null), care: useRef(null), price: useRef(null), size: useRef(null), blueprint: useRef(null), community: useRef(null) };
+            const sectionRefs = {
+                details: useRef(null),
+                care: useRef(null),
+                price: useRef(null),
+                size: useRef(null),
+                blueprint: useRef(null),
+                community: useRef(null),
+            };
 
             const changeMedia = (direction) => {
                 const newIndex = (currentMediaIndex + direction + mediaItems.length) % mediaItems.length;
@@ -887,248 +813,352 @@
                 }
             };
             
-            const handleTouchStart = (e) => { touchStartX.current = e.targetTouches[0].clientX; hasSwiped.current = false; };
-            const handleTouchMove = (e) => { touchEndX.current = e.targetTouches[0].clientX; if (Math.abs(touchStartX.current - touchEndX.current) > 10) { hasSwiped.current = true; } };
-            const handleTouchEnd = () => { if (!hasSwiped.current) return; const swipeDistance = touchStartX.current - touchEndX.current; if (Math.abs(swipeDistance) > 50) { const direction = swipeDistance > 0 ? 1 : -1; changeMedia(direction); } };
-            const handleMediaClick = (index) => { if (!hasSwiped.current) { onShowMedia(index); } };
+            const handleTouchStart = (e) => {
+                touchStartY.current = e.targetTouches[0].clientY;
+            };
+            
+            const handleTouchMove = (e) => {
+                touchEndY.current = e.targetTouches[0].clientY;
+            };
+            
+            const handleTouchEnd = () => {
+                const swipeDistance = touchStartY.current - touchEndY.current;
+                if (swipeDistance > 50) { // Swipe up
+                    setIsPanelOpen(true);
+                }
+                if (swipeDistance < -50 && panelRef.current?.scrollTop === 0) { // Swipe down from top of panel
+                    setIsPanelOpen(false);
+                }
+            };
+
+            const handlePanelNav = (id) => {
+                setIsPanelOpen(true);
+                setTimeout(() => {
+                    sectionRefs[id].current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300); // Wait for panel animation
+            };
 
             const MainActions = () => {
                 const baseButtonClass = "font-bold py-3 sm:py-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 w-full disabled:opacity-50 disabled:cursor-not-allowed";
                 switch(campaign.stage) {
                     case 'DESIGN': return ( <button onClick={onLike} className={`${baseButtonClass} ${isLiked ? 'bg-pink-600 text-white hover:bg-pink-700' : 'bg-white text-pink-600 border-2 border-pink-600 hover:bg-pink-50'}`}> <HeartIcon className="w-6 h-6" isFilled={isLiked} /> <span>{isLiked ? 'Liked' : 'Like to Fund Sampling'}</span> </button> );
                     case 'SAMPLING': return ( <button onClick={onAddToWaitingList} className={`${baseButtonClass} ${isOnWaitingList ? 'bg-gray-400 text-white' : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}> {isOnWaitingList ? 'On Waiting List' : 'Notify Me When Live'} </button> );
-                    case 'PRE_ORDER': return ( <button onClick={onOpenPledgeModal} className={`flex-grow ${baseButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>Select Size & Pledge</button> );
-                    case 'CONFIRMED': return <button disabled className={`${baseButtonClass} bg-green-600 text-white`}> <CheckCircleIcon className="w-6 h-6" /> <span>Fully Funded!</span> </button>;
+                    case 'PRE_ORDER': 
+                        return (
+                            <div className="flex items-stretch gap-3 w-full">
+                                <button onClick={onOpenPledgeModal} className={`flex-grow ${baseButtonClass} bg-blue-600 text-white hover:bg-blue-700`}>
+                                    Select Size & Pledge
+                                </button>
+                            </div>
+                        );
+                    case 'CONFIRMED':
+                        return <button disabled className={`${baseButtonClass} bg-green-600 text-white`}> <CheckCircleIcon className="w-6 h-6" /> <span>Fully Funded!</span> </button>;
                     default: return null;
                 }
-            };
-            
-            return (
-                <div className="w-full h-full flex flex-col relative">
-                    {/* Background Gallery */}
-                    <div className="absolute inset-0 bottom-[92px] z-0">
-                         <div 
-                            className={`relative w-full h-full bg-gray-100 transition-opacity duration-150 ${isFading ? 'opacity-0' : 'opacity-100'}`}
-                            onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
-                        >
-                            <button className="w-full h-full" onClick={() => handleMediaClick(currentMediaIndex)}>
-                            {mediaItems[currentMediaIndex].type === 'video' ? (
-                                <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} playsInline loop muted autoPlay className="w-full h-full object-cover object-bottom bg-black"></video>
-                            ) : (
-                                <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-cover object-bottom" />
-                            )}
+            }
+
+            const AllContentSections = () => (
+                <>
+                    <ContentSection id="details" title="Details" ref={sectionRefs.details}>
+                        <p className="text-gray-700 mb-6">{campaign.details}</p>
+                        {campaign.manufacturer?.country !== 'TBD' && ["Portugal", "Spain", "Italy", "France"].includes(campaign.manufacturer.country) && (
+                            <div className="mb-6 border border-blue-200 p-4 rounded-lg flex items-center gap-4">
+                                <EUFlagIcon />
+                                <div>
+                                    <h4 className="font-semibold text-blue-900">Proudly Made in the EU</h4>
+                                    <p className="text-sm text-blue-800">This product is manufactured in {campaign.manufacturer.country}, supporting local craftsmanship and ensuring high labor standards.</p>
+                                </div>
+                            </div>
+                        )}
+                        {campaign.designerUpdates && campaign.designerUpdates.length > 0 && (
+                            <div className="mb-6">
+                                <h3 className="font-semibold text-md mb-3 text-gray-800">Designer's Updates</h3>
+                                <div className="space-y-4">
+                                    {campaign.designerUpdates.map((update, index) => (
+                                        <div key={index} className="relative pl-6 border-l-2 border-gray-200">
+                                            <div className="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-gray-300 rounded-full"></div>
+                                            <p className="text-xs text-gray-500">{update.date}</p>
+                                            <p className="font-semibold text-gray-800">{update.title}</p>
+                                            <p className="text-sm text-gray-600">{update.text}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </ContentSection>
+                    <ContentSection id="care" title="Care & Composition" ref={sectionRefs.care}>
+                        <div className="space-y-2 text-sm">
+                            <h5 className="font-bold mb-2 text-gray-800">Composition</h5>
+                            <p className="text-gray-700">{campaign.garmentCare.composition}</p>
+                        </div>
+                        <div className="mt-4 space-y-2 text-sm">
+                            <h5 className="font-bold mb-2 text-gray-800">Care Instructions</h5>
+                            <ul className="list-disc list-inside text-gray-700">
+                                {campaign.garmentCare.instructions.map((instruction, index) => <li key={index}>{instruction}</li>)}
+                            </ul>
+                        </div>
+                    </ContentSection>
+                    <ContentSection id="price" title="Price Breakdown" ref={sectionRefs.price}>
+                        <p className="text-gray-700 mb-4 text-sm">We believe in radical transparency. Here's the true cost of making this garment.</p>
+                        <div className="space-y-3 mb-6">
+                            {Object.entries(campaign.priceBreakdown).map(([key, value]) => {
+                                const percentage = (value / campaign.price) * 100;
+                                return (
+                                    <div key={key}>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="capitalize text-gray-600">{key}</span>
+                                            <span className="font-semibold text-gray-900">€{value.toFixed(2)}</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="bg-blue-500 h-2 rounded-full" style={{width: `${percentage}%`}}></div>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                        <div className="border-t border-gray-200 pt-4">
+                            <div className="flex justify-between text-sm mb-2">
+                                <span className="text-gray-600">True Cost</span>
+                                <span className="font-semibold text-gray-900">€{Object.values(campaign.priceBreakdown).reduce((sum, val) => sum + val, 0).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-md font-bold text-gray-900">
+                                <span>Our Price</span>
+                                <span>€{campaign.price.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div className="mt-6 text-sm text-blue-800">
+                            <p><strong>Note:</strong> Final cost, including shipping & duties, will be calculated at checkout.</p>
+                        </div>
+                    </ContentSection>
+                    <ContentSection id="size" title="Size & Fit" ref={sectionRefs.size}>
+                        <p className="text-gray-700 mb-4">{campaign.sizeGuide.fitDetails}</p>
+                        {selectedSize ? (
+                            <>
+                            <div className="flex space-x-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                                {Object.keys(campaign.sizeGuide.sizes).map(size => (
+                                    <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="space-y-2 text-sm">
+                                <h5 className="font-bold mb-2 text-gray-800">Measurements for Size {selectedSize}</h5>
+                                {Object.entries(campaign.sizeGuide.sizes[selectedSize]).map(([key, value]) => (
+                                    <div key={key} className="flex justify-between">
+                                        <span className="text-gray-600">{key}</span>
+                                        <span className="font-semibold text-gray-900">{value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            </>
+                        ) : <p className="text-gray-500 text-sm">Size guide coming soon.</p>}
+                    </ContentSection>
+                    {campaign.productionBlueprint && (
+                        <ContentSection id="blueprint" title="Production Blueprint" ref={sectionRefs.blueprint}>
+                            <div className="flex items-center gap-3 mb-3">
+                                <ShieldCheckIcon className="w-8 h-8 text-blue-600" />
+                                <div>
+                                    <h4 className="font-bold text-md text-gray-800">Verified Traceability</h4>
+                                </div>
+                            </div>
+                            <p className="text-gray-700 mb-4 text-sm">This item has a verified production plan. View the full blueprint for details on the manufacturer, supply chain, and sustainability.</p>
+                            <button onClick={onShowBlueprint} className="w-full bg-gray-800 text-white font-bold py-2 rounded-lg hover:bg-black transition-colors">
+                                View Full Blueprint
                             </button>
-                            <button onClick={() => changeMedia(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronLeftIcon className="w-6 h-6" /></button>
-                            <button onClick={() => changeMedia(1)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronRightIcon className="w-6 h-6" /></button>
-                            {campaign.has3D && (
-                                <button onClick={(e) => { e.stopPropagation(); onShow3D(); }} className="absolute bottom-12 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors"><CubeIcon className="w-5 h-5" /><span>3D</span></button>
-                            )}
-                        </div>
-                        <div className="absolute bottom-2 left-0 right-0 flex justify-center items-center space-x-2">
-                            {mediaItems.map((_, index) => (<div key={index} className={`w-2 h-2 rounded-full transition-colors ${currentMediaIndex === index ? 'bg-white' : 'bg-white/50'}`}></div>))}
-                        </div>
-                    </div>
-                    
-                    {/* Top Nav Island */}
-                    <div className="flex-shrink-0 p-4 z-20">
-                        <DetailIsland sectionRefs={sectionRefs} containerRef={contentRef} notification={islandNotification} onClose={onClose} hasBlueprint={!!campaign.productionBlueprint} />
-                    </div>
-
-                    {/* Scrollable Content */}
-                    <div ref={contentRef} className="flex-1 relative min-h-0 overflow-y-auto scrollbar-hide z-10" style={{scrollBehavior: 'smooth'}}>
-                        <div className="h-[calc(100vh-250px)] pointer-events-none"></div>
-                        <div className="bg-white rounded-t-2xl relative">
-                            <div className="p-5 pt-6">
-                                <p className="text-sm text-gray-800">{campaign.designer}</p>
-                                <h2 className="text-xl font-bold text-gray-900">{campaign.name}</h2>
+                        </ContentSection>
+                    )}
+                    <ContentSection id="community" title="Community" ref={sectionRefs.community}>
+                        <h4 className="font-bold text-md mb-3 text-gray-800">Reviews</h4>
+                        {campaign.reviews.length > 0 ? (
+                            <div className="space-y-4">
+                                {campaign.reviews.map((review, index) => (
+                                    <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                                        <div className="flex items-center mb-1">
+                                            {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-yellow-500" isFilled={i < review.rating} />)}
+                                            <span className="ml-2 font-bold text-gray-800">{review.user}</span>
+                                        </div>
+                                        <p className="text-gray-700">{review.comment}</p>
+                                    </div>
+                                ))}
                             </div>
-                            <div className="px-5 pb-24 space-y-6">
-                                <ContentSection id="details" title="Details" ref={sectionRefs.details} campaign={campaign}/>
-                                <ContentSection id="care" title="Care & Composition" ref={sectionRefs.care} campaign={campaign}/>
-                                <ContentSection id="price" title="Price Breakdown" ref={sectionRefs.price} campaign={campaign}/>
-                                <ContentSection id="size" title="Size & Fit" ref={sectionRefs.size} campaign={campaign} selectedSize={selectedSize} setSelectedSize={setSelectedSize}/>
-                                {campaign.productionBlueprint && <ContentSection id="blueprint" title="Production Blueprint" ref={sectionRefs.blueprint} campaign={campaign} onShowBlueprint={onShowBlueprint}/>}
-                                <ContentSection id="community" title="Community" ref={sectionRefs.community} campaign={campaign} hasPurchased={hasPurchased} onReviewSubmit={onReviewSubmit} onCommentSubmit={onCommentSubmit}/>
+                        ) : (
+                            <p className="text-gray-500 text-sm py-2">No reviews yet.</p>
+                        )}
+                        {hasPurchased && <ReviewForm campaignId={campaign.id} onSubmit={onReviewSubmit} />}
+                        
+                        <h4 className="font-bold text-md mt-6 mb-3 text-gray-800">Comments</h4>
+                        {campaign.comments.length > 0 ? (
+                            <div className="space-y-4">
+                                {campaign.comments.map((comment, index) => (
+                                    <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                                        <p className="font-bold text-sm text-gray-800">{comment.user}</p>
+                                        <p className="text-gray-700">{comment.comment}</p>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
-                    </div>
+                        ) : (
+                            <p className="text-gray-500 text-sm py-2">No comments yet. Be the first!</p>
+                        )}
+                        <CommentForm campaignId={campaign.id} onSubmit={onCommentSubmit} />
+                    </ContentSection>
+                </>
+            );
 
-                    {/* Sticky Footer */}
-                    <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-200 z-20">
-                       <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showStatusInFooter ? 'max-h-96 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}><FooterStatusDisplay campaign={campaign} /></div>
-                        <div className="flex items-center gap-3">
-                            <MainActions />
-                            {['DESIGN', 'PRE_ORDER', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) && (<button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-3 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`} aria-label="Toggle campaign status"><BarChartIcon className="w-6 h-6" /></button>)}
-                        </div>
-                    </div>
-                </div>
-            )
-        }
-        
-        function CampaignDetailContent(props) {
             return (
                 <>
-                    <div className="hidden lg:block w-full h-full">
-                        <CampaignDetailDesktop {...props} />
+                    {/* --- NEW MOBILE/TABLET LAYOUT --- */}
+                    <div className="lg:hidden w-full h-full flex flex-col bg-white overflow-hidden">
+                        {/* Header */}
+                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl z-30">
+                            <DetailIsland 
+                                sectionRefs={sectionRefs}
+                                containerRef={panelRef}
+                                notification={islandNotification}
+                                onClose={onClose}
+                                hasBlueprint={!!campaign.productionBlueprint}
+                                onNavClick={handlePanelNav}
+                            />
+                        </div>
+
+                        {/* Gallery Area */}
+                        <div className="flex-grow relative bg-gray-100" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+                             <button className="w-full h-full" onClick={() => onShowMedia(currentMediaIndex)}>
+                                {mediaItems[currentMediaIndex].type === 'video' ? (
+                                    <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-contain"></video>
+                                ) : (
+                                    <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-contain" />
+                                )}
+                            </button>
+                            
+                            {/* Product Name Overlay */}
+                            <div className="absolute top-0 left-0 right-0 p-4 pt-0 bg-gradient-to-b from-black/30 to-transparent pointer-events-none">
+                                <p className="text-sm text-white/90 drop-shadow-md">{campaign.designer}</p>
+                                <h2 className="text-xl font-bold text-white drop-shadow-md">{campaign.name}</h2>
+                            </div>
+
+                             {/* Gallery Nav Arrows */}
+                            <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronLeftIcon className="w-6 h-6" /></button>
+                            <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors"><ChevronRightIcon className="w-6 h-6" /></button>
+                            {campaign.has3D && (
+                                <button onClick={(e) => { e.stopPropagation(); onShow3D(); }} className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors">
+                                    <CubeIcon className="w-5 h-5" /><span>3D</span>
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Sliding Details Panel */}
+                        <div 
+                            className={`absolute left-0 right-0 bottom-0 bg-white shadow-2xl rounded-t-2xl flex flex-col transition-transform duration-500 ease-in-out z-20`}
+                            style={{ 
+                                transform: isPanelOpen ? 'translateY(0)' : 'translateY(calc(100% - 150px))', 
+                                height: 'calc(100% - 80px)' // Height minus header
+                            }}
+                            onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+                        >
+                            <div className="flex-shrink-0 text-center py-3 cursor-grab" onClick={() => setIsPanelOpen(!isPanelOpen)}>
+                                <div className="w-10 h-1.5 bg-gray-300 rounded-full mx-auto"></div>
+                            </div>
+                            <div ref={panelRef} className="flex-grow overflow-y-auto scrollbar-hide p-5 pt-0 space-y-6">
+                                <AllContentSections />
+                            </div>
+                        </div>
+
+                         {/* Footer */}
+                        <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-200 z-30">
+                            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showStatusInFooter ? 'max-h-96 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
+                                <FooterStatusDisplay campaign={campaign} />
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <MainActions />
+                                {['DESIGN', 'PRE_ORDER', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) && (
+                                    <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-3 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`} aria-label="Toggle campaign status">
+                                        <BarChartIcon className="w-6 h-6" />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                    <div className="lg:hidden w-full h-full">
-                        <CampaignDetailMobile {...props} />
+
+                    {/* --- EXISTING DESKTOP LAYOUT --- */}
+                    <div className="hidden lg:grid lg:grid-cols-5 w-full h-full overflow-hidden">
+                        {/* Media Column (Left) */}
+                        <div className="lg:col-span-3 h-full p-4 flex flex-col gap-4 overflow-hidden bg-gray-50 group">
+                            <div className="flex-1 relative rounded-lg bg-gray-100 min-h-0">
+                                <button className="w-full h-full" onClick={() => onShowMedia(currentMediaIndex)}>
+                                    {mediaItems[currentMediaIndex].type === 'video' ? (
+                                        <video key={mediaItems[currentMediaIndex].url} src={mediaItems[currentMediaIndex].url} autoPlay loop muted playsInline className="w-full h-full object-contain"></video>
+                                    ) : (
+                                        <img src={mediaItems[currentMediaIndex].url} alt="Product view" className="w-full h-full object-contain" />
+                                    )}
+                                </button>
+                                <button onClick={(e) => { e.stopPropagation(); changeMedia(-1); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors opacity-0 group-hover:opacity-100"><ChevronLeftIcon className="w-6 h-6" /></button>
+                                <button onClick={(e) => { e.stopPropagation(); changeMedia(1); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/50 backdrop-blur-sm rounded-full p-2 text-gray-800 hover:bg-white transition-colors opacity-0 group-hover:opacity-100"><ChevronRightIcon className="w-6 h-6" /></button>
+                                {campaign.has3D && (
+                                    <button onClick={(e) => { e.stopPropagation(); onShow3D(); }} className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-gray-800 font-semibold py-2 px-3 rounded-full flex items-center gap-2 shadow-lg hover:bg-white transition-colors">
+                                        <CubeIcon className="w-5 h-5" /><span>3D</span>
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex-shrink-0 flex justify-center items-center space-x-2 py-2">
+                                {mediaItems.map((_, index) => (
+                                    <button key={index} onClick={() => setCurrentMediaIndex(index)} className="p-1">
+                                        <div className={`w-2 h-2 rounded-full transition-colors ${currentMediaIndex === index ? 'bg-blue-600' : 'bg-gray-300 hover:bg-gray-400'}`}></div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Details Column (Right) */}
+                        <div className="lg:col-span-2 h-full flex flex-col bg-white">
+                            <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-b border-gray-200 z-30">
+                                <DetailIsland 
+                                    sectionRefs={sectionRefs}
+                                    containerRef={contentRef}
+                                    notification={islandNotification}
+                                    onClose={onClose}
+                                    hasBlueprint={!!campaign.productionBlueprint}
+                                    onNavClick={(id) => sectionRefs[id].current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                                />
+                            </div>
+                            
+                            <div className="flex-1 relative min-h-0">
+                                <div ref={contentRef} className="absolute inset-0 overflow-y-auto scrollbar-hide">
+                                    <div className="p-5 lg:p-6">
+                                        <p className="text-sm text-gray-800">{campaign.designer}</p>
+                                        <h2 className="text-xl font-bold text-gray-900">{campaign.name}</h2>
+                                    </div>
+                                    <div className="px-5 lg:px-6 pb-24 space-y-6">
+                                        <AllContentSections />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Sticky CTA Bar */}
+                            <div className="flex-shrink-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-200 z-30">
+                                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showStatusInFooter ? 'max-h-96 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
+                                    <FooterStatusDisplay campaign={campaign} />
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <MainActions />
+                                    {['DESIGN', 'PRE_ORDER', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) && (
+                                        <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-3 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`} aria-label="Toggle campaign status">
+                                            <BarChartIcon className="w-6 h-6" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </>
             );
-        }
+        };
 
-        const ContentSection = React.forwardRef(({ id, title, campaign, selectedSize, setSelectedSize, hasPurchased, onReviewSubmit, onCommentSubmit, onShowBlueprint }, ref) => {
-            const renderContent = () => {
-                switch(id) {
-                    case 'details':
-                        return <>
-                            <p className="text-gray-700 mb-6">{campaign.details}</p>
-                            {campaign.manufacturer?.country !== 'TBD' && ["Portugal", "Spain", "Italy", "France"].includes(campaign.manufacturer.country) && (
-                                <div className="mb-6 border border-blue-200 p-4 rounded-lg flex items-center gap-4">
-                                    <EUFlagIcon />
-                                    <div>
-                                        <h4 className="font-semibold text-blue-900">Proudly Made in the EU</h4>
-                                        <p className="text-sm text-blue-800">This product is manufactured in {campaign.manufacturer.country}, supporting local craftsmanship and ensuring high labor standards.</p>
-                                    </div>
-                                </div>
-                            )}
-                            {campaign.designerUpdates && campaign.designerUpdates.length > 0 && (
-                                <div className="mb-6">
-                                    <h3 className="font-semibold text-md mb-3 text-gray-800">Designer's Updates</h3>
-                                    <div className="space-y-4">
-                                        {campaign.designerUpdates.map((update, index) => (
-                                            <div key={index} className="relative pl-6 border-l-2 border-gray-200">
-                                                <div className="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-gray-300 rounded-full"></div>
-                                                <p className="text-xs text-gray-500">{update.date}</p>
-                                                <p className="font-semibold text-gray-800">{update.title}</p>
-                                                <p className="text-sm text-gray-600">{update.text}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </>;
-                    case 'care':
-                        return <>
-                            <div className="space-y-2 text-sm">
-                                <h5 className="font-bold mb-2 text-gray-800">Composition</h5>
-                                <p className="text-gray-700">{campaign.garmentCare.composition}</p>
-                            </div>
-                            <div className="mt-4 space-y-2 text-sm">
-                                <h5 className="font-bold mb-2 text-gray-800">Care Instructions</h5>
-                                <ul className="list-disc list-inside text-gray-700">
-                                    {campaign.garmentCare.instructions.map((instruction, index) => <li key={index}>{instruction}</li>)}
-                                </ul>
-                            </div>
-                        </>;
-                    case 'price':
-                        return <>
-                            <p className="text-gray-700 mb-4 text-sm">We believe in radical transparency. Here's the true cost of making this garment.</p>
-                            <div className="space-y-3 mb-6">
-                                {Object.entries(campaign.priceBreakdown).map(([key, value]) => {
-                                    const percentage = (value / campaign.price) * 100;
-                                    return (
-                                        <div key={key}>
-                                            <div className="flex justify-between text-sm mb-1">
-                                                <span className="capitalize text-gray-600">{key}</span>
-                                                <span className="font-semibold text-gray-900">€{value.toFixed(2)}</span>
-                                            </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div className="bg-blue-500 h-2 rounded-full" style={{width: `${percentage}%`}}></div>
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                            <div className="border-t border-gray-200 pt-4">
-                                <div className="flex justify-between text-sm mb-2">
-                                    <span className="text-gray-600">True Cost</span>
-                                    <span className="font-semibold text-gray-900">€{Object.values(campaign.priceBreakdown).reduce((sum, val) => sum + val, 0).toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between text-md font-bold text-gray-900">
-                                    <span>Our Price</span>
-                                    <span>€{campaign.price.toFixed(2)}</span>
-                                </div>
-                            </div>
-                            <div className="mt-6 text-sm text-blue-800">
-                                <p><strong>Note:</strong> Final cost, including shipping & duties, will be calculated at checkout.</p>
-                            </div>
-                        </>;
-                    case 'size':
-                        return <>
-                            <p className="text-gray-700 mb-4">{campaign.sizeGuide.fitDetails}</p>
-                            {selectedSize ? (
-                                <>
-                                <div className="flex space-x-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
-                                    {Object.keys(campaign.sizeGuide.sizes).map(size => (
-                                        <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-700 border-gray-200'}`}>
-                                            {size}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="space-y-2 text-sm">
-                                    <h5 className="font-bold mb-2 text-gray-800">Measurements for Size {selectedSize}</h5>
-                                    {Object.entries(campaign.sizeGuide.sizes[selectedSize]).map(([key, value]) => (
-                                        <div key={key} className="flex justify-between">
-                                            <span className="text-gray-600">{key}</span>
-                                            <span className="font-semibold text-gray-900">{value}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                </>
-                            ) : <p className="text-gray-500 text-sm">Size guide coming soon.</p>}
-                        </>;
-                    case 'blueprint':
-                        return <>
-                            <div className="flex items-center gap-3 mb-3">
-                                <ShieldCheckIcon className="w-8 h-8 text-blue-600" />
-                                <div><h4 className="font-bold text-md text-gray-800">Verified Traceability</h4></div>
-                            </div>
-                            <p className="text-gray-700 mb-4 text-sm">This item has a verified production plan. View the full blueprint for details on the manufacturer, supply chain, and sustainability.</p>
-                            <button onClick={onShowBlueprint} className="w-full bg-gray-800 text-white font-bold py-2 rounded-lg hover:bg-black transition-colors">View Full Blueprint</button>
-                        </>;
-                    case 'community':
-                        return <>
-                            <h4 className="font-bold text-md mb-3 text-gray-800">Reviews</h4>
-                            {campaign.reviews.length > 0 ? (
-                                <div className="space-y-4">
-                                    {campaign.reviews.map((review, index) => (
-                                        <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
-                                            <div className="flex items-center mb-1">
-                                                {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-yellow-500" isFilled={i < review.rating} />)}
-                                                <span className="ml-2 font-bold text-gray-800">{review.user}</span>
-                                            </div>
-                                            <p className="text-gray-700">{review.comment}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (<p className="text-gray-500 text-sm py-2">No reviews yet.</p>)}
-                            {hasPurchased && <ReviewForm campaignId={campaign.id} onSubmit={onReviewSubmit} />}
-                            <h4 className="font-bold text-md mt-6 mb-3 text-gray-800">Comments</h4>
-                            {campaign.comments.length > 0 ? (
-                                <div className="space-y-4">
-                                    {campaign.comments.map((comment, index) => (
-                                        <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
-                                            <p className="font-bold text-sm text-gray-800">{comment.user}</p>
-                                            <p className="text-gray-700">{comment.comment}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (<p className="text-gray-500 text-sm py-2">No comments yet. Be the first!</p>)}
-                            <CommentForm campaignId={campaign.id} onSubmit={onCommentSubmit} />
-                        </>;
-                    default: return null;
-                }
-            };
-
-            return (
-                <div id={id} ref={ref} className="scroll-mt-20 bg-gray-50/70 p-5 rounded-2xl border border-gray-200/60 shadow-sm">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">{title}</h3>
-                    {renderContent()}
-                </div>
-            )
-        });
+        const ContentSection = React.forwardRef(({ id, title, children }, ref) => (
+            <div id={id} ref={ref} className="scroll-mt-20 bg-gray-50/70 p-5 rounded-2xl border border-gray-200/60 shadow-sm">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">{title}</h3>
+                {children}
+            </div>
+        ));
 
         function PledgeModal({ campaign, onClose, onPledge }) {
             const [show, setShow] = useState(false);
@@ -1148,7 +1178,7 @@
                         <div className="mb-4"> <h3 className="font-semibold text-sm mb-3">{isCombinedFunding ? 'Pledges by Size' : 'Funding Progress by Size'}</h3> <div className="space-y-3"> {Object.entries(campaign.preOrderDetails.sizes).map(([size, data]) => { if (isCombinedFunding) { return ( <div key={size} className="flex justify-between items-center text-sm py-1"> <span className="font-medium text-gray-800">{size}</span> <span className="text-gray-600 font-semibold">{data.funded} pledged</span> </div> ) } const moq = data.moq; const progress = moq ? (data.funded / moq) * 100 : 0; const isFunded = moq && progress >= 100; return ( <div key={size}> <div className={`flex justify-between items-center mb-1 text-xs ${isFunded ? 'text-green-600 font-semibold' : 'text-gray-600'}`}> <span className="font-semibold">{size}</span> {moq && <span>{data.funded} / {moq}</span>} </div> {moq && <div className="w-full bg-gray-200 rounded-full h-2"> <div className={`${isFunded ? 'bg-green-600' : 'bg-blue-600'} h-2 rounded-full`} style={{ width: `${Math.min(progress, 100)}%` }}></div> </div>} </div> ); })} </div> </div>
                         <div className="mb-6"> <h3 className="font-semibold text-sm mb-2">Select Size to Pledge For</h3> <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide"> {Object.keys(campaign.preOrderDetails.sizes).map(size => ( <button key={size} onClick={() => setSelectedSize(size)} className={`px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-semibold ${selectedSize === size ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-700 border-gray-200'}`}> {size} </button> ))} </div> </div>
                         <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-lg mb-6"> <p className="text-sm text-blue-800">Your card will only be charged if the funding goal is met.</p> </div>
-                        <button onClick={() => onPledge(campaign, selectedSize, null)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all"> Confirm Pledge for Size {selectedSize} </button>
+                        <button onClick={() => onPledge(campaign, selectedSize, showIslandNotification)} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all"> Confirm Pledge for Size {selectedSize} </button>
                     </div>
                 </div>
             );
@@ -1683,7 +1713,7 @@
             );
         }
 
-        const DetailIsland = ({ sectionRefs, containerRef, notification, onClose, hasBlueprint }) => {
+        const DetailIsland = ({ sectionRefs, containerRef, notification, onClose, hasBlueprint, onNavClick }) => {
             const [activeSection, setActiveSection] = useState('details');
             const islandRef = useRef(null);
 
@@ -1724,7 +1754,7 @@
             }, [sectionRefs, containerRef]);
 
             const handleNavClick = (id) => {
-                sectionRefs[id].current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                onNavClick(id);
             };
 
             return (

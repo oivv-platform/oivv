@@ -60,6 +60,7 @@
             width: 40px;
             height: 40px;
             position: relative;
+            overflow: hidden; /* This clips the animation */
         }
         
         .icon-wrapper-main {
@@ -281,12 +282,17 @@
             const introWrapperRef = useRef(null);
             const settlingWrapperRef = useRef(null);
             
-            const totalFunded = Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.funded, 0);
-            const totalMoq = campaign.preOrderDetails.fundingType === 'COMBINED' 
-                ? campaign.preOrderDetails.overallMoq 
-                : Object.values(campaign.preOrderDetails.sizes).reduce((acc, size) => acc + size.moq, 0);
-            
-            const REAL_PROGRESS = totalMoq > 0 ? (totalFunded / totalMoq) * 100 : 0;
+            const REAL_PROGRESS = useMemo(() => {
+                const { fundingType, sizes, overallMoq } = campaign.preOrderDetails;
+                if (fundingType === 'COMBINED') {
+                    const totalFunded = Object.values(sizes).reduce((acc, size) => acc + size.funded, 0);
+                    return overallMoq > 0 ? (totalFunded / overallMoq) * 100 : 0;
+                } else { // INDEPENDENT
+                    const totalFunded = Object.values(sizes).reduce((acc, size) => acc + size.funded, 0);
+                    const totalMoq = Object.values(sizes).reduce((acc, size) => acc + size.moq, 0);
+                    return totalMoq > 0 ? (totalFunded / totalMoq) * 100 : 0;
+                }
+            }, [campaign]);
 
             useEffect(() => {
                 const introNode = introWrapperRef.current;
@@ -1254,7 +1260,7 @@
                                         <MainActions />
                                     </div>
                                     {campaign.stage === 'PRE_ORDER' ? (
-                                        <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-2 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100' : 'bg-gray-200 hover:bg-gray-300'}`} aria-label="Toggle campaign status">
+                                        <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-0 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100' : 'bg-gray-200 hover:bg-gray-300'}`} aria-label="Toggle campaign status">
                                             <AnimatedStatusIcon campaign={campaign} />
                                         </button>
                                     ) : ['DESIGN', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) ? (
@@ -1330,7 +1336,7 @@
                                 <div className="flex items-center gap-3">
                                     <MainActions />
                                     {campaign.stage === 'PRE_ORDER' ? (
-                                        <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-2 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100' : 'bg-gray-200 hover:bg-gray-300'}`} aria-label="Toggle campaign status">
+                                        <button onClick={() => setShowStatusInFooter(!showStatusInFooter)} className={`p-0 rounded-xl transition-colors ${showStatusInFooter ? 'bg-blue-100' : 'bg-gray-200 hover:bg-gray-300'}`} aria-label="Toggle campaign status">
                                             <AnimatedStatusIcon campaign={campaign} />
                                         </button>
                                     ) : ['DESIGN', 'SAMPLING', 'CONFIRMED'].includes(campaign.stage) ? (

@@ -848,18 +848,7 @@
             const handlePanelNav = (id) => {
                 setIsPanelOpen(true);
                 setTimeout(() => {
-                    const panel = panelRef.current;
-                    const section = sectionRefs[id].current;
-                    if (panel && section) {
-                        // We need to account for the sticky header inside the panel
-                        const headerHeight = panel.querySelector(':first-child').offsetHeight;
-                        const sectionTop = section.offsetTop;
-                        
-                        panel.scrollTo({
-                            top: sectionTop - headerHeight,
-                            behavior: 'smooth'
-                        });
-                    }
+                    sectionRefs[id].current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 300); // Wait for panel animation
             };
 
@@ -1065,6 +1054,7 @@
                                     onClose={onClose}
                                     hasBlueprint={!!campaign.productionBlueprint}
                                     onNavClick={handlePanelNav}
+                                    isPanelOpen={isPanelOpen}
                                 />
                              </div>
                         </div>
@@ -1755,7 +1745,7 @@
             );
         }
 
-        const DetailIsland = ({ sectionRefs, containerRef, notification, onClose, hasBlueprint, onNavClick }) => {
+        const DetailIsland = ({ sectionRefs, containerRef, notification, onClose, hasBlueprint, onNavClick, isPanelOpen }) => {
             const [activeSection, setActiveSection] = useState('details');
             const islandRef = useRef(null);
 
@@ -1770,7 +1760,16 @@
 
             useEffect(() => {
                 const scrollContainer = containerRef.current;
-                if (!scrollContainer) return;
+                
+                // On mobile, if the panel is explicitly closed, do not attach the observer.
+                // On desktop, isPanelOpen is undefined, so this condition is false and we proceed.
+                if (isPanelOpen === false) {
+                    return;
+                }
+
+                if (!scrollContainer) {
+                    return;
+                }
 
                 const observer = new IntersectionObserver(
                     (entries) => {
@@ -1793,7 +1792,7 @@
                         if (ref.current) observer.unobserve(ref.current);
                     });
                 };
-            }, [sectionRefs, containerRef]);
+            }, [sectionRefs, containerRef, isPanelOpen]); // Re-run when the panel's visibility changes on mobile
 
             const handleNavClick = (id) => {
                 onNavClick(id);
